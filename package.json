@@ -1,0 +1,40 @@
+{
+  "name": "mark-sites",
+  "version": "0.1.0",
+  "description": "Convert Markdown into standalone GitHub-styled HTML.",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "bin": {
+    "mark-sites": "./dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "npm run build && node --test",
+    "check": "tsc -p tsconfig.json --noEmit"
+  },
+  "keywords": [
+    "markdown",
+    "html",
+    "github"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "github-markdown-css": "latest",
+    "marked": "latest"
+  },
+  "devDependencies": {
+    "@types/node": "latest",
+    "typescript": "latest"
+  }
+}
