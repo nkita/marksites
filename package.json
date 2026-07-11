@@ -31,6 +31,8 @@
   },
   "dependencies": {
     "github-markdown-css": "latest",
+    "github-slugger": "^2.0.0",
+    "highlight.js": "^11.11.1",
     "marked": "latest"
   },
   "devDependencies": {
