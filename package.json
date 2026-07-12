@@ -1,5 +1,5 @@
 {
-  "name": "mark-sites",
+  "name": "marksites",
   "version": "0.1.0",
   "description": "Convert Markdown into standalone GitHub-styled HTML.",
   "type": "module",
@@ -10,7 +10,7 @@
     }
   },
   "bin": {
-    "mark-sites": "./dist/cli.js"
+    "marksites": "./dist/cli.js"
   },
   "files": [
     "dist"

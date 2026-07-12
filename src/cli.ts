@@ -5,7 +5,7 @@ import { basename } from "node:path";
 import { markdownToHtml } from "./index.js";
 
 function usage(): never {
-  console.error("Usage: mark-sites <input.md> [output.html]");
+  console.error("Usage: marksites <input.md> [output.html]");
   process.exit(1);
 }
 

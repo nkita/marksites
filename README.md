@@ -1,4 +1,4 @@
-# mark-sites
+# marksites
 
 Markdownを、GitHub風のスタイルを埋め込んだ単独のHTMLファイルへ変換するTypeScriptライブラリです。
 
@@ -12,7 +12,7 @@ npm run build
 ## ライブラリとして使う
 
 ```ts
-import { markdownToHtml } from "mark-sites";
+import { markdownToHtml } from "marksites";
 
 const html = markdownToHtml("# Hello", { title: "My page" });
 ```
@@ -50,7 +50,7 @@ const html = markdownToHtml(markdown, { highlight: false });
 ## CLIとして使う
 
 ```sh
-npx mark-sites README.md README.html
+npx marksites README.md README.html
 ```
 
 出力先を省略すると、入力ファイルと同じ場所に拡張子 `.html` で保存します。

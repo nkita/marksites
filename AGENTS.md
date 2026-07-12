@@ -2,7 +2,7 @@
 
 ## Project goals
 
-`mark-sites` converts Markdown into a standalone GitHub-styled HTML document. Preserve the small public API, the zero-runtime-service design, and the ability to open generated files directly from the local filesystem.
+`marksites` converts Markdown into a standalone GitHub-styled HTML document. Preserve the small public API, the zero-runtime-service design, and the ability to open generated files directly from the local filesystem.
 
 ## Architecture
 
