@@ -1,19 +1,39 @@
 #!/usr/bin/env node
 
-import { readFile, writeFile } from "node:fs/promises";
-import { basename } from "node:path";
-import { markdownToHtml } from "./index.js";
+import { stat } from "node:fs/promises";
+import { resolve } from "node:path";
+import { convertDirectory, convertFile } from "./cli/directory.js";
 
 function usage(): never {
-  console.error("Usage: marksites <input.md> [output.html]");
+  console.error(
+    "Usage: marksites <input.md|input-directory> [output.html|output-directory]",
+  );
   process.exit(1);
 }
 
-const input = process.argv[2];
-if (!input) usage();
+async function main(): Promise<void> {
+  const inputArgument = process.argv[2];
+  if (!inputArgument) usage();
 
-const output = process.argv[3] ?? input.replace(/\.(md|markdown)$/i, "") + ".html";
-const markdown = await readFile(input, "utf8");
-const title = basename(input).replace(/\.(md|markdown)$/i, "");
-await writeFile(output, markdownToHtml(markdown, { title }), "utf8");
-console.log(`Created ${output}`);
+  const input = resolve(inputArgument);
+  const inputStat = await stat(input);
+  const outputArgument = process.argv[3];
+
+  if (inputStat.isDirectory()) {
+    const count = await convertDirectory(input, outputArgument);
+    console.log(`Created ${count} HTML file${count === 1 ? "" : "s"}`);
+    return;
+  }
+
+  if (!inputStat.isFile()) {
+    throw new Error(`Input is not a file or directory: ${inputArgument}`);
+  }
+
+  const output = await convertFile(input, outputArgument);
+  console.log(`Created ${output}`);
+}
+
+main().catch((error: unknown) => {
+  console.error(error instanceof Error ? error.message : String(error));
+  process.exitCode = 1;
+});

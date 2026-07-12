@@ -1,5 +1,9 @@
 import { marked, Renderer } from "marked";
 import { createCodeBlocksFeature } from "./features/code-blocks.js";
+import {
+  renderBreadcrumbs,
+  renderFileTree,
+} from "./features/file-tree.js";
 import { createTableOfContentsFeature } from "./features/table-of-contents.js";
 import { renderDocument } from "./template/document.js";
 import type { RenderOptions } from "./types.js";
@@ -32,11 +36,15 @@ export function markdownToHtml(
     async: false,
   });
   const toc = tableOfContents.render();
+  const fileTree = renderFileTree(options.fileTree);
+  const breadcrumbs = renderBreadcrumbs(options.fileTree?.breadcrumbs);
 
   return renderDocument({
     title,
     language,
     content,
+    breadcrumbs,
+    fileTree,
     tableOfContents: toc.markup,
     tableOfContentsScript: toc.script,
     codeBlockScript: codeBlocks.renderScript(),

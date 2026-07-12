@@ -51,3 +51,30 @@ export const documentStyles = `    body.markdown-body { box-sizing: border-box; 
     }
     @media (max-width: 600px) { .markdown-content { padding: 24px 20px; border-radius: 6px; } }
     @media (prefers-reduced-motion: reduce) { .table-of-contents a { transition: none; } }`;
+
+export const fileTreeStyles = `    body.markdown-body.has-file-tree { grid-template-columns: 260px minmax(0, 1fr) 300px; grid-template-areas: "tree content toc"; column-gap: 24px; }
+    .file-breadcrumbs { margin: -12px 0 28px; padding-bottom: 14px; border-bottom: 1px solid var(--borderColor-muted, #d8dee4); }
+    .file-breadcrumbs ol { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0; padding: 0; list-style: none; }
+    .file-breadcrumbs li { display: inline-flex; min-width: 0; align-items: center; color: var(--fgColor-muted, #59636e); font-size: 0.875rem; line-height: 1.4; }
+    .file-breadcrumbs li + li::before { margin-right: 6px; color: var(--fgColor-muted, #818b98); content: "/"; }
+    .file-breadcrumbs a { color: var(--fgColor-accent, #0969da); font-weight: 500; text-decoration: none; }
+    .file-breadcrumbs a:hover { text-decoration: underline; }
+    .file-breadcrumbs [aria-current="page"] { overflow: hidden; color: var(--fgColor-default, #1f2328); font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+    .file-tree { grid-area: tree; position: sticky; top: 24px; max-height: calc(100vh - 48px); overflow: auto; padding: 16px 12px; border: 1px solid var(--borderColor-muted, #d8dee4); border-radius: 8px; scrollbar-width: thin; scrollbar-color: var(--borderColor-default, #d0d7de) transparent; }
+    .file-tree h2 { margin: 0 8px 12px; padding-bottom: 12px; color: var(--fgColor-default, #1f2328); font-size: 0.9375rem; line-height: 1.25; border-bottom: 1px solid var(--borderColor-muted, #d8dee4); }
+    .file-tree ul { margin: 0; padding: 0; list-style: none; }
+    .file-tree details > ul { margin-left: 10px; padding-left: 10px; border-left: 1px solid var(--borderColor-muted, #d8dee4); }
+    .file-tree summary { padding: 5px 7px; color: var(--fgColor-default, #1f2328); font-size: 0.875rem; font-weight: 600; line-height: 1.35; border-radius: 5px; cursor: pointer; user-select: none; }
+    .file-tree summary:hover { background: var(--bgColor-muted, #f6f8fa); }
+    .file-tree summary::marker { color: var(--fgColor-muted, #59636e); }
+    .file-tree a { display: block; margin: 1px 0; padding: 5px 8px; overflow: hidden; color: var(--fgColor-muted, #59636e); font-size: 0.875rem; line-height: 1.35; text-decoration: none; text-overflow: ellipsis; white-space: nowrap; border-radius: 5px; }
+    .file-tree a:hover { color: var(--fgColor-default, #1f2328); background: var(--bgColor-muted, #f6f8fa); text-decoration: none; }
+    .file-tree a:focus-visible { outline: 2px solid var(--focus-outlineColor, #0969da); outline-offset: -2px; }
+    .file-tree a[aria-current="page"] { color: var(--fgColor-accent, #0969da); font-weight: 600; background: var(--bgColor-accent-muted, #ddf4ff); }
+    @media (max-width: 1200px) and (min-width: 901px) {
+      body.markdown-body.has-file-tree { grid-template-columns: 220px minmax(0, 1fr) 260px; column-gap: 20px; }
+    }
+    @media (max-width: 900px) {
+      body.markdown-body.has-file-tree { grid-template-columns: minmax(0, 1fr); grid-template-areas: "tree" "toc" "content"; }
+      .file-tree { position: static; width: auto; max-height: 40vh; }
+    }`;

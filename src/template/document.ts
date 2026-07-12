@@ -1,5 +1,6 @@
 import {
   documentStyles,
+  fileTreeStyles,
   githubMarkdownCss,
   highlightCss,
 } from "./styles.js";
@@ -8,6 +9,8 @@ interface DocumentParts {
   title: string;
   language: string;
   content: string;
+  breadcrumbs: string;
+  fileTree: string;
   tableOfContents: string;
   tableOfContentsScript: string;
   codeBlockScript: string;
@@ -15,6 +18,10 @@ interface DocumentParts {
 }
 
 export function renderDocument(parts: DocumentParts): string {
+  const bodyClass = parts.fileTree
+    ? "markdown-body has-file-tree"
+    : "markdown-body";
+
   return `<!doctype html>
 <html lang="${parts.language}">
 <head>
@@ -24,12 +31,12 @@ export function renderDocument(parts: DocumentParts): string {
   <style>${githubMarkdownCss}</style>
   ${parts.highlight ? `<style>${highlightCss}</style>` : ""}
   <style>
-${documentStyles}
+${documentStyles}${parts.fileTree ? `\n${fileTreeStyles}` : ""}
   </style>
 </head>
-<body class="markdown-body">
-<main class="markdown-content">
-${parts.content}
+<body class="${bodyClass}">
+${parts.fileTree}<main class="markdown-content">
+${parts.breadcrumbs}${parts.content}
 </main>
 ${parts.tableOfContents}
 ${parts.tableOfContentsScript}

@@ -55,6 +55,19 @@ npx marksites README.md README.html
 
 出力先を省略すると、入力ファイルと同じ場所に拡張子 `.html` で保存します。
 
+フォルダを指定すると、配下の `.md` と `.markdown` を再帰的に変換します。出力先でも元のフォルダ階層を維持し、各ページの左側にファイルツリー、本文上部に現在のファイルパスを示すパンくずを表示します。Markdownファイル間の相対リンクは `.html` へ書き換えられます。
+
+```sh
+npx marksites docs public
+```
+
+出力先を省略した場合は、入力フォルダと同じ階層に `<入力名>-html` フォルダを作成します。
+
+```sh
+npx marksites docs
+# docs-html/ に出力
+```
+
 ## 開発
 
 ```sh

@@ -9,8 +9,40 @@ export interface RenderOptions {
   highlight?: boolean;
   /** Add a table of contents generated from headings. Defaults to true. */
   tableOfContents?: boolean | TableOfContentsOptions;
+  /** Add a repository-style file tree for a converted Markdown collection. */
+  fileTree?: FileTreeOptions;
   /** Options forwarded to marked. Async parsing is not supported. */
   markedOptions?: Omit<MarkedOptions, "async" | "renderer">;
+}
+
+export interface FileTreeOptions {
+  /** Heading shown above the file tree. Defaults to "Files". */
+  title?: string;
+  /** Nested directories and Markdown files to render. */
+  items: FileTreeNode[];
+  /** Path segments shown above the document content. */
+  breadcrumbs?: FileBreadcrumb[];
+}
+
+export interface FileBreadcrumb {
+  name: string;
+  href?: string;
+  current?: boolean;
+}
+
+export type FileTreeNode = FileTreeDirectory | FileTreeFile;
+
+export interface FileTreeDirectory {
+  type: "directory";
+  name: string;
+  children: FileTreeNode[];
+}
+
+export interface FileTreeFile {
+  type: "file";
+  name: string;
+  href: string;
+  current?: boolean;
 }
 
 export interface TableOfContentsOptions {
