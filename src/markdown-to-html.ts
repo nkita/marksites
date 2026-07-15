@@ -1,5 +1,7 @@
 import { marked, Renderer } from "marked";
 import { createCodeBlocksFeature } from "./features/code-blocks.js";
+import { createAnnotationsFeature } from "./features/annotations.js";
+import type { AnnotationDocument } from "./annotations/model.js";
 import {
   renderBreadcrumbs,
   renderFileTree,
@@ -15,13 +17,19 @@ export function markdownToHtml(
   markdown: string,
   options: RenderOptions = {},
 ): string {
+  return renderMarkdown(markdown, options);
+}
+
+export function renderMarkdown(
+  markdown: string,
+  options: RenderOptions = {},
+  annotations?: AnnotationDocument,
+): string {
   const title = escapeHtml(options.title ?? "Markdown document");
   const language = escapeHtml(options.language ?? "en");
   const highlight = options.highlight ?? true;
   const tocOptions =
-    typeof options.tableOfContents === "object"
-      ? options.tableOfContents
-      : {};
+    typeof options.tableOfContents === "object" ? options.tableOfContents : {};
   const renderer = new Renderer();
   const tableOfContents = createTableOfContentsFeature(renderer, {
     enabled: options.tableOfContents !== false,
@@ -40,6 +48,7 @@ export function markdownToHtml(
   const fileTree = renderFileTree(options.fileTree);
   const fileTreeScript = renderFileTreeScript(fileTree !== "");
   const breadcrumbs = renderBreadcrumbs(options.fileTree?.breadcrumbs);
+  const annotationFeature = createAnnotationsFeature(annotations);
 
   return renderDocument({
     title,
@@ -52,5 +61,8 @@ export function markdownToHtml(
     tableOfContentsScript: toc.script,
     codeBlockScript: codeBlocks.renderScript(),
     highlight,
+    annotations: annotationFeature.markup,
+    annotationStyles: annotationFeature.styles,
+    annotationScript: annotationFeature.script,
   });
 }

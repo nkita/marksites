@@ -3,7 +3,11 @@ import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
 import { convertDirectory } from "../dist/cli/directory.js";
+
+const execFileAsync = promisify(execFile);
 
 test("converts a Markdown directory while preserving its hierarchy", async () => {
   const temporaryDirectory = await mkdtemp(join(tmpdir(), "marksites-cli-"));
@@ -46,5 +50,22 @@ test("rejects Markdown files that map to the same HTML path", async () => {
   await assert.rejects(
     convertDirectory(input, join(temporaryDirectory, "site")),
     /Multiple Markdown files map to: guide\.html/,
+  );
+});
+
+test("rejects invalid serve options", async () => {
+  await assert.rejects(
+    execFileAsync(process.execPath, [
+      "dist/cli.js",
+      "serve",
+      ".",
+      "--port",
+      "70000",
+    ]),
+    /Invalid port: 70000/,
+  );
+  await assert.rejects(
+    execFileAsync(process.execPath, ["dist/cli.js", "serve", ".", "--unknown"]),
+    /Unknown option: --unknown/,
   );
 });

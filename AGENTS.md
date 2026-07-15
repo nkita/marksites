@@ -13,6 +13,12 @@
 - Keep only shared, side-effect-free helpers in `src/utils/`. Do not create generic utilities for logic used by a single feature.
 - Keep public option types in `src/types.ts`. Feature-internal state and types stay private to their feature module.
 - Preserve ESM imports with explicit `.js` extensions in TypeScript source files.
+- Store feature designs, specifications, and implementation decisions as Markdown under `docs/`; update the relevant design document in the same change when implementation decisions change.
+- Keep confirmed behavior in design documents and outstanding work in dedicated TODO documents.
+- Keep Markdown collection discovery, path mapping, navigation assembly, incremental manifests, and conversion execution in `src/conversion/`. `src/cli/` should only parse CLI input, report results, and retain deliberate compatibility facades.
+- Keep annotation persistence and validation in `src/annotations/`.
+- Keep the optional Node HTTP service in `src/server/`; separate API routing, static-file delivery, HTML response security, persistence, and server lifecycle by responsibility.
+- Do not expose conversion, annotation, CLI, or server internals through the package exports map.
 
 ## Compatibility
 
@@ -25,6 +31,9 @@
 - File-tree filtering is case-insensitive, matches file names, keeps matching ancestor directories visible, and must remain entirely client-side.
 - Continue escaping document metadata, code from unsupported languages, generated attributes, and table-of-contents text.
 - Preserve GitHub-compatible heading IDs and deterministic suffixes for duplicate headings.
+- Treat adjacent `.<HTML basename>.json` files as extensible per-document user data. Never replace or delete them during an ordinary build, and write updates atomically.
+- Keep `marksites serve` optional and idle: no file watcher, polling loop, or resident document cache.
+- Reserve `/_marksites/api/v1` for the local-server API and `_marksites` at the output root.
 
 ## Testing
 

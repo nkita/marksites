@@ -16,12 +16,18 @@ interface DocumentParts {
   tableOfContentsScript: string;
   codeBlockScript: string;
   highlight: boolean;
+  annotations: string;
+  annotationStyles: string;
+  annotationScript: string;
 }
 
 export function renderDocument(parts: DocumentParts): string {
   const bodyClass = parts.fileTree
     ? "markdown-body has-file-tree"
     : "markdown-body";
+
+  const trustedScript = (script: string): string =>
+    script.replace("<script>", '<script data-marksites-script="true">');
 
   return `<!doctype html>
 <html lang="${parts.language}">
@@ -32,7 +38,7 @@ export function renderDocument(parts: DocumentParts): string {
   <style>${githubMarkdownCss}</style>
   ${parts.highlight ? `<style>${highlightCss}</style>` : ""}
   <style>
-${documentStyles}${parts.fileTree ? `\n${fileTreeStyles}` : ""}
+${documentStyles}${parts.fileTree ? `\n${fileTreeStyles}` : ""}${parts.annotationStyles}
   </style>
 </head>
 <body class="${bodyClass}">
@@ -40,8 +46,10 @@ ${parts.fileTree}<main class="markdown-content">
 ${parts.breadcrumbs}${parts.content}
 </main>
 ${parts.tableOfContents}
-${parts.fileTreeScript}${parts.tableOfContentsScript}
-${parts.codeBlockScript}
+${parts.annotations}
+${trustedScript(parts.fileTreeScript)}${trustedScript(parts.tableOfContentsScript)}
+${trustedScript(parts.codeBlockScript)}
+${trustedScript(parts.annotationScript)}
 </body>
 </html>
 `;
