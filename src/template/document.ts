@@ -11,6 +11,7 @@ interface DocumentParts {
   content: string;
   breadcrumbs: string;
   fileTree: string;
+  fileTreeScript: string;
   tableOfContents: string;
   tableOfContentsScript: string;
   codeBlockScript: string;
@@ -39,7 +40,7 @@ ${parts.fileTree}<main class="markdown-content">
 ${parts.breadcrumbs}${parts.content}
 </main>
 ${parts.tableOfContents}
-${parts.tableOfContentsScript}
+${parts.fileTreeScript}${parts.tableOfContentsScript}
 ${parts.codeBlockScript}
 </body>
 </html>

@@ -25,6 +25,13 @@ test("generates a table of contents with GitHub-style heading IDs", () => {
   assert.match(html, /a\[aria-current="location"\]::before/);
   assert.match(html, /border-radius: 0 6px 6px 0/);
   assert.match(html, /class="toc-toggle"/);
+  assert.match(html, /aria-label="Hide table of contents"/);
+  assert.match(html, /<h2>\s*<button type="button" class="toc-toggle"/);
+  assert.match(html, /<span>Table of contents<\/span>/);
+  assert.match(html, /class="panel-toggle-icon"/);
+  assert.doesNotMatch(html, /toc-toggle-label/);
+  assert.match(html, /\.toc-toggle\[aria-expanded="false"\] \.panel-toggle-icon/);
+  assert.match(html, /\.toc-panel \{ margin-top: 12px; padding-top: 12px; border-top:/);
   assert.match(html, /matchMedia\('\(max-width: 900px\)'\)/);
   assert.match(html, /panel\.hidden = !expanded/);
 });
@@ -34,7 +41,7 @@ test("supports table of contents options", () => {
     tableOfContents: { title: "目次", minDepth: 1, maxDepth: 2 },
   });
 
-  assert.match(html, /<h2>目次<\/h2>/);
+  assert.match(html, /<span>目次<\/span>/);
   assert.match(html, /href="#document"/);
   assert.match(html, /href="#section"/);
   assert.doesNotMatch(html, /href="#detail"/);

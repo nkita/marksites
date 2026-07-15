@@ -22,6 +22,7 @@
 - Generated HTML must continue to work when opened through `file://`. Clipboard functionality therefore needs a non-Clipboard-API fallback.
 - Directory conversion must preserve relative folder structure, rewrite relative Markdown links to HTML, and generate page-relative file-tree links.
 - Directory pages must show breadcrumbs above the content. Link breadcrumb segments to an `index.md` or `index.markdown` when that directory provides one.
+- File-tree filtering is case-insensitive, matches file names, keeps matching ancestor directories visible, and must remain entirely client-side.
 - Continue escaping document metadata, code from unsupported languages, generated attributes, and table-of-contents text.
 - Preserve GitHub-compatible heading IDs and deterministic suffixes for duplicate headings.
 

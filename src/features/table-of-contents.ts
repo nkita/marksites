@@ -36,8 +36,12 @@ function renderTableOfContents(
 
   return `<nav class="table-of-contents" aria-label="${escapedTitle}">
   <div class="toc-header">
-    <h2>${escapedTitle}</h2>
-    <button type="button" class="toc-toggle" aria-expanded="true" aria-controls="table-of-contents-list"><span class="toc-toggle-label">Hide</span></button>
+    <h2>
+      <button type="button" class="toc-toggle" aria-expanded="true" aria-controls="table-of-contents-list" aria-label="Hide table of contents" title="Hide table of contents">
+        <span>${escapedTitle}</span>
+        <svg class="panel-toggle-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" /></svg>
+      </button>
+    </h2>
   </div>
   <div class="toc-panel" id="table-of-contents-list">
     <ul>
@@ -55,12 +59,13 @@ function renderTableOfContentsScript(): string {
   if (!navigation) return;
 
   const toggle = navigation.querySelector('.toc-toggle');
-  const toggleLabel = navigation.querySelector('.toc-toggle-label');
   const panel = navigation.querySelector('.toc-panel');
   const compactLayout = matchMedia('(max-width: 900px)');
   const setExpanded = (expanded) => {
     toggle.setAttribute('aria-expanded', String(expanded));
-    toggleLabel.textContent = expanded ? 'Hide' : 'Show';
+    const label = expanded ? 'Hide table of contents' : 'Show table of contents';
+    toggle.setAttribute('aria-label', label);
+    toggle.title = label;
     panel.hidden = !expanded;
   };
   const syncLayout = () => setExpanded(!compactLayout.matches);

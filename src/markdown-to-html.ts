@@ -3,6 +3,7 @@ import { createCodeBlocksFeature } from "./features/code-blocks.js";
 import {
   renderBreadcrumbs,
   renderFileTree,
+  renderFileTreeScript,
 } from "./features/file-tree.js";
 import { createTableOfContentsFeature } from "./features/table-of-contents.js";
 import { renderDocument } from "./template/document.js";
@@ -37,6 +38,7 @@ export function markdownToHtml(
   });
   const toc = tableOfContents.render();
   const fileTree = renderFileTree(options.fileTree);
+  const fileTreeScript = renderFileTreeScript(fileTree !== "");
   const breadcrumbs = renderBreadcrumbs(options.fileTree?.breadcrumbs);
 
   return renderDocument({
@@ -45,6 +47,7 @@ export function markdownToHtml(
     content,
     breadcrumbs,
     fileTree,
+    fileTreeScript,
     tableOfContents: toc.markup,
     tableOfContentsScript: toc.script,
     codeBlockScript: codeBlocks.renderScript(),

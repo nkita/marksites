@@ -55,7 +55,7 @@ npx marksites README.md README.html
 
 出力先を省略すると、入力ファイルと同じ場所に拡張子 `.html` で保存します。
 
-フォルダを指定すると、配下の `.md` と `.markdown` を再帰的に変換します。出力先でも元のフォルダ階層を維持し、各ページの左側にファイルツリー、本文上部に現在のファイルパスを示すパンくずを表示します。Markdownファイル間の相対リンクは `.html` へ書き換えられます。
+フォルダを指定すると、配下の `.md` と `.markdown` を再帰的に変換します。出力先でも元のフォルダ階層を維持し、各ページの左側にファイル名で絞り込めるファイルツリー、本文上部に現在のファイルパスを示すパンくずを表示します。Markdownファイル間の相対リンクは `.html` へ書き換えられます。
 
 ```sh
 npx marksites docs public
@@ -67,6 +67,29 @@ npx marksites docs public
 npx marksites docs
 # docs-html/ に出力
 ```
+
+### Webアプリの静的ファイルとして公開する
+
+Next.jsやVue、ViteなどのWebアプリで公開する場合は、アプリの静的ファイル用ディレクトリ配下を出力先に指定します。
+
+```sh
+npx marksites docs public/docs
+```
+
+例えば `docs/index.md` と `docs/guide.md` は、それぞれ `public/docs/index.html` と `public/docs/guide.html` に変換されます。Webアプリからは `/docs/index.html` と `/docs/guide.html` への通常のリンクとして参照できます。
+
+Webアプリをビルドする前にHTMLを生成するよう、npmスクリプトへ追加できます。
+
+```json
+{
+  "scripts": {
+    "build:docs": "marksites docs public/docs",
+    "build": "npm run build:docs && next build"
+  }
+}
+```
+
+Viteを使用する場合は、`next build` を `vite build` に置き換えます。
 
 ## 開発
 
