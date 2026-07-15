@@ -12,7 +12,7 @@ import { openBrowser } from "./cli/open-browser.js";
 
 function usage(): never {
   console.error(
-    "Usage:\n  marksites <input.md|input-directory> [output.html|output-directory]\n  marksites serve <input-directory> [output-directory] [--host HOST] [--port PORT] [--open]",
+    "Usage:\n  marksites [input.md|input-directory] [output.html|output-directory]\n  marksites serve [input-directory] [output-directory] [--host HOST] [--port PORT] [--open]",
   );
   process.exit(1);
 }
@@ -51,10 +51,11 @@ async function serve(args: string[]): Promise<void> {
       throw new Error(`Unknown option: ${argument}`);
     positional.push(argument);
   }
-  if (positional.length < 1 || positional.length > 2) usage();
-  const input = resolve(positional[0]!);
+  if (positional.length > 2) usage();
+  const inputArgument = positional[0] ?? ".";
+  const input = resolve(inputArgument);
   if (!(await stat(input)).isDirectory())
-    throw new Error(`serve input must be a directory: ${positional[0]}`);
+    throw new Error(`serve input must be a directory: ${inputArgument}`);
   const initial = await convertDirectoryDetailed(input, positional[1]);
   report(initial);
   const output = initial.outputRoot;
@@ -118,8 +119,7 @@ async function serve(args: string[]): Promise<void> {
 
 async function main(): Promise<void> {
   if (process.argv[2] === "serve") return serve(process.argv.slice(3));
-  const inputArgument = process.argv[2];
-  if (!inputArgument) usage();
+  const inputArgument = process.argv[2] ?? ".";
   const input = resolve(inputArgument);
   const inputStat = await stat(input);
   const outputArgument = process.argv[3];

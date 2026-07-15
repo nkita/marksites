@@ -1,13 +1,14 @@
 import assert from "node:assert/strict";
 import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 import test from "node:test";
-import { execFile } from "node:child_process";
+import { execFile, spawn } from "node:child_process";
 import { promisify } from "node:util";
 import { convertDirectory } from "../dist/cli/directory.js";
 
 const execFileAsync = promisify(execFile);
+const cliPath = resolve("dist/cli.js");
 
 test("converts a Markdown directory while preserving its hierarchy", async () => {
   const temporaryDirectory = await mkdtemp(join(tmpdir(), "marksites-cli-"));
@@ -68,4 +69,69 @@ test("rejects invalid serve options", async () => {
     execFileAsync(process.execPath, ["dist/cli.js", "serve", ".", "--unknown"]),
     /Unknown option: --unknown/,
   );
+});
+
+test("uses the current directory for omitted input and output", async () => {
+  const project = await mkdtemp(join(tmpdir(), "marksites-defaults-"));
+  await writeFile(join(project, "README.md"), "# Project\n");
+  await mkdir(join(project, "node_modules", "dependency"), { recursive: true });
+  await writeFile(
+    join(project, "node_modules", "dependency", "README.md"),
+    "# Dependency\n",
+  );
+
+  await execFileAsync(process.execPath, [cliPath], { cwd: project });
+
+  assert.match(
+    await readFile(join(project, "marksites", "README.html"), "utf8"),
+    /Project/,
+  );
+  assert.equal(
+    JSON.parse(
+      await readFile(join(project, "marksites", ".README.json"), "utf8"),
+    ).document,
+    "README.md",
+  );
+  await assert.rejects(
+    readFile(join(project, "node_modules", "dependency", "README.html")),
+    /ENOENT/,
+  );
+});
+
+test("serve uses the current directory when paths are omitted", async (t) => {
+  const project = await mkdtemp(join(tmpdir(), "marksites-serve-defaults-"));
+  await writeFile(join(project, "index.md"), "# Project\n");
+  const child = spawn(process.execPath, [cliPath, "serve", "--port", "0"], {
+    cwd: project,
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+  t.after(() => {
+    if (!child.killed) child.kill("SIGTERM");
+  });
+  let stderr = "";
+  child.stderr.setEncoding("utf8");
+  child.stderr.on("data", (chunk) => (stderr += chunk));
+  await new Promise((done, fail) => {
+    const timeout = setTimeout(
+      () => fail(new Error(`serve did not start: ${stderr}`)),
+      5_000,
+    );
+    child.stdout.setEncoding("utf8");
+    child.stdout.on("data", (chunk) => {
+      if (!chunk.includes("marksites server:")) return;
+      clearTimeout(timeout);
+      done();
+    });
+    child.once("error", fail);
+    child.once("exit", (code) => {
+      if (code && code !== 0)
+        fail(new Error(`serve exited ${code}: ${stderr}`));
+    });
+  });
+  assert.match(
+    await readFile(join(project, "marksites", "index.html"), "utf8"),
+    /Project/,
+  );
+  child.kill("SIGTERM");
+  await new Promise((done) => child.once("exit", done));
 });

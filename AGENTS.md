@@ -1,58 +1,86 @@
-# Development guidelines
+# marksites 開発ガイド
 
-## Project goals
+## プロジェクト
 
-`marksites` converts Markdown into a standalone GitHub-styled HTML document. Preserve the small public API, the zero-runtime-service design, and the ability to open generated files directly from the local filesystem.
+`marksites` は Markdown を GitHub 風のスタンドアロン HTML に変換する。
+公開 API を小さく保ち、実行時サービスなしで `file://` から閲覧できる設計を維持する。
 
-## Architecture
+## 技術スタックとコマンド
 
-- Keep `src/index.ts` as the public facade. Export only supported public functions and types from it.
-- Keep orchestration in `src/markdown-to-html.ts`. It resolves options and composes features, but must not contain large CSS, HTML, or browser scripts.
-- Keep feature-specific rendering and browser behavior in `src/features/`. A feature should own its markup and client script together.
-- Keep the standalone document shell and embedded styles in `src/template/`.
-- Keep only shared, side-effect-free helpers in `src/utils/`. Do not create generic utilities for logic used by a single feature.
-- Keep public option types in `src/types.ts`. Feature-internal state and types stay private to their feature module.
-- Preserve ESM imports with explicit `.js` extensions in TypeScript source files.
-- Store feature designs, specifications, and implementation decisions as Markdown under `docs/`; update the relevant design document in the same change when implementation decisions change.
-- Keep confirmed behavior in design documents and outstanding work in dedicated TODO documents.
-- Keep Markdown collection discovery, path mapping, navigation assembly, incremental manifests, and conversion execution in `src/conversion/`. `src/cli/` should only parse CLI input, report results, and retain deliberate compatibility facades.
-- Keep annotation persistence and validation in `src/annotations/`.
-- Keep the optional Node HTTP service in `src/server/`; separate API routing, static-file delivery, HTML response security, persistence, and server lifecycle by responsibility.
-- Do not expose conversion, annotation, CLI, or server internals through the package exports map.
+- Node.js 20 以上、npm、TypeScript、ESM、`tsc`
+- Node.js 組み込みテストランナー。テストは `test/` 配下に置く。
+- `npm run build`: TypeScript を `dist/` にコンパイルする。
+- `npm run check`: ファイルを生成せず型チェックする。
+- `npm test`: ビルド後に全テストを実行する。
+- 作業完了前に `npm test` と `git diff --check` を実行する。
 
-## Compatibility
+TypeScript の import には、出力後の `.js` 拡張子を記述する。
 
-- Treat `markdownToHtml()` and the types exported by `src/index.ts` as the public API.
-- Do not change CLI arguments, defaults, generated markup, styling, or browser behavior as part of an unrelated refactor.
-- Generated HTML must remain standalone. Embed required CSS and browser JavaScript; do not add CDN or network requirements.
-- Generated HTML must continue to work when opened through `file://`. Clipboard functionality therefore needs a non-Clipboard-API fallback.
-- Directory conversion must preserve relative folder structure, rewrite relative Markdown links to HTML, and generate page-relative file-tree links.
-- Directory pages must show breadcrumbs above the content. Link breadcrumb segments to an `index.md` or `index.markdown` when that directory provides one.
-- File-tree filtering is case-insensitive, matches file names, keeps matching ancestor directories visible, and must remain entirely client-side.
-- Continue escaping document metadata, code from unsupported languages, generated attributes, and table-of-contents text.
-- Preserve GitHub-compatible heading IDs and deterministic suffixes for duplicate headings.
-- Treat adjacent `.<HTML basename>.json` files as extensible per-document user data. Never replace or delete them during an ordinary build, and write updates atomically.
-- Keep `marksites serve` optional and idle: no file watcher, polling loop, or resident document cache.
-- Reserve `/_marksites/api/v1` for the local-server API and `_marksites` at the output root.
+```ts
+import { escapeHtml } from "./utils/html.js";
+```
 
-## Testing
+## アーキテクチャ
 
-- Run `npm test` and `git diff --check` before handing off a change.
-- Organize tests by feature under `test/` and test only through the public `dist/index.js` entry point unless a unit genuinely requires a private boundary.
-- Add coverage for enabled, disabled, empty, unsupported, and duplicate cases when changing an optional feature.
-- For structural refactors, capture representative HTML before the change and compare it byte-for-byte after the change.
-- Verify the CLI against a real Markdown file when changing document assembly, embedded assets, or file handling.
-- Cover recursive traversal, nested output paths, and cross-document links when changing directory conversion.
+- `src/index.ts` は公開ファサード。サポート対象の関数と型だけを export する。
+- `src/markdown-to-html.ts` はオプション解決と機能の組み立てを担う。
+  大きな CSS、HTML、ブラウザ用スクリプトは置かない。
+- `src/features/` は各機能のマークアップとブラウザ動作を一緒に所有する。
+- `src/template/` はスタンドアロン文書の外枠と埋め込みスタイルを所有する。
+- `src/utils/` には、複数箇所で共有する副作用のない処理だけを置く。
+- 公開オプション型は `src/types.ts` に置き、機能内部の型は非公開にする。
+- `src/conversion/` は Markdown の探索、パス変換、ナビゲーション、
+  差分マニフェスト、変換処理を所有する。
+- `src/cli/` は CLI 入力の解析と結果表示を担う。意図的な互換ファサードは維持する。
+- `src/annotations/` は注釈の検証と永続化を所有する。
+- `src/server/` は任意の Node HTTP サービスを責務別に所有する。
+- package exports は公開ファサードだけを公開し、変換、注釈、CLI、
+  サーバーの内部モジュールは公開しない。
 
-## Dependencies and build
+## 設計文書
 
-- Prefer the current TypeScript-only build. Keep CSS and browser scripts in TypeScript modules unless adding an asset pipeline has a clear, reviewed benefit.
-- Avoid adding a bundler, framework, dependency-injection layer, or class hierarchy without a concrete requirement.
-- Add runtime dependencies only when they provide standards compatibility or substantial maintained functionality that would be risky to reproduce locally.
-- Keep internal modules private through the package `exports` map.
+- `src/` 配下の各フォルダには `spec.md` があり、そのフォルダとファイルの
+  設計および仕様を記載する。
+- 実装を変更するたびに、該当する `spec.md` または `README.md` も同じ変更内で更新する。
+- 確定した設計と判断は文書に反映し、未完了事項は専用 TODO 文書に記録する。
 
-## Repository hygiene
+## 互換性
 
-- Do not commit generated HTML or `dist/` output.
-- Keep `sample.md` and `sample/` as local manual-verification fixtures. Do not commit their source or generated HTML output unless the project policy is explicitly changed.
-- Use Conventional Commits for subsequent commits, for example `feat: add ...`, `fix: handle ...`, or `refactor: split ...`.
+- CLI の入力省略時はカレントディレクトリ、出力省略時はその配下の `marksites/`
+  を使用する。ルート変換では `.git`、`node_modules`、`dist`、`coverage` を除外する。
+- ディレクトリ探索は、否定パターンを含む入れ子の `.gitignore` に従う。
+  現在の出力先と `.marksites-build.json` で生成物と判定したディレクトリも除外する。
+- 公開 API は `markdownToHtml()` と `src/index.ts` から export される型である。
+- CLI 引数、デフォルト値、生成マークアップ、スタイル、ブラウザ動作は、
+  無関係なリファクタリングでは変更しない。
+- 生成 HTML は CSS と JavaScript を内包し、CDN やネットワークに依存しない。
+  `file://` で動作し、クリップボード機能には Clipboard API 非対応時の代替処理を持つ。
+- ディレクトリ変換は相対構造を維持し、相対 Markdown リンクを書き換え、
+  各ページ基準のファイルツリーリンクを生成する。
+- ディレクトリページにはパンくずを表示する。その階層に `index.md` または
+  `index.markdown` があれば、該当セグメントをリンクにする。
+- ファイルツリー検索はクライアント側だけで動作し、大文字小文字を区別せず、
+  ファイル名に一致する項目とその祖先ディレクトリを表示する。
+- メタデータ、未対応言語のコード、生成属性、目次テキストはエスケープする。
+- 見出し ID は GitHub 互換とし、重複時の接尾辞を決定的に生成する。
+- 隣接する `.<HTML basename>.json` は拡張可能なユーザーデータである。
+  通常ビルドでは保持し、更新時はアトミックに書き込む。
+- `marksites serve` は watcher、ポーリング、常駐文書キャッシュを持たない。
+- `/_marksites/api/v1` はローカル API、出力ルートの `_marksites` は内部用途に予約する。
+
+## テスト
+
+- テストは、非公開境界の単体テストが必要な場合を除き、公開された
+  `dist/index.js` エントリポイントを使用する。
+- 任意機能では、該当する有効・無効・空・未対応・重複ケースを網羅する。
+- 構造的リファクタリングでは、代表的な HTML を変更前後でバイト単位に比較する。
+- 文書組み立て、埋め込みアセット、ファイル処理の変更は実ファイルで CLI を検証する。
+- ディレクトリ処理の変更では、再帰探索、入れ子の出力パス、文書間リンクを検証する。
+
+## 境界とリポジトリ管理
+
+- バンドラー、フレームワーク、DI 層、クラス階層は具体的な要件なしに追加しない。
+- 依存関係は、独自実装のリスクが高い標準互換性、または保守された実質的な
+  機能を提供する場合に限って追加する。
+- `dist/`、生成 HTML、`sample.md`、`sample/` はコミットしない。
+- コミットは `feat:`、`fix:`、`refactor:` などの Conventional Commits を使用する。

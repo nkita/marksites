@@ -64,3 +64,50 @@ test("records a fingerprint derived from the rendered document", async () => {
   );
   assert.match(manifest.generator.renderFingerprint, /^sha256:[a-f0-9]{64}$/);
 });
+
+test("honors nested gitignore files and skips generated directories", async () => {
+  const root = await mkdtemp(join(tmpdir(), "marksites-ignore-"));
+  const input = join(root, "project"),
+    output = join(root, "site");
+  await mkdir(join(input, "nested"), { recursive: true });
+  await mkdir(join(input, "ignored-directory"), { recursive: true });
+  await mkdir(join(input, "previous-output"), { recursive: true });
+  await writeFile(
+    join(input, ".gitignore"),
+    "ignored.md\nignored-directory/\n",
+  );
+  await writeFile(join(input, "included.md"), "# Included\n");
+  await writeFile(join(input, "ignored.md"), "# Ignored\n");
+  await writeFile(join(input, "ignored-directory", "hidden.md"), "# Hidden\n");
+  await writeFile(join(input, "nested", ".gitignore"), "*.md\n!important.md\n");
+  await writeFile(join(input, "nested", "ignored.md"), "# Nested ignored\n");
+  await writeFile(join(input, "nested", "important.md"), "# Important\n");
+  await writeFile(
+    join(input, "previous-output", ".marksites-build.json"),
+    "{}",
+  );
+  await writeFile(
+    join(input, "previous-output", "generated.md"),
+    "# Generated\n",
+  );
+
+  const result = await convertDirectoryDetailed(input, output);
+
+  assert.equal(result.converted, 2);
+  assert.match(
+    await readFile(join(output, "included.html"), "utf8"),
+    /Included/,
+  );
+  assert.match(
+    await readFile(join(output, "nested", "important.html"), "utf8"),
+    /Important/,
+  );
+  for (const path of [
+    join(output, "ignored.html"),
+    join(output, "ignored-directory", "hidden.html"),
+    join(output, "nested", "ignored.html"),
+    join(output, "previous-output", "generated.html"),
+  ]) {
+    await assert.rejects(readFile(path, "utf8"), /ENOENT/);
+  }
+});

@@ -3,7 +3,12 @@ import { basename, dirname, extname, join, resolve } from "node:path";
 import { readAnnotations } from "../annotations/storage.js";
 import { renderMarkdown } from "../markdown-to-html.js";
 import { atomicWriteFile } from "../utils/files.js";
-import { firstExistingPath, isMarkdown, pathExists } from "./paths.js";
+import {
+  DEFAULT_OUTPUT_DIRECTORY,
+  firstExistingPath,
+  isMarkdown,
+  pathExists,
+} from "./paths.js";
 
 export async function convertFile(
   input: string,
@@ -13,7 +18,10 @@ export async function convertFile(
     throw new Error(`Input file must use .md or .markdown: ${input}`);
   const output = outputArgument
     ? resolve(outputArgument)
-    : input.slice(0, -extname(input).length) + ".html";
+    : resolve(
+        DEFAULT_OUTPUT_DIRECTORY,
+        `${basename(input, extname(input))}.html`,
+      );
   const outputName = basename(output, extname(output));
   const metadataPath = join(dirname(output), `.${outputName}.json`);
   const legacyPaths = [

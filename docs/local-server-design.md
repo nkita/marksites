@@ -53,6 +53,10 @@ marksites serve <input> [output]
     `- コメントAPIを提供
 ```
 
+CLIの入力を省略した場合はカレントディレクトリ、出力を省略した場合はカレントディレクトリ直下の`marksites/`として扱う。したがって`marksites`は`marksites . marksites`、`marksites serve`は`marksites serve . marksites`と同じである。プロジェクトルートの探索では`.git`、`node_modules`、`dist`、`coverage`を標準で除外する。
+
+Markdown探索では、入力ルートから各階層の`.gitignore`を読み込み、Git互換のパターン、ディレクトリ指定、否定パターンを適用する。現在の出力先は絶対パスで除外し、`.marksites-build.json`が存在する過去の生成フォルダも再帰探索しない。これにより、生成物の再入力と依存パッケージ内Markdownの誤変換を防ぐ。
+
 ### 実装モジュール構成
 
 内部実装は次の責務で分離する。

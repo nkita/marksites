@@ -53,7 +53,14 @@ const html = markdownToHtml(markdown, { highlight: false });
 npx marksites README.md README.html
 ```
 
-出力先を省略すると、入力ファイルと同じ場所に拡張子 `.html` で保存します。
+入力と出力を両方省略すると、カレントディレクトリ配下のMarkdownを`./marksites/`へ変換します。
+
+```sh
+npx marksites
+# npx marksites . marksites と同じ
+```
+
+単一Markdownの出力先を省略した場合も、`./marksites/`へ同じbasenameのHTMLを保存します。
 
 フォルダを指定すると、配下の `.md` と `.markdown` を再帰的に変換します。出力先でも元のフォルダ階層を維持し、各ページの左側にファイル名で絞り込めるファイルツリー、本文上部に現在のファイルパスを示すパンくずを表示します。Markdownファイル間の相対リンクは `.html` へ書き換えられます。
 
@@ -61,12 +68,16 @@ npx marksites README.md README.html
 npx marksites docs public
 ```
 
-出力先を省略した場合は、入力フォルダと同じ階層に `<入力名>-html` フォルダを作成します。
+ディレクトリ変換の出力先を省略した場合は、カレントディレクトリの`marksites/`へ出力します。
 
 ```sh
 npx marksites docs
-# docs-html/ に出力
+# ./marksites/ に出力
 ```
+
+プロジェクトルートを対象にする場合、`.git`、`node_modules`、`dist`、`coverage`は探索対象から除外されます。
+
+入力フォルダ配下の`.gitignore`を読み込み、Gitと同じパターン規則で除外されたファイルとフォルダを変換対象から外します。ネストした`.gitignore`と`!`による再包含にも対応します。また、`.marksites-build.json`を持つ既存の生成フォルダと、今回指定された出力フォルダは常に探索対象外です。
 
 2回目以降はMarkdown本文、コメント、ファイル構成、レンダー設定のSHA-256を比較し、影響したHTMLだけを再生成します。管理情報は出力先直下の `.marksites-build.json`、文書ごとのメタデータは各HTMLに隣接する `.<名前>.json` に保存されます。このJSONは再変換時にも上書きされません。現在はコメント情報を格納し、将来は文書固有のほかの情報も管理できるファイルとして扱います。
 
@@ -77,6 +88,13 @@ npx marksites docs
 ```sh
 npx marksites serve docs public/docs
 # http://127.0.0.1:3000
+```
+
+入力・出力を省略して、カレントディレクトリを`./marksites/`へ変換・配信することもできます。
+
+```sh
+npx marksites serve
+# npx marksites serve . marksites と同じ
 ```
 
 `--host`、`--port`、`--open`を指定できます。サーバーは起動時に差分変換を行い、アイドル中のファイル監視や定期処理は行いません。停止後もコメントはHTMLへ埋め込まれているため、生成HTMLを`file://`で閲覧できます。この場合、コメントは閲覧専用です。

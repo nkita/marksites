@@ -1,6 +1,17 @@
 import { access, readdir } from "node:fs/promises";
 import { join, posix, relative, resolve, sep } from "node:path";
 import type { MarkdownFile } from "./types.js";
+import { isGitignored, loadGitignoreRules } from "./gitignore.js";
+import { BUILD_MANIFEST } from "./manifest.js";
+
+const EXCLUDED_DIRECTORY_NAMES = new Set([
+  ".git",
+  "coverage",
+  "dist",
+  "node_modules",
+]);
+
+export const DEFAULT_OUTPUT_DIRECTORY = "marksites";
 
 export function isMarkdown(path: string): boolean {
   return /\.(md|markdown)$/i.test(path);
@@ -53,7 +64,17 @@ export async function findMarkdownFiles(
   excludedDirectory?: string,
 ): Promise<MarkdownFile[]> {
   const files: MarkdownFile[] = [];
-  async function visit(directory: string): Promise<void> {
+  async function visit(
+    directory: string,
+    inheritedRules: Awaited<ReturnType<typeof loadGitignoreRules>>,
+  ): Promise<void> {
+    if (
+      directory !== root &&
+      (await pathExists(join(directory, BUILD_MANIFEST)))
+    ) {
+      return;
+    }
+    const rules = await loadGitignoreRules(root, directory, inheritedRules);
     const entries = await readdir(directory, { withFileTypes: true });
     entries.sort((left, right) =>
       left.isDirectory() !== right.isDirectory()
@@ -64,10 +85,16 @@ export async function findMarkdownFiles(
     );
     for (const entry of entries) {
       const absolute = join(directory, entry.name);
+      const relativePath = toPosix(relative(root, absolute));
+      if (isGitignored(relativePath, entry.isDirectory(), rules)) continue;
       if (entry.isDirectory()) {
-        if (resolve(absolute) !== excludedDirectory) await visit(absolute);
+        if (
+          resolve(absolute) !== excludedDirectory &&
+          !EXCLUDED_DIRECTORY_NAMES.has(entry.name)
+        ) {
+          await visit(absolute, rules);
+        }
       } else if (entry.isFile() && isMarkdown(entry.name)) {
-        const relativePath = toPosix(relative(root, absolute));
         files.push({
           sourcePath: absolute,
           relativePath,
@@ -77,6 +104,6 @@ export async function findMarkdownFiles(
       }
     }
   }
-  await visit(root);
+  await visit(root, []);
   return files;
 }

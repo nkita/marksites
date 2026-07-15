@@ -24,6 +24,7 @@ import {
 } from "./manifest.js";
 import { buildBreadcrumbs, buildFileTree } from "./navigation.js";
 import {
+  DEFAULT_OUTPUT_DIRECTORY,
   findMarkdownFiles,
   firstExistingPath,
   pathExists,
@@ -221,7 +222,7 @@ export async function convertDirectoryDetailed(
 ): Promise<ConversionResult> {
   const output = outputArgument
     ? resolve(outputArgument)
-    : resolve(dirname(input), `${basename(input)}-html`);
+    : resolve(DEFAULT_OUTPUT_DIRECTORY);
   const outputRelative = relative(input, output);
   const outputInsideInput =
     outputRelative !== "" &&
