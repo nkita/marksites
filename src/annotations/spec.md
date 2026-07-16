@@ -10,7 +10,7 @@
 
 ### `model.ts`
 
-- `AnnotationSelection`: 選択文字列の再特定情報。`exact`、前後文、見出しID、開始・終了オフセットを保持する。
+- `AnnotationSelection`: 選択文字列の再特定情報。`exact`、前後文、見出しID、開始・終了オフセットを保持する。`exact`が空で全項目が初期値の場合は、範囲に紐づかない文書全体コメントを表す。
 - `Annotation`: ID、選択位置、コメント本文・作者、状態、作成・更新日時を表す。
 - `AnnotationDocument`: `schemaVersion: 1`、Markdown相対パス、revision、コメント配列からなる正本形式。
 - `emptyAnnotationDocument(document)`: revision 0、空配列の初期データを生成する。

@@ -255,7 +255,10 @@ export async function convertDirectoryDetailed(
 
   const treeHash = contentHash(
     files
-      .map((file) => file.relativePath)
+      .map(
+        (file) =>
+          `${file.relativePath}\0${file.annotations?.annotations.length ?? 0}`,
+      )
       .sort()
       .join("\n"),
   );

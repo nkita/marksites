@@ -43,6 +43,8 @@ export interface FileTreeFile {
   name: string;
   href: string;
   current?: boolean;
+  /** Number of comments associated with the file. Omitted when unavailable. */
+  commentCount?: number;
 }
 
 export interface TableOfContentsOptions {

@@ -8,18 +8,18 @@
 
 ### `document.ts`
 
-- `DocumentParts`: 事前に組み立てられたtitle、language、本文、パンくず、ファイルツリー、目次、コメント、各スクリプトを受け取る内部型。
+- `DocumentParts`: 事前に組み立てられたtitle、language、本文、パンくず、ファイルツリー、右サイドバー、コメント補助UI、各スタイルとスクリプトを受け取る内部型。
 - `renderDocument(parts)`: doctypeからbody末尾までの単一HTML文字列を生成する。
 - `trustedScript()`: marksites自身の実行スクリプトへ`data-marksites-script="true"`を付け、サーバーCSPの照合対象にする。
 
-ファイルツリーがある場合だけ`has-file-tree` classと専用スタイルを追加する。highlight無効時はhighlightテーマを埋め込まない。スクリプトの順序はファイルツリー、目次、コードブロック、コメントとする。
+ファイルツリーがある場合だけ`has-file-tree` classと専用スタイルを追加する。highlight無効時はhighlightテーマを埋め込まない。スクリプトの順序はファイルツリー、サイドバー、目次、コードブロック、コメントとする。
 
 ### `styles.ts`
 
 - `githubMarkdownCss`: `github-markdown-css`のCSSをビルド済みモジュール読み込み時に取得する。
 - `highlightCss`: highlight.jsのGitHubテーマを取得する。
-- `documentStyles`: 本文と右目次、レスポンシブ目次、コードツール、基本レイアウトを定義する。
-- `fileTreeStyles`: 左ファイルツリーを持つ3カラム構成とレスポンシブ表示を定義する。
+- `documentStyles`: 本文と右サイドバーのグリッド、目次パネル、コードツール、基本レイアウトを定義する。タブとコメント固有のスタイルは各featureが所有する。
+- `fileTreeStyles`: 左ファイルツリーを持つ3カラム構成、コメント件数バッジ、レスポンシブ表示を定義する。
 
 CSSは生成HTMLへ直接埋め込み、CDNや実行時ファイル参照を追加しない。
 

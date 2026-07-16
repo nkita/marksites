@@ -20,7 +20,11 @@ ${renderNodes(node.children)}
       }
 
       const current = node.current ? ' aria-current="page"' : "";
-      return `      <li class="file-tree-file"><a href="${escapeHtml(node.href)}"${current}>${escapeHtml(node.name)}</a></li>`;
+      const count =
+        Number.isSafeInteger(node.commentCount) && node.commentCount! > 0
+          ? `<span class="file-tree-comment-count" aria-label="${node.commentCount} ${node.commentCount === 1 ? "comment" : "comments"}">${node.commentCount}</span>`
+          : "";
+      return `      <li class="file-tree-file"><a href="${escapeHtml(node.href)}" data-file-name="${escapeHtml(node.name)}"${current}><span class="file-tree-name">${escapeHtml(node.name)}</span>${count}</a></li>`;
     })
     .join("\n");
 }
@@ -86,7 +90,7 @@ export function renderFileTreeScript(enabled: boolean): string {
     let matches = 0;
 
     for (const file of files) {
-      const name = file.querySelector('a').textContent.toLocaleLowerCase();
+      const name = file.querySelector('a').dataset.fileName.toLocaleLowerCase();
       const visible = query === '' || name.includes(query);
       file.hidden = !visible;
       if (visible) matches += 1;
@@ -113,9 +117,7 @@ export function renderFileTreeScript(enabled: boolean): string {
 </script>`;
 }
 
-export function renderBreadcrumbs(
-  breadcrumbs?: FileBreadcrumb[],
-): string {
+export function renderBreadcrumbs(breadcrumbs?: FileBreadcrumb[]): string {
   if (!breadcrumbs || breadcrumbs.length === 0) return "";
 
   const items = breadcrumbs

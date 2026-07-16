@@ -1,5 +1,5 @@
 import { lstat, realpath } from "node:fs/promises";
-import { createServer } from "node:http";
+import { createServer, type Server } from "node:http";
 import type { AddressInfo } from "node:net";
 import { join, resolve } from "node:path";
 import { AnnotationRepository } from "./annotation-repository.js";
@@ -10,6 +10,38 @@ import { handleStaticFile } from "./static-files.js";
 import type { MarksitesServerOptions, RunningServer } from "./types.js";
 
 export type { MarksitesServerOptions, RunningServer } from "./types.js";
+
+async function listen(
+  server: Server,
+  host: string,
+  initialPort: number,
+  fallbackPort: boolean,
+): Promise<void> {
+  let port = initialPort;
+  while (true) {
+    try {
+      await new Promise<void>((done, fail) => {
+        const onError = (error: Error) => fail(error);
+        server.once("error", onError);
+        server.listen(port, host, () => {
+          server.off("error", onError);
+          done();
+        });
+      });
+      return;
+    } catch (error) {
+      if (
+        !fallbackPort ||
+        port === 0 ||
+        port >= 65535 ||
+        (error as NodeJS.ErrnoException).code !== "EADDRINUSE"
+      ) {
+        throw error;
+      }
+      port += 1;
+    }
+  }
+}
 
 async function assertReservedPathIsAvailable(root: string): Promise<void> {
   try {
@@ -25,6 +57,7 @@ export async function startMarksitesServer(
 ): Promise<RunningServer> {
   const host = options.host ?? "127.0.0.1";
   const port = options.port ?? 3000;
+  const fallbackPort = options.fallbackPort ?? options.port === undefined;
   const root = resolve(options.outputRoot);
   const rootReal = await realpath(root);
   await assertReservedPathIsAvailable(root);
@@ -72,13 +105,7 @@ export async function startMarksitesServer(
       );
     }
   });
-  await new Promise<void>((done, fail) => {
-    server.once("error", fail);
-    server.listen(port, host, () => {
-      server.off("error", fail);
-      done();
-    });
-  });
+  await listen(server, host, port, fallbackPort);
   const address = server.address() as AddressInfo;
   ownOrigin = `http://${host}:${address.port}`;
   return {

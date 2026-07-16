@@ -33,6 +33,51 @@ test("creates sidecars and skips unchanged HTML", async () => {
   );
 });
 
+test("rebuilds every file when a file-tree comment count changes", async () => {
+  const root = await mkdtemp(join(tmpdir(), "marksites-comment-count-"));
+  const input = join(root, "docs"),
+    output = join(root, "site");
+  await mkdir(input);
+  await writeFile(join(input, "a.md"), "# A\n");
+  await writeFile(join(input, "b.md"), "# B\n");
+  await convertDirectoryDetailed(input, output);
+
+  const metadata = JSON.parse(await readFile(join(output, ".a.json"), "utf8"));
+  metadata.revision = 1;
+  metadata.annotations.push({
+    id: "comment-one",
+    selection: {
+      exact: "",
+      prefix: "",
+      suffix: "",
+      headingId: null,
+      startOffset: 0,
+      endOffset: 0,
+    },
+    comment: { body: "Document comment", author: null },
+    status: "open",
+    createdAt: "2026-07-16T00:00:00.000Z",
+    updatedAt: "2026-07-16T00:00:00.000Z",
+  });
+  await writeFile(join(output, ".a.json"), JSON.stringify(metadata));
+
+  const result = await convertDirectoryDetailed(input, output);
+  assert.equal(result.converted, 2);
+  assert.equal(result.skipped, 0);
+  for (const outputFile of ["a.html", "b.html"]) {
+    const html = await readFile(join(output, outputFile), "utf8");
+    assert.match(
+      html,
+      /data-file-name="a\.md"[^>]*>[\s\S]*?aria-label="1 comment">1<\/span>/,
+    );
+    const bLink = /<a[^>]*data-file-name="b\.md"[^>]*>[\s\S]*?<\/a>/.exec(
+      html,
+    )?.[0];
+    assert.ok(bLink);
+    assert.doesNotMatch(bLink, /file-tree-comment-count/);
+  }
+});
+
 test("moves annotations on an unambiguous rename", async () => {
   const root = await mkdtemp(join(tmpdir(), "marksites-rename-"));
   const input = join(root, "docs"),

@@ -4,6 +4,7 @@ import { emptyAnnotationDocument } from "../annotations/model.js";
 import { createAnnotationsFeature } from "../features/annotations.js";
 import { createCodeBlocksFeature } from "../features/code-blocks.js";
 import { renderFileTreeScript } from "../features/file-tree.js";
+import { createSidebarFeature } from "../features/sidebar.js";
 import { createTableOfContentsFeature } from "../features/table-of-contents.js";
 
 function scriptBody(script: string): string {
@@ -25,12 +26,30 @@ function generatedScriptBodies(): Set<string> {
     maxDepth: 6,
   });
   marked.parse("## Heading", { renderer: tocRenderer, async: false });
+  const renderedToc = toc.render();
+  const annotations = createAnnotationsFeature(
+    emptyAnnotationDocument("index.md"),
+  );
   return new Set([
     scriptBody(code.renderScript()),
     scriptBody(renderFileTreeScript(true)),
-    scriptBody(toc.render().script),
+    scriptBody(renderedToc.script),
+    scriptBody(annotations.script),
     scriptBody(
-      createAnnotationsFeature(emptyAnnotationDocument("index.md")).script,
+      createSidebarFeature({
+        tableOfContents: renderedToc.markup,
+        tableOfContentsTitle: renderedToc.title,
+        annotations: annotations.panel,
+        annotationCount: annotations.count,
+      }).script,
+    ),
+    scriptBody(
+      createSidebarFeature({
+        tableOfContents: "",
+        tableOfContentsTitle: renderedToc.title,
+        annotations: annotations.panel,
+        annotationCount: annotations.count,
+      }).script,
     ),
   ]);
 }

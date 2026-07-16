@@ -8,6 +8,7 @@ import {
   renderFileTreeScript,
 } from "./features/file-tree.js";
 import { createTableOfContentsFeature } from "./features/table-of-contents.js";
+import { createSidebarFeature } from "./features/sidebar.js";
 import { renderDocument } from "./template/document.js";
 import type { RenderOptions } from "./types.js";
 import { escapeHtml } from "./utils/html.js";
@@ -49,6 +50,12 @@ export function renderMarkdown(
   const fileTreeScript = renderFileTreeScript(fileTree !== "");
   const breadcrumbs = renderBreadcrumbs(options.fileTree?.breadcrumbs);
   const annotationFeature = createAnnotationsFeature(annotations);
+  const sidebar = createSidebarFeature({
+    tableOfContents: toc.markup,
+    tableOfContentsTitle: toc.title,
+    annotations: annotationFeature.panel,
+    annotationCount: annotationFeature.count,
+  });
 
   return renderDocument({
     title,
@@ -57,7 +64,9 @@ export function renderMarkdown(
     breadcrumbs,
     fileTree,
     fileTreeScript,
-    tableOfContents: toc.markup,
+    sidebar: sidebar.markup,
+    sidebarStyles: sidebar.styles,
+    sidebarScript: sidebar.script,
     tableOfContentsScript: toc.script,
     codeBlockScript: codeBlocks.renderScript(),
     highlight,

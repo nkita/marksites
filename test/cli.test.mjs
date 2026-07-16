@@ -31,8 +31,14 @@ test("converts a Markdown directory while preserving its hierarchy", async () =>
   assert.equal(count, 2);
   assert.match(home, /href="guide\/start\.html"/);
   assert.match(guide, /href="\.\.\/index\.html"/);
-  assert.match(home, /href="index\.html" aria-current="page"/);
-  assert.match(guide, /href="start\.html" aria-current="page"/);
+  assert.match(
+    home,
+    /href="index\.html" data-file-name="index\.md" aria-current="page"/,
+  );
+  assert.match(
+    guide,
+    /href="start\.html" data-file-name="start\.md" aria-current="page"/,
+  );
   assert.match(home, /<summary>guide<\/summary>/);
   assert.match(home, /class="file-breadcrumbs"/);
   assert.match(

@@ -54,6 +54,7 @@ export function buildFileTree(
               posix.basename(file.outputPath),
           ),
           current: file.outputPath === currentOutputPath,
+          commentCount: file.annotations?.annotations.length ?? 0,
         })),
     ];
   }

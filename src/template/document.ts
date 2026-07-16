@@ -12,7 +12,9 @@ interface DocumentParts {
   breadcrumbs: string;
   fileTree: string;
   fileTreeScript: string;
-  tableOfContents: string;
+  sidebar: string;
+  sidebarStyles: string;
+  sidebarScript: string;
   tableOfContentsScript: string;
   codeBlockScript: string;
   highlight: boolean;
@@ -38,16 +40,16 @@ export function renderDocument(parts: DocumentParts): string {
   <style>${githubMarkdownCss}</style>
   ${parts.highlight ? `<style>${highlightCss}</style>` : ""}
   <style>
-${documentStyles}${parts.fileTree ? `\n${fileTreeStyles}` : ""}${parts.annotationStyles}
+${documentStyles}${parts.fileTree ? `\n${fileTreeStyles}` : ""}${parts.sidebarStyles}${parts.annotationStyles}
   </style>
 </head>
 <body class="${bodyClass}">
 ${parts.fileTree}<main class="markdown-content">
 ${parts.breadcrumbs}${parts.content}
 </main>
-${parts.tableOfContents}
+${parts.sidebar}
 ${parts.annotations}
-${trustedScript(parts.fileTreeScript)}${trustedScript(parts.tableOfContentsScript)}
+${trustedScript(parts.fileTreeScript)}${trustedScript(parts.sidebarScript)}${trustedScript(parts.tableOfContentsScript)}
 ${trustedScript(parts.codeBlockScript)}
 ${trustedScript(parts.annotationScript)}
 </body>

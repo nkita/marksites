@@ -7,7 +7,7 @@ test("generates a table of contents with GitHub-style heading IDs", () => {
     "# Document\n\n## Getting Started\n\n### API & usage\n\n## Getting Started\n",
   );
 
-  assert.match(html, /class="table-of-contents"/);
+  assert.match(html, /class="table-of-contents sidebar-panel"/);
   assert.match(html, /href="#getting-started">Getting Started<\/a>/);
   assert.match(html, /href="#api--usage">API &amp; usage<\/a>/);
   assert.match(html, /href="#getting-started-1">Getting Started<\/a>/);
@@ -17,23 +17,24 @@ test("generates a table of contents with GitHub-style heading IDs", () => {
   assert.match(html, /grid-template-columns: minmax\(0, 1fr\) 300px/);
   assert.match(html, /grid-template-areas: "content toc"/);
   assert.match(html, /body\.markdown-body/);
-  assert.match(html, /position: sticky/);
+  assert.match(html, /position:sticky/);
   assert.match(html, /class="markdown-content"/);
   assert.doesNotMatch(html, /background: #edf2f7/);
   assert.match(html, /aria-current/);
   assert.match(html, /requestAnimationFrame/);
   assert.match(html, /a\[aria-current="location"\]::before/);
   assert.match(html, /border-radius: 0 6px 6px 0/);
-  assert.match(html, /class="toc-toggle"/);
-  assert.match(html, /aria-label="Hide table of contents"/);
-  assert.match(html, /<h2>\s*<button type="button" class="toc-toggle"/);
-  assert.match(html, /<span>Table of contents<\/span>/);
+  assert.match(html, /class="document-sidebar"/);
+  assert.match(html, /class="sidebar-tabs" role="tablist"/);
+  assert.match(html, /data-sidebar-tab="toc">Table of contents<\/button>/);
   assert.match(html, /class="panel-toggle-icon"/);
-  assert.doesNotMatch(html, /toc-toggle-label/);
-  assert.match(html, /\.toc-toggle\[aria-expanded="false"\] \.panel-toggle-icon/);
-  assert.match(html, /\.toc-panel \{ margin-top: 12px; padding-top: 12px; border-top:/);
+  assert.match(
+    html,
+    /\.sidebar-toggle\[aria-expanded="false"\] \.panel-toggle-icon/,
+  );
+  assert.match(html, /\.sidebar-panels\{display:flex;min-height:0;flex:1\}/);
   assert.match(html, /matchMedia\('\(max-width: 900px\)'\)/);
-  assert.match(html, /panel\.hidden = !expanded/);
+  assert.match(html, /body\.hidden=!expanded/);
 });
 
 test("supports table of contents options", () => {
@@ -41,7 +42,7 @@ test("supports table of contents options", () => {
     tableOfContents: { title: "目次", minDepth: 1, maxDepth: 2 },
   });
 
-  assert.match(html, /<span>目次<\/span>/);
+  assert.match(html, /data-sidebar-tab="toc">目次<\/button>/);
   assert.match(html, /href="#document"/);
   assert.match(html, /href="#section"/);
   assert.doesNotMatch(html, /href="#detail"/);
@@ -50,7 +51,7 @@ test("supports table of contents options", () => {
 test("can disable the table of contents while retaining heading IDs", () => {
   const html = markdownToHtml("## Section", { tableOfContents: false });
 
-  assert.doesNotMatch(html, /class="table-of-contents"/);
+  assert.doesNotMatch(html, /class="table-of-contents sidebar-panel"/);
   assert.doesNotMatch(html, /document\.querySelector\('\.table-of-contents'\)/);
   assert.match(html, /<h2 id="section">Section<\/h2>/);
 });

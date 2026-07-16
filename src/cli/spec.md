@@ -29,7 +29,7 @@
 `src/cli.ts`は次を担当する。
 
 - `marksites [input] [output]`と`marksites serve [input] [output]`の解析
-- `--host`、`--port`、`--open`の処理
+- `--host`、`--port`、`--open`の処理。ポート未指定時は3000から空きポートを昇順に探索し、`--port`指定時はそのポートだけを使用する
 - 入力省略時のカレントディレクトリ解決
 - 変換件数、スキップ、削除、メタデータ移動の表示
 - `SIGINT`と`SIGTERM`でのサーバー終了

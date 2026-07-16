@@ -3,6 +3,7 @@ export interface MarksitesServerOptions {
   entryPath?: string;
   host?: string;
   port?: number;
+  fallbackPort?: boolean;
   projectId: string;
   projectName: string;
   documents: Map<string, string>;

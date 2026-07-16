@@ -144,6 +144,31 @@ test("serves static output and annotation CRUD", async (t) => {
   );
   assert.equal(deleted.status, 200);
   assert.equal((await deleted.json()).data.annotations.length, 0);
+  const documentComment = await fetch(
+    server.url + "/_marksites/api/v1/annotations",
+    {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        document: "index.md",
+        baseRevision: 3,
+        selection: {
+          exact: "",
+          prefix: "",
+          suffix: "",
+          headingId: null,
+          startOffset: 0,
+          endOffset: 0,
+        },
+        comment: { body: "Document-level note" },
+      }),
+    },
+  );
+  assert.equal(documentComment.status, 201);
+  assert.equal(
+    (await documentComment.json()).data.annotations[0].selection.exact,
+    "",
+  );
   assert.equal((await fetch(server.url + "/../package.json")).status, 404);
   assert.equal(
     (
@@ -180,6 +205,29 @@ test("reports a port conflict", async (t) => {
     startMarksitesServer({ ...options, port }),
     /EADDRINUSE/,
   );
+});
+
+test("falls back to a later port when the preferred port is occupied", async (t) => {
+  const root = await mkdtemp(join(tmpdir(), "marksites-server-fallback-"));
+  const options = {
+    outputRoot: root,
+    port: 0,
+    projectId: "fallback-test",
+    projectName: "Test",
+    documents: new Map(),
+    onAnnotationsChange: async () => {},
+  };
+  const first = await startMarksitesServer(options);
+  t.after(() => first.close());
+  const occupiedPort = Number(new URL(first.url).port);
+  const second = await startMarksitesServer({
+    ...options,
+    port: occupiedPort,
+    fallbackPort: true,
+  });
+  t.after(() => second.close());
+
+  assert.ok(Number(new URL(second.url).port) > occupiedPort);
 });
 
 test("serves the configured entry page when index.html is absent", async (t) => {

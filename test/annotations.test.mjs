@@ -48,6 +48,35 @@ test("embeds annotations without allowing script element escape", async () => {
   assert.match(html, /\\u003c\/script\\u003e/);
   assert.doesNotMatch(html, /<script>alert\(1\)<\/script>/);
   assert.match(html, /Add comment<\/button>/);
+  assert.match(
+    html,
+    /data-sidebar-tab="comments">Comments <span class="sidebar-count" id="annotation-count">1<\/span>/,
+  );
+  assert.match(html, /id="sidebar-panel-comments" role="tabpanel"/);
+  assert.doesNotMatch(html, /class="table-of-contents sidebar-panel"/);
+  assert.match(html, /aria-selected="true"[^>]*data-sidebar-tab="comments"/);
+  assert.match(html, /marksites:show-comments/);
+  assert.match(html, /data-add-document-comment disabled/);
+  assert.match(html, /pendingSelection=\{exact:'',prefix:'',suffix:''/);
+  assert.match(html, /function updateCurrentFileCount\(\)/);
+  assert.match(html, /-webkit-line-clamp:2/);
+  assert.match(html, /\.annotation-card:hover>\[data-annotation-action\]/);
+  assert.match(
+    html,
+    /\.annotation-card>\[data-annotation-action\]:focus-visible/,
+  );
+  assert.doesNotMatch(
+    html,
+    /\.annotation-card\.is-focused>\[data-annotation-action\]/,
+  );
+  assert.doesNotMatch(html, /@media\((?:any-)?hover:none\)/);
+  assert.match(html, /e\.pointerType!==\x27touch\x27/);
+  assert.match(html, /\.annotation-card\.is-focused\{/);
+  assert.match(html, /\.annotation-highlight\.is-focused\{/);
+  assert.match(html, /\.annotation-card\{[^}]*border-radius:8px/);
+  assert.match(html, /\.annotations-panel button\{[^}]*border-radius:6px/);
+  assert.match(html, /\.annotation-card\{[^}]*font-size:\.8125rem/);
+  assert.match(html, /\.annotation-quote\{[^}]*font-size:\.75rem/);
   const executableScripts = [
     ...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g),
   ]

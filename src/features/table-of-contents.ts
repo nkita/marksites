@@ -16,7 +16,7 @@ interface TableOfContentsConfig {
 }
 
 export interface TableOfContentsFeature {
-  render(): { markup: string; script: string };
+  render(): { markup: string; script: string; title: string };
 }
 
 function renderTableOfContents(
@@ -34,16 +34,8 @@ function renderTableOfContents(
     .join("\n");
   const escapedTitle = escapeHtml(title);
 
-  return `<nav class="table-of-contents" aria-label="${escapedTitle}">
-  <div class="toc-header">
-    <h2>
-      <button type="button" class="toc-toggle" aria-expanded="true" aria-controls="table-of-contents-list" aria-label="Hide table of contents" title="Hide table of contents">
-        <span>${escapedTitle}</span>
-        <svg class="panel-toggle-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" /></svg>
-      </button>
-    </h2>
-  </div>
-  <div class="toc-panel" id="table-of-contents-list">
+  return `<nav class="table-of-contents sidebar-panel" id="sidebar-panel-toc" role="tabpanel" aria-labelledby="sidebar-tab-toc" aria-label="${escapedTitle}">
+  <div class="toc-panel">
     <ul>
 ${links}
     </ul>
@@ -58,30 +50,8 @@ function renderTableOfContentsScript(): string {
   const navigation = document.querySelector('.table-of-contents');
   if (!navigation) return;
 
-  const toggle = navigation.querySelector('.toc-toggle');
   const panel = navigation.querySelector('.toc-panel');
-  const compactLayout = matchMedia('(max-width: 900px)');
-  const setExpanded = (expanded) => {
-    toggle.setAttribute('aria-expanded', String(expanded));
-    const label = expanded ? 'Hide table of contents' : 'Show table of contents';
-    toggle.setAttribute('aria-label', label);
-    toggle.title = label;
-    panel.hidden = !expanded;
-  };
-  const syncLayout = () => setExpanded(!compactLayout.matches);
-
-  toggle.addEventListener('click', () => {
-    setExpanded(toggle.getAttribute('aria-expanded') !== 'true');
-  });
-  compactLayout.addEventListener('change', syncLayout);
-  syncLayout();
-
   const links = [...panel.querySelectorAll('a[href^="#"]')];
-  for (const link of links) {
-    link.addEventListener('click', () => {
-      if (compactLayout.matches) setExpanded(false);
-    });
-  }
   const entries = links
     .map((link) => ({ link, heading: document.getElementById(link.getAttribute('href').slice(1)) }))
     .filter((entry) => entry.heading);
@@ -104,7 +74,7 @@ function renderTableOfContentsScript(): string {
     }
     const navigationRect = navigation.getBoundingClientRect();
     const activeRect = active.link.getBoundingClientRect();
-    if (!panel.hidden && (activeRect.top < navigationRect.top || activeRect.bottom > navigationRect.bottom)) {
+    if (!navigation.hidden && (activeRect.top < navigationRect.top || activeRect.bottom > navigationRect.bottom)) {
       navigation.scrollTop += activeRect.top - navigationRect.top - navigation.clientHeight / 2;
     }
   };
@@ -152,6 +122,7 @@ export function createTableOfContentsFeature(
       return {
         markup,
         script: markup ? renderTableOfContentsScript() : "",
+        title: config.title,
       };
     },
   };

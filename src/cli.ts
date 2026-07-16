@@ -28,7 +28,7 @@ function report(result: ConversionResult): void {
 async function serve(args: string[]): Promise<void> {
   const positional: string[] = [];
   let host = "127.0.0.1",
-    port = 3000,
+    port: number | undefined,
     shouldOpen = false;
   for (let index = 0; index < args.length; index++) {
     const argument = args[index]!;
@@ -89,6 +89,7 @@ async function serve(args: string[]): Promise<void> {
     entryPath,
     host,
     port,
+    fallbackPort: port === undefined,
     projectId,
     projectName: basename(input),
     documents,
