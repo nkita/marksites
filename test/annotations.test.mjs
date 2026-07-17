@@ -50,6 +50,14 @@ test("embeds annotations without allowing script element escape", async () => {
   assert.match(html, /Add comment<\/button>/);
   assert.match(
     html,
+    /data-selection-action="copy"><svg class="action-icon copy-icon"[^>]*>[\s\S]*?<span data-copy-label>Copy selection<\/span>/,
+  );
+  assert.match(
+    html,
+    /data-selection-action="ai"><svg class="action-icon copy-icon"[^>]*>[\s\S]*?<span data-copy-label>Copy for AI<\/span>/,
+  );
+  assert.match(
+    html,
     /data-sidebar-tab="comments">Comments <span class="sidebar-count" id="annotation-count">1<\/span>/,
   );
   assert.match(html, /id="sidebar-panel-comments" role="tabpanel"/);
@@ -60,15 +68,29 @@ test("embeds annotations without allowing script element escape", async () => {
   assert.match(html, /pendingSelection=\{exact:'',prefix:'',suffix:''/);
   assert.match(html, /function updateCurrentFileCount\(\)/);
   assert.match(html, /-webkit-line-clamp:2/);
-  assert.match(html, /\.annotation-card:hover>\[data-annotation-action\]/);
+  assert.match(html, /\.annotation-card\{position:relative/);
   assert.match(
     html,
-    /\.annotation-card>\[data-annotation-action\]:focus-visible/,
+    /\.annotation-card-actions\{position:absolute;top:6px;right:6px/,
   );
+  assert.match(html, /\.annotation-card:hover>\.annotation-card-actions/);
+  assert.match(html, /\.annotation-card-actions:focus-within/);
   assert.doesNotMatch(
     html,
-    /\.annotation-card\.is-focused>\[data-annotation-action\]/,
+    /\.annotation-card\.is-focused>\.annotation-card-actions/,
   );
+  assert.match(html, /actions\.className='annotation-card-actions'/);
+  assert.match(html, /class=\\?"action-icon edit-icon/);
+  assert.match(html, /class=\\?"action-icon delete-icon/);
+  assert.match(html, /b\.setAttribute\('aria-label',label\+' comment'\)/);
+  assert.match(html, /formHome=document\.createComment\('annotation-form-home'\)/);
+  assert.match(html, /function openForm\(card=null\)/);
+  assert.match(html, /card\.classList\.add\('is-editing'\);card\.append\(form\)/);
+  assert.match(html, /\.annotation-card\.is-editing #annotation-form\{margin:0\}/);
+  assert.match(html, /class="annotation-form-actions"/);
+  assert.match(html, /\.annotation-card\.is-editing:focus-visible\{[^}]*outline:0/);
+  assert.match(html, /\.annotation-form-actions\{[^}]*justify-content:flex-end/);
+  assert.match(html, /button\[type="submit"\]\{color:#fff/);
   assert.doesNotMatch(html, /@media\((?:any-)?hover:none\)/);
   assert.match(html, /e\.pointerType!==\x27touch\x27/);
   assert.match(html, /\.annotation-card\.is-focused\{/);

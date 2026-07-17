@@ -39,12 +39,17 @@ test("converts a Markdown directory while preserving its hierarchy", async () =>
     guide,
     /href="start\.html" data-file-name="start\.md" aria-current="page"/,
   );
-  assert.match(home, /<summary>guide<\/summary>/);
+  assert.match(
+    home,
+    /<summary><svg class="folder-icon"[^>]*>[\s\S]*?<span>guide<\/span><\/summary>/,
+  );
   assert.match(home, /class="file-breadcrumbs"/);
+  assert.match(home, /<span>Files<\/span>/);
   assert.match(
     guide,
-    /<a href="\.\.\/index\.html">docs<\/a>[\s\S]*<span>guide<\/span>[\s\S]*<span aria-current="page">start\.md<\/span>/,
+    /<span>guide<\/span>[\s\S]*<span aria-current="page">start\.md<\/span>/,
   );
+  assert.doesNotMatch(guide, />docs<\//);
 });
 
 test("rejects Markdown files that map to the same HTML path", async () => {

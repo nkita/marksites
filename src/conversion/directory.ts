@@ -193,9 +193,9 @@ async function renderChangedFiles(
           {
             title: basename(file.relativePath, extname(file.relativePath)),
             fileTree: {
-              title: basename(input),
+              title: "Files",
               items: buildFileTree(files, file.outputPath),
-              breadcrumbs: buildBreadcrumbs(files, file, basename(input)),
+              breadcrumbs: buildBreadcrumbs(files, file),
             },
             markedOptions: { walkTokens: rewriteMarkdownLinks },
           },

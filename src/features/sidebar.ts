@@ -49,7 +49,7 @@ ${tableOfContents}${annotations}
 </aside>`;
 
   const styles = `
-.document-sidebar{grid-area:toc;position:sticky;top:24px;box-sizing:border-box;display:flex;max-height:calc(100vh - 48px);min-height:0;flex-direction:column;border:1px solid var(--borderColor-muted,#d8dee4);border-radius:8px;background:var(--bgColor-default,#fff);overflow:hidden}
+.document-sidebar{grid-area:toc;position:sticky;top:32px;box-sizing:border-box;display:flex;max-height:calc(100vh - 64px);min-height:0;flex-direction:column;border:1px solid var(--borderColor-muted,#d8dee4);border-radius:8px;background:var(--bgColor-default,#fff);overflow:hidden}
 .sidebar-toggle{display:none}
 .document-sidebar-body{display:flex;min-height:0;flex:1;flex-direction:column}
 .sidebar-tabs{display:flex;flex:none;gap:4px;padding:10px 10px 0;border-bottom:1px solid var(--borderColor-muted,#d8dee4)}
@@ -63,7 +63,7 @@ ${tableOfContents}${annotations}
 .sidebar-panels{display:flex;min-height:0;flex:1}
 .sidebar-panel{box-sizing:border-box;width:100%;min-height:0;overflow:auto;padding:12px;scrollbar-width:thin;scrollbar-color:var(--borderColor-default,#d0d7de) transparent}
 .sidebar-panel[hidden],.document-sidebar-body[hidden]{display:none}
-@media(max-width:900px){.document-sidebar{z-index:10;top:8px;width:auto;max-height:calc(100vh - 16px);box-shadow:0 4px 12px rgba(31,35,40,.08)}.sidebar-toggle{box-sizing:border-box;display:flex;width:100%;min-height:44px;flex:none;align-items:center;justify-content:space-between;padding:8px 12px;color:var(--fgColor-default,#1f2328);font:inherit;font-size:.9375rem;font-weight:700;background:transparent;border:0;cursor:pointer}.sidebar-toggle:focus-visible{outline:2px solid var(--focus-outlineColor,#0969da);outline-offset:-2px}.sidebar-toggle[aria-expanded="false"] .panel-toggle-icon{transform:rotate(-90deg)}.sidebar-tabs{padding-top:0}}
+@media(max-width:900px){.document-sidebar{z-index:10;top:12px;width:auto;max-height:calc(100vh - 24px);box-shadow:0 4px 12px rgba(31,35,40,.08)}.sidebar-toggle{box-sizing:border-box;display:flex;width:100%;min-height:44px;flex:none;align-items:center;justify-content:space-between;padding:8px 12px;color:var(--fgColor-default,#1f2328);font:inherit;font-size:.9375rem;font-weight:700;background:transparent;border:0;cursor:pointer}.sidebar-toggle:focus-visible{outline:2px solid var(--focus-outlineColor,#0969da);outline-offset:-2px}.sidebar-toggle[aria-expanded="false"] .panel-toggle-icon{transform:rotate(-90deg)}.sidebar-tabs{padding-top:0}}
 @media(prefers-reduced-motion:reduce){.panel-toggle-icon{transition:none}}`;
 
   const script = `<script>(()=>{

@@ -70,7 +70,6 @@ function hrefBetween(current: string, target: string): string {
 export function buildBreadcrumbs(
   files: MarkdownFile[],
   current: MarkdownFile,
-  rootName: string,
 ): FileBreadcrumb[] {
   const findIndex = (directory: string) =>
     files.find(
@@ -80,15 +79,7 @@ export function buildBreadcrumbs(
           posix.basename(file.relativePath).toLowerCase(),
         ),
     );
-  const rootIndex = findIndex(".");
-  const result: FileBreadcrumb[] = [
-    {
-      name: rootName,
-      href: rootIndex
-        ? hrefBetween(current.outputPath, rootIndex.outputPath)
-        : undefined,
-    },
-  ];
+  const result: FileBreadcrumb[] = [];
   const parts = current.relativePath.split("/");
   const fileName = parts.pop();
   let directory = "";

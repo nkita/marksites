@@ -20,6 +20,16 @@
 
 manifest、文書メタデータ、HTMLなど、途中状態を正本として見せたくない書き込みに使用する。書き込み失敗時に既存ファイルを先に削除してはならない。
 
+### `icons.ts`
+
+- `renderCopyIcon()`: コード、選択範囲、AI用テキスト、ファイルパスの各コピー操作で共有するinline SVGを返す。
+- `renderWrapIcon()`: コードブロックの行折り返し操作を示すinline SVGを返す。
+- `renderEditIcon()`: コメント編集操作を示す鉛筆のinline SVGを返す。
+- `renderDeleteIcon()`: コメント削除操作を示すごみ箱のinline SVGを返す。
+- `renderFolderIcon()`: ファイルツリーのディレクトリを示し、他の操作アイコンと線幅を揃えたアウトライン型フォルダのinline SVGを返す。
+
+SVGは16px viewBox内で視覚的な中心を揃え、外部アセットへ依存せず、装飾要素として`aria-hidden`を付ける。各ボタンの用途はボタン本文または`aria-label`で示す。
+
 ## 追加基準
 
 - 複数モジュールで共有されること。

@@ -1,6 +1,7 @@
 import hljs from "highlight.js/lib/common";
 import type { Renderer } from "marked";
 import { escapeHtml } from "../utils/html.js";
+import { renderCopyIcon, renderWrapIcon } from "../utils/icons.js";
 
 export interface CodeBlocksFeature {
   renderScript(): string;
@@ -75,8 +76,8 @@ function renderCodeBlock(
   <div class="code-toolbar">
     ${languageLabel}
     <div class="code-tools">
-      <button type="button" class="code-tool" data-code-action="wrap" aria-label="Wrap long lines" aria-pressed="false"><span class="code-tool-label">Wrap</span></button>
-      <button type="button" class="code-tool" data-code-action="copy" aria-label="Copy code"><span class="code-tool-label">Copy</span></button>
+      <button type="button" class="code-tool" data-code-action="wrap" aria-label="Wrap long lines" aria-pressed="false">${renderWrapIcon()}<span class="code-tool-label">Wrap</span></button>
+      <button type="button" class="code-tool" data-code-action="copy" aria-label="Copy code">${renderCopyIcon()}<span class="code-tool-label">Copy</span></button>
     </div>
   </div>
   <pre><code${languageClass ? ` class="${languageClass}"` : ""}>${code}</code></pre>

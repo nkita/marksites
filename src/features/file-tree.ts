@@ -4,6 +4,7 @@ import type {
   FileTreeOptions,
 } from "../types.js";
 import { escapeHtml } from "../utils/html.js";
+import { renderCopyIcon, renderFolderIcon } from "../utils/icons.js";
 
 function renderNodes(nodes: FileTreeNode[]): string {
   return nodes
@@ -11,7 +12,7 @@ function renderNodes(nodes: FileTreeNode[]): string {
       if (node.type === "directory") {
         return `      <li class="file-tree-directory">
         <details open>
-          <summary>${escapeHtml(node.name)}</summary>
+          <summary>${renderFolderIcon()}<span>${escapeHtml(node.name)}</span></summary>
           <ul>
 ${renderNodes(node.children)}
           </ul>
@@ -67,6 +68,7 @@ export function renderFileTreeScript(enabled: boolean): string {
   const input = tree.querySelector('.file-tree-filter-input');
   const empty = tree.querySelector('.file-tree-filter-empty');
   const root = tree.querySelector('.file-tree-root');
+  const copyPath = document.querySelector('[data-copy-file-path]');
   const directories = [...root.querySelectorAll('.file-tree-directory')];
   const initialOpenState = new Map(
     directories.map((directory) => {
@@ -82,6 +84,34 @@ export function renderFileTreeScript(enabled: boolean): string {
     toggle.setAttribute('aria-label', label);
     toggle.title = label;
     panel.hidden = !expanded;
+  });
+
+  copyPath?.addEventListener('click', async () => {
+    const path = copyPath.dataset.copyFilePath;
+    try {
+      if (navigator.clipboard && location.protocol !== 'file:') {
+        await navigator.clipboard.writeText(path);
+      } else {
+        const area = document.createElement('textarea');
+        area.value = path;
+        area.style.position = 'fixed';
+        area.style.opacity = '0';
+        document.body.append(area);
+        area.select();
+        const copied = document.execCommand('copy');
+        area.remove();
+        if (!copied) throw new Error('Copy failed');
+      }
+      copyPath.setAttribute('aria-label', 'Copied file path');
+      copyPath.title = 'Copied';
+    } catch {
+      copyPath.setAttribute('aria-label', 'Could not copy file path');
+      copyPath.title = 'Copy failed';
+    }
+    setTimeout(() => {
+      copyPath.setAttribute('aria-label', 'Copy file path');
+      copyPath.title = 'Copy file path';
+    }, 1000);
   });
 
   const filter = () => {
@@ -128,11 +158,13 @@ export function renderBreadcrumbs(breadcrumbs?: FileBreadcrumb[]): string {
       return `    <li>${label}</li>`;
     })
     .join("\n");
+  const path = breadcrumbs.map((breadcrumb) => breadcrumb.name).join("/");
 
   return `<nav class="file-breadcrumbs" aria-label="Breadcrumb">
   <ol>
 ${items}
   </ol>
+  <button type="button" class="copy-file-path" data-copy-file-path="${escapeHtml(path)}" aria-label="Copy file path" title="Copy file path">${renderCopyIcon()}</button>
 </nav>
 `;
 }

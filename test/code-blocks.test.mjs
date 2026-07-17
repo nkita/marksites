@@ -9,6 +9,8 @@ test("highlights fenced code with a supported language", () => {
   assert.match(html, /hljs-keyword/);
   assert.match(html, /hljs-number/);
   assert.match(html, /data-code-action="copy"/);
+  assert.match(html, /data-code-action="copy"[^>]*>[\s\S]*?class="action-icon copy-icon"/);
+  assert.match(html, /data-code-action="wrap"[^>]*>[\s\S]*?class="action-icon wrap-icon"/);
   assert.match(html, /data-code-action="wrap"/);
   assert.match(html, /navigator\.clipboard/);
 });

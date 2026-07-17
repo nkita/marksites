@@ -17,7 +17,12 @@ test("generates a table of contents with GitHub-style heading IDs", () => {
   assert.match(html, /grid-template-columns: minmax\(0, 1fr\) 300px/);
   assert.match(html, /grid-template-areas: "content toc"/);
   assert.match(html, /body\.markdown-body/);
+  assert.match(html, /padding: 32px 0 0/);
+  assert.match(html, /\.markdown-content \{[^}]*margin-bottom: 72px/);
   assert.match(html, /position:sticky/);
+  assert.match(html, /top:32px/);
+  assert.match(html, /max-height:calc\(100vh - 64px\)/);
+  assert.doesNotMatch(html, /\.toc-panel \{ min-height: 100%; \}/);
   assert.match(html, /class="markdown-content"/);
   assert.doesNotMatch(html, /background: #edf2f7/);
   assert.match(html, /aria-current/);
