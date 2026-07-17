@@ -2,6 +2,10 @@ export function renderCopyIcon(): string {
   return '<svg class="action-icon copy-icon" viewBox="0 0 16 16" aria-hidden="true"><rect x="6" y="6" width="7.5" height="7.5" rx="1"/><path d="M10 6V3.5a1 1 0 0 0-1-1H3.5a1 1 0 0 0-1 1V10a1 1 0 0 0 1 1H6"/></svg>';
 }
 
+export function renderAddIcon(): string {
+  return '<svg class="action-icon add-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3v10M3 8h10"/></svg>';
+}
+
 export function renderWrapIcon(): string {
   return '<svg class="action-icon wrap-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 4h8a3 3 0 0 1 0 6H6"/><path d="m8 7.5-2.5 2.5L8 12.5"/></svg>';
 }

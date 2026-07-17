@@ -56,7 +56,7 @@ export const fileTreeStyles = `    .file-navigation { position: relative; margin
     .file-breadcrumbs a { display: inline-block; height: 28px; color: var(--fgColor-accent, #0969da); font-weight: 500; line-height: 28px; text-decoration: none; vertical-align: baseline; }
     .file-breadcrumbs a:hover { text-decoration: underline; }
     .file-breadcrumbs [aria-current="page"] { color: var(--fgColor-default, #1f2328); font-weight: 600; white-space: nowrap; }
-    .file-tree-popover-toggle { display: inline-flex; height: 28px; flex: none; align-items: center; justify-content: center; gap: 5px; padding: 0 8px; color: var(--fgColor-muted, #59636e); font: inherit; font-size: 0.8125rem; font-weight: 600; background: var(--button-default-bgColor-rest, #f6f8fa); border: 1px solid var(--borderColor-default, #d0d7de); border-radius: 6px; cursor: pointer; }
+    .file-tree-popover-toggle { display: inline-flex; height: 28px; flex: none; align-items: center; justify-content: center; gap: 5px; padding: 0 8px; color: var(--fgColor-muted, #59636e); font: inherit; font-size: 0.8125rem; font-weight: 600; background: var(--button-default-bgColor-rest, #f6f8fa); border: 1px solid var(--borderColor-default, #d0d7de); border-radius: 6px; transform: translateY(1px); cursor: pointer; }
     .file-tree-popover-toggle .folder-icon { margin: 0; transform: translateY(1px); }
     .file-tree-popover-toggle .panel-toggle-icon, .copy-file-path .copy-icon { transform: translateY(1px); }
     .file-tree-popover-toggle:hover { color: var(--fgColor-default, #1f2328); background: var(--button-default-bgColor-hover, #eaeef2); }

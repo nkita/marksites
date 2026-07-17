@@ -67,7 +67,7 @@ test("renders a GitHub-style file tree with a current page", () => {
   assert.doesNotMatch(html, /class="file-tree-toggle"/);
   assert.doesNotMatch(html, /file-tree-collapse-all/);
   assert.match(html, /\.file-tree \{ position: absolute; z-index: 15/);
-  assert.match(html, /\.file-tree-popover-toggle \{[^}]*height: 28px;[^}]*gap: 5px/);
+  assert.match(html, /\.file-tree-popover-toggle \{[^}]*height: 28px;[^}]*gap: 5px;[^}]*transform: translateY\(1px\)/);
   assert.match(html, /\.file-tree-popover-toggle \.folder-icon \{[^}]*transform: translateY\(1px\)/);
   assert.match(html, /\.copy-file-path \.copy-icon \{ transform: translateY\(1px\)/);
   assert.match(html, /\.file-breadcrumbs ol \{[^}]*align-items: baseline/);

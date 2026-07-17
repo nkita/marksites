@@ -50,7 +50,11 @@ test("embeds annotations without allowing script element escape", async () => {
   assert.match(html, /Add comment<\/button>/);
   assert.match(
     html,
-    /data-selection-action="copy"><svg class="action-icon copy-icon"[^>]*>[\s\S]*?<span data-copy-label>Copy selection<\/span>/,
+    /data-selection-action="copy"><svg class="action-icon copy-icon"[^>]*>[\s\S]*?<span data-copy-label>Copy<\/span>/,
+  );
+  assert.match(
+    html,
+    /data-selection-action="comment"[^>]*><svg class="action-icon add-icon"[^>]*>[\s\S]*?<span>Comment<\/span><\/button>/,
   );
   assert.match(
     html,
@@ -65,8 +69,29 @@ test("embeds annotations without allowing script element escape", async () => {
   assert.match(html, /aria-selected="true"[^>]*data-sidebar-tab="comments"/);
   assert.match(html, /marksites:show-comments/);
   assert.match(html, /data-add-document-comment disabled/);
+  assert.match(
+    html,
+    /data-copy-all-comments><svg class="action-icon copy-icon"[^>]*>[\s\S]*?<span data-copy-comments-label>Copy<\/span>/,
+  );
   assert.match(html, /pendingSelection=\{exact:'',prefix:'',suffix:''/);
   assert.match(html, /function updateCurrentFileCount\(\)/);
+  assert.match(html, /className='annotation-updated'/);
+  assert.match(html, /Updated '\+formatTimestamp\(a\.updatedAt\)/);
+  assert.match(html, /function sortedAnnotations\(\)/);
+  assert.match(html, /function annotationMetadata\(a,title='Comment'\)/);
+  assert.match(html, /'Document: '\+state\.document/);
+  assert.match(html, /'Heading: '\+headingText/);
+  assert.match(html, /'Comment:',a\.comment\.body/);
+  assert.doesNotMatch(html, /'Heading ID: '/);
+  assert.doesNotMatch(html, /'Location: '/);
+  assert.doesNotMatch(html, /'Status: '/);
+  assert.doesNotMatch(html, /'Created: '\+a\.createdAt/);
+  assert.doesNotMatch(html, /'Updated: '\+a\.updatedAt/);
+  assert.match(html, /function headingFor\(node\)\{if\(!node\)return null/);
+  assert.match(html, /heading\.compareDocumentPosition\(node\)&Node\.DOCUMENT_POSITION_FOLLOWING/);
+  assert.match(html, /function allCommentsMetadata\(\)/);
+  assert.match(html, /const created=method==='POST'/);
+  assert.match(html, /focused\.card\?\.focus\(\{preventScroll:true\}\)/);
   assert.match(html, /-webkit-line-clamp:2/);
   assert.match(html, /\.annotation-card\{position:relative/);
   assert.match(
@@ -80,12 +105,15 @@ test("embeds annotations without allowing script element escape", async () => {
     /\.annotation-card\.is-focused>\.annotation-card-actions/,
   );
   assert.match(html, /actions\.className='annotation-card-actions'/);
+  assert.match(html, /availableActions=\[\['Copy','copy'/);
+  assert.match(html, /class=\\?"action-icon copy-icon/);
   assert.match(html, /class=\\?"action-icon edit-icon/);
   assert.match(html, /class=\\?"action-icon delete-icon/);
   assert.match(html, /b\.setAttribute\('aria-label',label\+' comment'\)/);
   assert.match(html, /formHome=document\.createComment\('annotation-form-home'\)/);
   assert.match(html, /function openForm\(card=null\)/);
   assert.match(html, /card\.classList\.add\('is-editing'\);card\.append\(form\)/);
+  assert.match(html, /else list\.before\(form\)/);
   assert.match(html, /\.annotation-card\.is-editing #annotation-form\{margin:0\}/);
   assert.match(html, /class="annotation-form-actions"/);
   assert.match(html, /\.annotation-card\.is-editing:focus-visible\{[^}]*outline:0/);
@@ -99,6 +127,7 @@ test("embeds annotations without allowing script element escape", async () => {
   assert.match(html, /\.annotations-panel button\{[^}]*border-radius:6px/);
   assert.match(html, /\.annotation-card\{[^}]*font-size:\.8125rem/);
   assert.match(html, /\.annotation-quote\{[^}]*font-size:\.75rem/);
+  assert.match(html, /\.annotation-updated\{[^}]*font-size:\.6875rem/);
   const executableScripts = [
     ...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g),
   ]

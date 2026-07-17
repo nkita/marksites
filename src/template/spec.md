@@ -19,7 +19,7 @@
 - `githubMarkdownCss`: `github-markdown-css`のCSSをビルド済みモジュール読み込み時に取得する。
 - `highlightCss`: highlight.jsのGitHubテーマを取得する。
 - `documentStyles`: 本文と右サイドバーのグリッド、目次パネル、コードツール、更新日、基本レイアウトを定義する。下余白はbodyのpaddingではなく本文のgrid marginとして確保し、ページ末尾でもstickyサイドバーが親グリッド下端に押し上げられないようにする。目次の内側へ`min-height: 100%`を指定せず、外側パネルのpaddingによる不要なオーバーフローを防ぐ。タブとコメント固有のスタイルは各featureが所有する。
-- `fileTreeStyles`: パンくず先頭の`Files`開閉ボタンとパスコピーボタン、パンくず直下のファイルツリーポップオーバー、コメント件数バッジを定義する。フォルダアイコン、`Files`、chevronを一つのボタンにまとめ、パス直後のコピー操作は枠なし、更新日は右端とする。パンくずの各テキストセグメントと区切りは共通の28px line-heightとbaselineで文字位置を揃え、操作SVGは文字の視覚中心に合わせて1px下へ補正する。GitHub本文CSSが`details`へ付ける16pxの下余白は、ツリー内に限って0へリセットする。
+- `fileTreeStyles`: パンくず先頭の`Files`開閉ボタンとパスコピーボタン、パンくず直下のファイルツリーポップオーバー、コメント件数バッジを定義する。フォルダアイコン、`Files`、chevronを一つのボタンにまとめ、パス直後のコピー操作は枠なし、更新日は右端とする。パンくずの各テキストセグメントと区切りは共通の28px line-heightとbaselineで文字位置を揃え、Filesボタン全体と操作SVGは文字の視覚中心に合わせて1px下へ補正する。GitHub本文CSSが`details`へ付ける16pxの下余白は、ツリー内に限って0へリセットする。
 
 CSSは生成HTMLへ直接埋め込み、CDNや実行時ファイル参照を追加しない。
 
