@@ -23,3 +23,18 @@ test("escapes document metadata", () => {
   assert.match(html, /&lt;script&gt;/);
   assert.match(html, /lang="en&quot;&gt;&lt;script&gt;"/);
 });
+
+test("renders an optional Markdown update timestamp", () => {
+  const html = markdownToHtml("text", {
+    modifiedAt: "2026-07-17T03:00:00.000Z",
+  });
+
+  assert.match(
+    html,
+    /<time class="document-modified" datetime="2026-07-17T03:00:00\.000Z">Updated 2026-07-17 03:00:00 UTC<\/time>/,
+  );
+  assert.throws(
+    () => markdownToHtml("text", { modifiedAt: "not-a-date" }),
+    /Invalid modifiedAt timestamp/,
+  );
+});

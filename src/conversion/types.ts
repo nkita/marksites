@@ -7,12 +7,14 @@ export interface MarkdownFile {
   metadataPath: string;
   source?: string;
   sourceHash?: string;
+  modifiedAt?: string;
   annotations?: AnnotationDocument;
   annotationHash?: string;
 }
 
 export interface ManifestFile {
   sourceHash: string;
+  modifiedAt: string;
   annotationHash: string;
   output: string;
   annotations: string;

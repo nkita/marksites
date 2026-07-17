@@ -1,4 +1,4 @@
-import { mkdir, readFile, rename, rm } from "node:fs/promises";
+import { mkdir, readFile, rename, rm, stat } from "node:fs/promises";
 import {
   basename,
   dirname,
@@ -66,8 +66,13 @@ async function migrateLegacyMetadata(
 
 async function loadSources(files: MarkdownFile[]): Promise<void> {
   for (const file of files) {
-    file.source = await readFile(file.sourcePath, "utf8");
+    const [source, sourceStat] = await Promise.all([
+      readFile(file.sourcePath, "utf8"),
+      stat(file.sourcePath),
+    ]);
+    file.source = source;
     file.sourceHash = contentHash(file.source);
+    file.modifiedAt = sourceStat.mtime.toISOString();
   }
 }
 
@@ -183,6 +188,7 @@ async function renderChangedFiles(
       full ||
       !old ||
       old.sourceHash !== file.sourceHash ||
+      old.modifiedAt !== file.modifiedAt ||
       old.annotationHash !== file.annotationHash ||
       !(await pathExists(destination));
     if (changed) {
@@ -192,6 +198,7 @@ async function renderChangedFiles(
           file.source!,
           {
             title: basename(file.relativePath, extname(file.relativePath)),
+            modifiedAt: file.modifiedAt,
             fileTree: {
               title: "Files",
               items: buildFileTree(files, file.outputPath),
@@ -208,6 +215,7 @@ async function renderChangedFiles(
     }
     manifestFiles[file.relativePath] = {
       sourceHash: file.sourceHash!,
+      modifiedAt: file.modifiedAt!,
       annotationHash: file.annotationHash!,
       output: file.outputPath,
       annotations: file.metadataPath,

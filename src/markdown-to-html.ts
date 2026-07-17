@@ -6,6 +6,7 @@ import {
   renderBreadcrumbs,
   renderFileTree,
   renderFileTreeScript,
+  renderModifiedAt,
 } from "./features/file-tree.js";
 import { createTableOfContentsFeature } from "./features/table-of-contents.js";
 import { createSidebarFeature } from "./features/sidebar.js";
@@ -34,7 +35,7 @@ export function renderMarkdown(
   const renderer = new Renderer();
   const tableOfContents = createTableOfContentsFeature(renderer, {
     enabled: options.tableOfContents !== false,
-    title: tocOptions.title ?? "Table of contents",
+    title: tocOptions.title ?? "Outline",
     minDepth: tocOptions.minDepth ?? 2,
     maxDepth: tocOptions.maxDepth ?? 6,
   });
@@ -48,7 +49,12 @@ export function renderMarkdown(
   const toc = tableOfContents.render();
   const fileTree = renderFileTree(options.fileTree);
   const fileTreeScript = renderFileTreeScript(fileTree !== "");
-  const breadcrumbs = renderBreadcrumbs(options.fileTree?.breadcrumbs);
+  const modifiedAt = renderModifiedAt(options.modifiedAt);
+  const breadcrumbs = fileTree
+    ? renderBreadcrumbs(options.fileTree?.breadcrumbs, options.modifiedAt)
+    : modifiedAt
+      ? `<div class="document-metadata">${modifiedAt}</div>\n`
+      : "";
   const annotationFeature = createAnnotationsFeature(annotations);
   const sidebar = createSidebarFeature({
     tableOfContents: toc.markup,

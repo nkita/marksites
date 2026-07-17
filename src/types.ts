@@ -11,6 +11,8 @@ export interface RenderOptions {
   tableOfContents?: boolean | TableOfContentsOptions;
   /** Add a repository-style file tree for a converted Markdown collection. */
   fileTree?: FileTreeOptions;
+  /** ISO 8601 timestamp shown as the Markdown source's last update time. */
+  modifiedAt?: string;
   /** Options forwarded to marked. Async parsing is not supported. */
   markedOptions?: Omit<MarkedOptions, "async" | "renderer">;
 }

@@ -44,8 +44,10 @@ ${documentStyles}${parts.fileTree ? `\n${fileTreeStyles}` : ""}${parts.sidebarSt
   </style>
 </head>
 <body class="${bodyClass}">
-${parts.fileTree}<main class="markdown-content">
-${parts.breadcrumbs}${parts.content}
+<main class="markdown-content">
+${parts.fileTree ? `<div class="file-navigation">
+${parts.breadcrumbs}${parts.fileTree}</div>
+` : parts.breadcrumbs}${parts.content}
 </main>
 ${parts.sidebar}
 ${parts.annotations}

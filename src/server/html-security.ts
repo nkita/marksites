@@ -21,7 +21,7 @@ function generatedScriptBodies(): Set<string> {
   const tocRenderer = new Renderer();
   const toc = createTableOfContentsFeature(tocRenderer, {
     enabled: true,
-    title: "Table of contents",
+    title: "Outline",
     minDepth: 2,
     maxDepth: 6,
   });

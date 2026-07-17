@@ -5,6 +5,7 @@ import {
   readFile,
   rename,
   stat,
+  utimes,
   writeFile,
 } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -30,6 +31,30 @@ test("creates sidecars and skips unchanged HTML", async () => {
   assert.equal(
     await readFile(join(output, ".index.json"), "utf8"),
     annotations,
+  );
+});
+
+test("rebuilds HTML when only the Markdown update time changes", async () => {
+  const root = await mkdtemp(join(tmpdir(), "marksites-mtime-"));
+  const input = join(root, "docs"),
+    output = join(root, "site"),
+    source = join(input, "index.md");
+  await mkdir(input);
+  await writeFile(source, "# Home\n");
+  await convertDirectoryDetailed(input, output);
+
+  const modifiedAt = new Date("2026-07-17T03:00:00.000Z");
+  await utimes(source, modifiedAt, modifiedAt);
+  const result = await convertDirectoryDetailed(input, output);
+  const manifest = JSON.parse(
+    await readFile(join(output, ".marksites-build.json"), "utf8"),
+  );
+
+  assert.equal(result.converted, 1);
+  assert.equal(manifest.files["index.md"].modifiedAt, modifiedAt.toISOString());
+  assert.match(
+    await readFile(join(output, "index.html"), "utf8"),
+    /Updated 2026-07-17 03:00:00 UTC/,
   );
 });
 

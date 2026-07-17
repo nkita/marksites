@@ -44,7 +44,8 @@ test("converts a Markdown directory while preserving its hierarchy", async () =>
     /<summary><svg class="folder-icon"[^>]*>[\s\S]*?<span>guide<\/span><\/summary>/,
   );
   assert.match(home, /class="file-breadcrumbs"/);
-  assert.match(home, /<span>Files<\/span>/);
+  assert.match(home, /class="file-tree-popover-toggle" data-file-tree-toggle/);
+  assert.match(home, /<span aria-current="page">index\.md<\/span>/);
   assert.match(
     guide,
     /<span>guide<\/span>[\s\S]*<span aria-current="page">start\.md<\/span>/,

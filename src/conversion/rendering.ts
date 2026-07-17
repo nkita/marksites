@@ -3,7 +3,7 @@ import type { Token } from "marked";
 import { emptyAnnotationDocument } from "../annotations/model.js";
 import { renderMarkdown } from "../markdown-to-html.js";
 
-export const OUTPUT_COMPATIBILITY_VERSION = 2;
+export const OUTPUT_COMPATIBILITY_VERSION = 3;
 
 export function contentHash(value: string | Buffer): string {
   return `sha256:${createHash("sha256").update(value).digest("hex")}`;
@@ -29,6 +29,7 @@ export function renderFingerprint(): string {
     "## Heading\n\n[Document](guide.md)\n\n```js\nconst value = 1;\n```\n",
     {
       title: "marksites-render-fingerprint",
+      modifiedAt: "2026-01-01T00:00:00.000Z",
       fileTree: {
         title: "Files",
         items: [
