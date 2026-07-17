@@ -57,10 +57,11 @@ export const fileTreeStyles = `    .file-navigation { position: relative; margin
     .file-breadcrumbs a:hover { text-decoration: underline; }
     .file-breadcrumbs [aria-current="page"] { color: var(--fgColor-default, #1f2328); font-weight: 600; white-space: nowrap; }
     .file-tree-popover-toggle { display: inline-flex; height: 28px; flex: none; align-items: center; justify-content: center; gap: 5px; padding: 0 8px; color: var(--fgColor-muted, #59636e); font: inherit; font-size: 0.8125rem; font-weight: 600; background: var(--button-default-bgColor-rest, #f6f8fa); border: 1px solid var(--borderColor-default, #d0d7de); border-radius: 6px; cursor: pointer; }
-    .file-tree-popover-toggle .folder-icon { margin: 0; }
+    .file-tree-popover-toggle .folder-icon { margin: 0; transform: translateY(1px); }
+    .file-tree-popover-toggle .panel-toggle-icon, .copy-file-path .copy-icon { transform: translateY(1px); }
     .file-tree-popover-toggle:hover { color: var(--fgColor-default, #1f2328); background: var(--button-default-bgColor-hover, #eaeef2); }
     .file-tree-popover-toggle:focus-visible { outline: 2px solid var(--focus-outlineColor, #0969da); outline-offset: 2px; }
-    .file-tree-popover-toggle[aria-expanded="true"] .panel-toggle-icon { transform: rotate(180deg); }
+    .file-tree-popover-toggle[aria-expanded="true"] .panel-toggle-icon { transform: translateY(1px) rotate(180deg); }
     .copy-file-path { display: inline-flex; width: 28px; height: 28px; flex: none; align-items: center; justify-content: center; padding: 0; color: var(--fgColor-muted, #59636e); background: transparent; border: 0; border-radius: 5px; cursor: pointer; }
     .copy-file-path:hover { color: var(--fgColor-default, #1f2328); background: var(--button-default-bgColor-hover, #eaeef2); }
     .copy-file-path:focus-visible { outline: 2px solid var(--focus-outlineColor, #0969da); outline-offset: 2px; }

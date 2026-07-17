@@ -12,6 +12,7 @@ interface DocumentParts {
   breadcrumbs: string;
   fileTree: string;
   fileTreeScript: string;
+  modifiedAtScript: string;
   sidebar: string;
   sidebarStyles: string;
   sidebarScript: string;
@@ -51,7 +52,7 @@ ${parts.breadcrumbs}${parts.fileTree}</div>
 </main>
 ${parts.sidebar}
 ${parts.annotations}
-${trustedScript(parts.fileTreeScript)}${trustedScript(parts.sidebarScript)}${trustedScript(parts.tableOfContentsScript)}
+${trustedScript(parts.fileTreeScript)}${trustedScript(parts.modifiedAtScript)}${trustedScript(parts.sidebarScript)}${trustedScript(parts.tableOfContentsScript)}
 ${trustedScript(parts.codeBlockScript)}
 ${trustedScript(parts.annotationScript)}
 </body>

@@ -3,7 +3,7 @@ import type { Token } from "marked";
 import { emptyAnnotationDocument } from "../annotations/model.js";
 import { renderMarkdown } from "../markdown-to-html.js";
 
-export const OUTPUT_COMPATIBILITY_VERSION = 3;
+export const OUTPUT_COMPATIBILITY_VERSION = 4;
 
 export function contentHash(value: string | Buffer): string {
   return `sha256:${createHash("sha256").update(value).digest("hex")}`;

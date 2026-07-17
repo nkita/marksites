@@ -33,6 +33,8 @@ test("renders an optional Markdown update timestamp", () => {
     html,
     /<time class="document-modified" datetime="2026-07-17T03:00:00\.000Z">Updated 2026-07-17 03:00:00 UTC<\/time>/,
   );
+  assert.match(html, /date\.getFullYear\(\)/);
+  assert.match(html, /timeZoneName:'short'/);
   assert.throws(
     () => markdownToHtml("text", { modifiedAt: "not-a-date" }),
     /Invalid modifiedAt timestamp/,

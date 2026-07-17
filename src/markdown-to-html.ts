@@ -7,6 +7,7 @@ import {
   renderFileTree,
   renderFileTreeScript,
   renderModifiedAt,
+  renderModifiedAtScript,
 } from "./features/file-tree.js";
 import { createTableOfContentsFeature } from "./features/table-of-contents.js";
 import { createSidebarFeature } from "./features/sidebar.js";
@@ -70,6 +71,7 @@ export function renderMarkdown(
     breadcrumbs,
     fileTree,
     fileTreeScript,
+    modifiedAtScript: renderModifiedAtScript(modifiedAt !== ""),
     sidebar: sidebar.markup,
     sidebarStyles: sidebar.styles,
     sidebarScript: sidebar.script,

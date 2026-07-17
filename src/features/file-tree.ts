@@ -279,3 +279,14 @@ export function renderModifiedAt(modifiedAt?: string): string {
   const label = `${date.toISOString().slice(0, 19).replace("T", " ")} UTC`;
   return `<time class="document-modified" datetime="${date.toISOString()}">Updated ${label}</time>`;
 }
+
+export function renderModifiedAtScript(enabled: boolean): string {
+  if (!enabled) return "";
+  return `<script>(()=>{
+const element=document.querySelector('.document-modified');if(!element)return;
+const date=new Date(element.dateTime);if(Number.isNaN(date.getTime()))return;
+const pad=value=>String(value).padStart(2,'0');
+const zone=new Intl.DateTimeFormat('en',{timeZoneName:'short'}).formatToParts(date).find(part=>part.type==='timeZoneName')?.value;
+element.textContent='Updated '+date.getFullYear()+'-'+pad(date.getMonth()+1)+'-'+pad(date.getDate())+' '+pad(date.getHours())+':'+pad(date.getMinutes())+':'+pad(date.getSeconds())+(zone?' '+zone:'');
+})()</script>`;
+}

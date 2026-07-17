@@ -3,7 +3,10 @@ import { marked, Renderer } from "marked";
 import { emptyAnnotationDocument } from "../annotations/model.js";
 import { createAnnotationsFeature } from "../features/annotations.js";
 import { createCodeBlocksFeature } from "../features/code-blocks.js";
-import { renderFileTreeScript } from "../features/file-tree.js";
+import {
+  renderFileTreeScript,
+  renderModifiedAtScript,
+} from "../features/file-tree.js";
 import { createSidebarFeature } from "../features/sidebar.js";
 import { createTableOfContentsFeature } from "../features/table-of-contents.js";
 
@@ -33,6 +36,7 @@ function generatedScriptBodies(): Set<string> {
   return new Set([
     scriptBody(code.renderScript()),
     scriptBody(renderFileTreeScript(true)),
+    scriptBody(renderModifiedAtScript(true)),
     scriptBody(renderedToc.script),
     scriptBody(annotations.script),
     scriptBody(
