@@ -1,8 +1,7 @@
-export interface HeaderFeature {
-  markup: string;
-  styles: string;
-  script: string;
-}
+import type { DocumentFeature } from "../types.js";
+
+/** Assets owned by the generated document header. */
+export type HeaderFeature = DocumentFeature;
 
 export function createHeaderFeature(): HeaderFeature {
   const markup = `<header class="site-header">

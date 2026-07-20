@@ -1,15 +1,15 @@
 import { randomBytes } from "node:crypto";
 import { marked, Renderer } from "marked";
 import { emptyAnnotationDocument } from "../annotations/model.js";
-import { createAnnotationsFeature } from "../features/annotations.js";
-import { createCodeBlocksFeature } from "../features/code-blocks.js";
-import { createHeaderFeature } from "../features/header.js";
+import { createAnnotationsFeature } from "../features/annotations/index.js";
+import { createCodeBlocksFeature } from "../features/code-blocks/index.js";
+import { createHeaderFeature } from "../features/header/index.js";
 import {
   renderFileTreeScript,
   renderModifiedAtScript,
-} from "../features/file-tree.js";
-import { createSidebarFeature } from "../features/sidebar.js";
-import { createTableOfContentsFeature } from "../features/table-of-contents.js";
+} from "../features/file-tree/index.js";
+import { createSidebarFeature } from "../features/sidebar/index.js";
+import { createTableOfContentsFeature } from "../features/table-of-contents/index.js";
 
 function scriptBody(script: string): string {
   return /^<script[^>]*>([\s\S]*)<\/script>$/.exec(script)?.[1] ?? "";

@@ -1,7 +1,7 @@
 import hljs from "highlight.js/lib/common";
 import type { Renderer } from "marked";
-import { escapeHtml } from "../utils/html.js";
-import { renderCopyIcon, renderWrapIcon } from "../utils/icons.js";
+import { escapeHtml } from "../../utils/html.js";
+import { renderCopyIcon, renderWrapIcon } from "../../utils/icons.js";
 
 export interface CodeBlocksFeature {
   renderScript(): string;

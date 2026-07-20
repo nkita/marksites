@@ -1,6 +1,6 @@
 import GithubSlugger from "github-slugger";
 import type { Renderer } from "marked";
-import { escapeHtml, plainTextFromHtml } from "../utils/html.js";
+import { escapeHtml, plainTextFromHtml } from "../../utils/html.js";
 
 interface TableOfContentsItem {
   depth: number;

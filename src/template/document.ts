@@ -7,29 +7,25 @@ import {
 
 interface DocumentParts {
   title: string;
-  header: string;
-  headerStyles: string;
-  headerScript: string;
   language: string;
   content: string;
-  breadcrumbs: string;
-  fileTree: string;
-  fileSidebar: string;
-  fileTreeScript: string;
-  modifiedAtScript: string;
-  sidebar: string;
-  sidebarStyles: string;
-  sidebarScript: string;
-  tableOfContentsScript: string;
-  codeBlockScript: string;
   highlight: boolean;
-  annotations: string;
-  annotationStyles: string;
-  annotationScript: string;
+  regions: {
+    header: string;
+    breadcrumbs: string;
+    fileTree: string;
+    fileSidebar: string;
+    sidebar: string;
+    overlays: string;
+  };
+  assets: {
+    styles: string[];
+    scripts: string[];
+  };
 }
 
 export function renderDocument(parts: DocumentParts): string {
-  const bodyClass = parts.fileTree
+  const bodyClass = parts.regions.fileTree
     ? "markdown-body has-file-tree"
     : "markdown-body";
 
@@ -45,22 +41,20 @@ export function renderDocument(parts: DocumentParts): string {
   <style>${githubMarkdownCss}</style>
   ${parts.highlight ? `<style>${highlightCss}</style>` : ""}
   <style>
-${documentStyles}${parts.fileTree ? `\n${fileTreeStyles}` : ""}${parts.sidebarStyles}${parts.annotationStyles}${parts.headerStyles}
+${documentStyles}${parts.regions.fileTree ? `\n${fileTreeStyles}` : ""}${parts.assets.styles.join("")}
   </style>
 </head>
 <body class="${bodyClass}">
-${parts.header}
-${parts.fileSidebar}
+${parts.regions.header}
+${parts.regions.fileSidebar}
 <main class="markdown-content">
-${parts.fileTree ? `<div class="file-navigation">
-${parts.breadcrumbs}${parts.fileTree}</div>
-` : parts.breadcrumbs}${parts.content}
+${parts.regions.fileTree ? `<div class="file-navigation">
+${parts.regions.breadcrumbs}${parts.regions.fileTree}</div>
+` : parts.regions.breadcrumbs}${parts.content}
 </main>
-${parts.sidebar}
-${parts.annotations}
-${trustedScript(parts.headerScript)}${trustedScript(parts.fileTreeScript)}${trustedScript(parts.modifiedAtScript)}${trustedScript(parts.sidebarScript)}${trustedScript(parts.tableOfContentsScript)}
-${trustedScript(parts.codeBlockScript)}
-${trustedScript(parts.annotationScript)}
+${parts.regions.sidebar}
+${parts.regions.overlays}
+${parts.assets.scripts.map(trustedScript).join("")}
 </body>
 </html>
 `;

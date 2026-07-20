@@ -6,7 +6,7 @@
 
 ## ファイル
 
-### `code-blocks.ts`
+### `code-blocks/index.ts`
 
 - `createCodeBlocksFeature(renderer, highlight)`: markedのcode rendererを設定し、コードブロックの有無を追跡する。
 - `renderCodeBlock()`: 言語ラベル、`折り返す`、`コピー`操作を含むコード領域を生成する。
@@ -15,7 +15,7 @@
 
 対応言語はhighlight.jsで強調し、未対応言語と強調無効時はHTMLエスケープしたプレーンコードを出力する。コピー操作には共通のinline SVGを表示し、Clipboard APIが使えない場合にtextareaと`execCommand("copy")`へフォールバックする。
 
-### `file-tree.ts`
+### `file-tree/index.ts`
 
 - `createFolderIds()`: ルート相対フォルダパスのSHA-256をbase64url化し、6文字から始めてツリー内で一意になるまで全IDを延長する。
 - `renderNodes()`: ディレクトリを短縮フォルダIDとフォルダSVG付きの`details`、ファイルをリンクとして再帰描画し、1件以上のコメント件数をバッジ表示する。
@@ -32,7 +32,7 @@
 
 常設ファイルサイドバーの幅は280pxとする。開閉トグルは枠線と通常背景を持たず、hover時の背景とキーボードフォーカスリングだけを表示する。
 
-### `table-of-contents.ts`
+### `table-of-contents/index.ts`
 
 - `createTableOfContentsFeature(renderer, config)`: markedのheading rendererを設定し、GithubSluggerで決定的な見出しIDを生成する。
 - `renderTableOfContents()`: 指定深度内の見出しを階層インデント付きリンクへ変換する。
@@ -40,7 +40,7 @@
 
 同一見出しにはGitHub互換の接尾辞を付ける。見出しリンクと現在位置の追従を担当し、サイドバー全体のタブ・レスポンシブ開閉は`sidebar.ts`へ委ねる。
 
-### `sidebar.ts`
+### `sidebar/index.ts`
 
 - `createSidebarFeature()`: デフォルトで`目次`と表示する目次と現在ページのコメント一覧を右サイドバーのタブとして構成し、マークアップ、スタイル、ブラウザ動作を返す。
 - `activate()`: ARIA tabの選択状態と対応するtabpanelの表示を同期する。
@@ -48,7 +48,7 @@
 
 デスクトップではタブヘッダーを固定し、選択中のパネルだけを独立スクロールさせる。stickyのtopは固定ヘッダー56pxと本文上余白32pxを加えた88px、モバイルでは68pxとし、スクロール開始時の位置補正を発生させない。左右矢印キーでタブを移動でき、コメント作成・本文ハイライト選択時の`marksites:show-comments`イベントでコメントタブを開く。
 
-### `header.ts`
+### `header/index.ts`
 
 - `createHeaderFeature()`: 画面上端へ固定する`marksites`ブランド、右端の枠なしテーマ切り替え・言語切り替えアイコン、スタイル、ブラウザ動作を返す。文書名はパンくずと本文へ委ね、固定ヘッダーには重複表示しない。
 
@@ -56,7 +56,7 @@
 
 ヘッダー高は56pxとし、本文と右サイドバーの上位置をヘッダー下32pxの88pxで揃える。ファイルサイドバーの有無と開閉状態にかかわらず同じ上余白を維持し、見出しのスクロール余白、左ファイルペインの開始位置も補正する。900px以下では文書名を省略して操作領域を確保する。
 
-### `annotations.ts`
+### `annotations/index.ts`
 
 - `safeJson()`: `<`、`>`、`&`をUnicode escapeし、JSON script要素からの脱出を防ぐ。
 - `createAnnotationsFeature(data?)`: 現在文書のコメントデータ、`コピー`、`AI向けコピー`、＋アイコン付き`コメント`を横並びにした選択操作ツールバー、サイドバーへ渡すコメントパネル、件数、スタイル、ブラウザ動作を一体で返す。
@@ -83,6 +83,10 @@
 編集時は共通フォームを対象カード内へ移動し、引用を対象箇所として残したまま本文・操作ボタンをフォームへ置き換えてその場で編集する。編集中は選択カードのアクセント背景と太いoutlineを解除し、通常背景、境界線、控えめなshadowでフォーム状態を示す。textareaは6pxの角丸とfocus ringを持ち、操作行は右寄せして`保存`をprimary、`キャンセル`をsecondaryとして表示する。保存またはキャンセル後は通常のカード表示へ戻す。カード操作は文字ラベルを持たない28pxのアイコンツールバーへまとめ、用途は日本語の`aria-label`、`title`、フォーカス時とhover時に表示するツールチップで示す。ツールチップがカード領域で切れないよう、コメントグループはoverflowを可視にする。削除操作はhover時だけdanger色で区別する。
 
 ## 依存境界
+
+- `types.ts`はFeature間で共通する内部契約だけを定義し、公開型は置かない。
+- 複数のマークアップとブラウザ動作を持つFeatureは専用フォルダを所有し、`index.ts`を内部エントリポイントにする。
+- Feature固有の追加ファイルはそのFeatureフォルダ内に置き、`utils/`へ移すのは複数Featureから共有する副作用のない処理だけとする。
 
 - featureはファイルシステムへアクセスしない。
 - 永続化、HTTPルーティング、ディレクトリ探索は扱わない。

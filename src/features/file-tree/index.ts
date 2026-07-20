@@ -3,9 +3,9 @@ import type {
   FileBreadcrumb,
   FileTreeNode,
   FileTreeOptions,
-} from "../types.js";
-import { escapeHtml } from "../utils/html.js";
-import { renderCopyIcon, renderFolderIcon } from "../utils/icons.js";
+} from "../../types.js";
+import { escapeHtml } from "../../utils/html.js";
+import { renderCopyIcon, renderFolderIcon } from "../../utils/icons.js";
 
 function createFolderIds(nodes: FileTreeNode[]): Map<string, string> {
   const paths: string[] = [];

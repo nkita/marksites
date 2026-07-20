@@ -1,7 +1,7 @@
 import { marked, Renderer } from "marked";
-import { createCodeBlocksFeature } from "./features/code-blocks.js";
-import { createHeaderFeature } from "./features/header.js";
-import { createAnnotationsFeature } from "./features/annotations.js";
+import { createCodeBlocksFeature } from "./features/code-blocks/index.js";
+import { createHeaderFeature } from "./features/header/index.js";
+import { createAnnotationsFeature } from "./features/annotations/index.js";
 import type { AnnotationDocument } from "./annotations/model.js";
 import {
   renderBreadcrumbs,
@@ -10,9 +10,9 @@ import {
   renderFileTreeScript,
   renderModifiedAt,
   renderModifiedAtScript,
-} from "./features/file-tree.js";
-import { createTableOfContentsFeature } from "./features/table-of-contents.js";
-import { createSidebarFeature } from "./features/sidebar.js";
+} from "./features/file-tree/index.js";
+import { createTableOfContentsFeature } from "./features/table-of-contents/index.js";
+import { createSidebarFeature } from "./features/sidebar/index.js";
 import { renderDocument } from "./template/document.js";
 import type { RenderOptions } from "./types.js";
 import { escapeHtml } from "./utils/html.js";
@@ -71,24 +71,28 @@ export function renderMarkdown(
 
   return renderDocument({
     title,
-    header: header.markup,
-    headerStyles: header.styles,
-    headerScript: header.script,
     language,
     content,
-    breadcrumbs,
-    fileTree,
-    fileSidebar,
-    fileTreeScript,
-    modifiedAtScript: renderModifiedAtScript(modifiedAt !== ""),
-    sidebar: sidebar.markup,
-    sidebarStyles: sidebar.styles,
-    sidebarScript: sidebar.script,
-    tableOfContentsScript: toc.script,
-    codeBlockScript: codeBlocks.renderScript(),
     highlight,
-    annotations: annotationFeature.markup,
-    annotationStyles: annotationFeature.styles,
-    annotationScript: annotationFeature.script,
+    regions: {
+      header: header.markup,
+      breadcrumbs,
+      fileTree,
+      fileSidebar,
+      sidebar: sidebar.markup,
+      overlays: annotationFeature.markup,
+    },
+    assets: {
+      styles: [sidebar.styles, annotationFeature.styles, header.styles],
+      scripts: [
+        header.script,
+        fileTreeScript,
+        renderModifiedAtScript(modifiedAt !== ""),
+        sidebar.script,
+        toc.script,
+        `\n${codeBlocks.renderScript()}\n`,
+        `${annotationFeature.script}\n`,
+      ],
+    },
   });
 }

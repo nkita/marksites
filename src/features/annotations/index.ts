@@ -1,7 +1,7 @@
 import {
   countActiveAnnotations,
   type AnnotationDocument,
-} from "../annotations/model.js";
+} from "../../annotations/model.js";
 import {
   renderAddIcon,
   renderArchiveIcon,
@@ -9,7 +9,8 @@ import {
   renderDeleteIcon,
   renderEditIcon,
   renderRestoreIcon,
-} from "../utils/icons.js";
+} from "../../utils/icons.js";
+import type { DocumentFeature } from "../types.js";
 
 function safeJson(value: unknown): string {
   return JSON.stringify(value)
@@ -18,11 +19,8 @@ function safeJson(value: unknown): string {
     .replace(/&/g, "\\u0026");
 }
 
-export interface AnnotationsFeature {
-  markup: string;
+export interface AnnotationsFeature extends DocumentFeature {
   panel: string;
-  styles: string;
-  script: string;
   count: number;
 }
 

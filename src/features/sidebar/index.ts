@@ -1,4 +1,5 @@
-import { escapeHtml } from "../utils/html.js";
+import { escapeHtml } from "../../utils/html.js";
+import type { DocumentFeature } from "../types.js";
 
 interface SidebarOptions {
   tableOfContents: string;
@@ -7,11 +8,7 @@ interface SidebarOptions {
   annotationCount: number;
 }
 
-export interface SidebarFeature {
-  markup: string;
-  styles: string;
-  script: string;
-}
+export type SidebarFeature = DocumentFeature;
 
 export function createSidebarFeature({
   tableOfContents,
