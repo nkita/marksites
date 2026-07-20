@@ -31,7 +31,7 @@ test("generates a table of contents with GitHub-style heading IDs", () => {
   assert.match(html, /border-radius: 0 6px 6px 0/);
   assert.match(html, /class="document-sidebar"/);
   assert.match(html, /class="sidebar-tabs" role="tablist"/);
-  assert.match(html, /data-sidebar-tab="toc">Outline<\/button>/);
+  assert.match(html, /data-sidebar-tab="toc">目次<\/button>/);
   assert.match(html, /class="panel-toggle-icon"/);
   assert.match(
     html,

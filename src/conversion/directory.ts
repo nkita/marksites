@@ -10,6 +10,7 @@ import {
   resolve,
   sep,
 } from "node:path";
+import { countActiveAnnotations } from "../annotations/model.js";
 import {
   readAnnotations,
   serializeAnnotations,
@@ -200,7 +201,7 @@ async function renderChangedFiles(
             title: basename(file.relativePath, extname(file.relativePath)),
             modifiedAt: file.modifiedAt,
             fileTree: {
-              title: "Files",
+              title: "ファイル",
               items: buildFileTree(files, file.outputPath),
               breadcrumbs: buildBreadcrumbs(files, file),
             },
@@ -265,7 +266,7 @@ export async function convertDirectoryDetailed(
     files
       .map(
         (file) =>
-          `${file.relativePath}\0${file.annotations?.annotations.length ?? 0}`,
+          `${file.relativePath}\0${file.annotations ? countActiveAnnotations(file.annotations) : 0}`,
       )
       .sort()
       .join("\n"),

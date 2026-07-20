@@ -11,7 +11,7 @@ export interface Annotation {
   id: string;
   selection: AnnotationSelection;
   comment: { body: string; author: string | null };
-  status: "open" | "resolved";
+  status: "open" | "archived";
   createdAt: string;
   updatedAt: string;
 }
@@ -25,6 +25,11 @@ export interface AnnotationDocument {
 
 export function emptyAnnotationDocument(document: string): AnnotationDocument {
   return { schemaVersion: 1, document, revision: 0, annotations: [] };
+}
+
+export function countActiveAnnotations(data: AnnotationDocument): number {
+  return data.annotations.filter((annotation) => annotation.status === "open")
+    .length;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -55,6 +60,9 @@ export function validateAnnotationDocument(
 export function validateAnnotation(
   value: unknown,
 ): asserts value is Annotation {
+  if (isRecord(value) && value.status === "resolved") {
+    value.status = "archived";
+  }
   if (
     !isRecord(value) ||
     typeof value.id !== "string" ||
@@ -76,7 +84,7 @@ export function validateAnnotation(
     !(
       typeof value.comment.author === "string" || value.comment.author === null
     ) ||
-    (value.status !== "open" && value.status !== "resolved") ||
+    (value.status !== "open" && value.status !== "archived") ||
     typeof value.createdAt !== "string" ||
     typeof value.updatedAt !== "string"
   ) {

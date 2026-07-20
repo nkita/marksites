@@ -54,7 +54,7 @@ test("rebuilds HTML when only the Markdown update time changes", async () => {
   assert.equal(manifest.files["index.md"].modifiedAt, modifiedAt.toISOString());
   assert.match(
     await readFile(join(output, "index.html"), "utf8"),
-    /Updated 2026-07-17 03:00:00 UTC/,
+    /更新 2026-07-17 03:00:00/,
   );
 });
 
@@ -84,6 +84,11 @@ test("rebuilds every file when a file-tree comment count changes", async () => {
     createdAt: "2026-07-16T00:00:00.000Z",
     updatedAt: "2026-07-16T00:00:00.000Z",
   });
+  metadata.annotations.push({
+    ...metadata.annotations[0],
+    id: "comment-archived",
+    status: "archived",
+  });
   await writeFile(join(output, ".a.json"), JSON.stringify(metadata));
 
   const result = await convertDirectoryDetailed(input, output);
@@ -93,13 +98,30 @@ test("rebuilds every file when a file-tree comment count changes", async () => {
     const html = await readFile(join(output, outputFile), "utf8");
     assert.match(
       html,
-      /data-file-name="a\.md"[^>]*>[\s\S]*?aria-label="1 comment">1<\/span>/,
+      /data-file-name="a\.md"[^>]*>[\s\S]*?aria-label="コメント1件">1<\/span>/,
     );
     const bLink = /<a[^>]*data-file-name="b\.md"[^>]*>[\s\S]*?<\/a>/.exec(
       html,
     )?.[0];
     assert.ok(bLink);
     assert.doesNotMatch(bLink, /file-tree-comment-count/);
+  }
+
+  const archivedMetadata = JSON.parse(
+    await readFile(join(output, ".a.json"), "utf8"),
+  );
+  archivedMetadata.revision = 2;
+  archivedMetadata.annotations[0].status = "archived";
+  await writeFile(join(output, ".a.json"), JSON.stringify(archivedMetadata));
+  const archivedResult = await convertDirectoryDetailed(input, output);
+  assert.equal(archivedResult.converted, 2);
+  for (const outputFile of ["a.html", "b.html"]) {
+    const html = await readFile(join(output, outputFile), "utf8");
+    const aLink = /<a[^>]*data-file-name="a\.md"[^>]*>[\s\S]*?<\/a>/.exec(
+      html,
+    )?.[0];
+    assert.ok(aLink);
+    assert.doesNotMatch(aLink, /file-tree-comment-count/);
   }
 });
 

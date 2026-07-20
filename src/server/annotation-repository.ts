@@ -169,7 +169,7 @@ export class AnnotationRepository {
     input: {
       baseRevision: unknown;
       comment?: { body: string; author?: string | null };
-      status?: "open" | "resolved";
+      status?: "open" | "archived";
     },
   ) {
     return this.locked(document, async () => {

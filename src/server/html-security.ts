@@ -3,6 +3,7 @@ import { marked, Renderer } from "marked";
 import { emptyAnnotationDocument } from "../annotations/model.js";
 import { createAnnotationsFeature } from "../features/annotations.js";
 import { createCodeBlocksFeature } from "../features/code-blocks.js";
+import { createHeaderFeature } from "../features/header.js";
 import {
   renderFileTreeScript,
   renderModifiedAtScript,
@@ -24,7 +25,7 @@ function generatedScriptBodies(): Set<string> {
   const tocRenderer = new Renderer();
   const toc = createTableOfContentsFeature(tocRenderer, {
     enabled: true,
-    title: "Outline",
+    title: "目次",
     minDepth: 2,
     maxDepth: 6,
   });
@@ -35,6 +36,7 @@ function generatedScriptBodies(): Set<string> {
   );
   return new Set([
     scriptBody(code.renderScript()),
+    scriptBody(createHeaderFeature().script),
     scriptBody(renderFileTreeScript(true)),
     scriptBody(renderModifiedAtScript(true)),
     scriptBody(renderedToc.script),

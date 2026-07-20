@@ -39,21 +39,21 @@ function renderCodeBlockScript(): string {
         await copyText(code.textContent);
         const label = button.querySelector('.code-tool-label');
         const previous = label.textContent;
-        label.textContent = 'Copied';
-        button.setAttribute('aria-label', 'Copied to clipboard');
+        label.textContent = 'コピーしました';
+        button.setAttribute('aria-label', 'コードをコピーしました');
         setTimeout(() => {
           label.textContent = previous;
-          button.setAttribute('aria-label', 'Copy code');
+          button.setAttribute('aria-label', 'コードをコピー');
         }, 1600);
       } catch {
-        button.setAttribute('aria-label', 'Could not copy code');
+        button.setAttribute('aria-label', 'コードをコピーできませんでした');
       }
     }
 
     if (button.dataset.codeAction === 'wrap') {
       const wrapped = block.classList.toggle('is-wrapped');
       button.setAttribute('aria-pressed', String(wrapped));
-      button.setAttribute('aria-label', wrapped ? 'Disable line wrapping' : 'Wrap long lines');
+      button.setAttribute('aria-label', wrapped ? '折り返しを解除' : '長い行を折り返す');
     }
   });
 })();
@@ -76,8 +76,8 @@ function renderCodeBlock(
   <div class="code-toolbar">
     ${languageLabel}
     <div class="code-tools">
-      <button type="button" class="code-tool" data-code-action="wrap" aria-label="Wrap long lines" aria-pressed="false">${renderWrapIcon()}<span class="code-tool-label">Wrap</span></button>
-      <button type="button" class="code-tool" data-code-action="copy" aria-label="Copy code">${renderCopyIcon()}<span class="code-tool-label">Copy</span></button>
+      <button type="button" class="code-tool" data-code-action="wrap" aria-label="長い行を折り返す" aria-pressed="false">${renderWrapIcon()}<span class="code-tool-label">折り返す</span></button>
+      <button type="button" class="code-tool" data-code-action="copy" aria-label="コードをコピー">${renderCopyIcon()}<span class="code-tool-label">コピー</span></button>
     </div>
   </div>
   <pre><code${languageClass ? ` class="${languageClass}"` : ""}>${code}</code></pre>

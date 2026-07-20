@@ -1,4 +1,5 @@
 import { basename, posix } from "node:path";
+import { countActiveAnnotations } from "../annotations/model.js";
 import type { FileBreadcrumb, FileTreeNode } from "../types.js";
 import type { MarkdownFile } from "./types.js";
 
@@ -54,7 +55,9 @@ export function buildFileTree(
               posix.basename(file.outputPath),
           ),
           current: file.outputPath === currentOutputPath,
-          commentCount: file.annotations?.annotations.length ?? 0,
+          commentCount: file.annotations
+            ? countActiveAnnotations(file.annotations)
+            : 0,
         })),
     ];
   }

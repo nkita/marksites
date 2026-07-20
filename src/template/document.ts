@@ -7,10 +7,14 @@ import {
 
 interface DocumentParts {
   title: string;
+  header: string;
+  headerStyles: string;
+  headerScript: string;
   language: string;
   content: string;
   breadcrumbs: string;
   fileTree: string;
+  fileSidebar: string;
   fileTreeScript: string;
   modifiedAtScript: string;
   sidebar: string;
@@ -41,10 +45,12 @@ export function renderDocument(parts: DocumentParts): string {
   <style>${githubMarkdownCss}</style>
   ${parts.highlight ? `<style>${highlightCss}</style>` : ""}
   <style>
-${documentStyles}${parts.fileTree ? `\n${fileTreeStyles}` : ""}${parts.sidebarStyles}${parts.annotationStyles}
+${documentStyles}${parts.fileTree ? `\n${fileTreeStyles}` : ""}${parts.sidebarStyles}${parts.annotationStyles}${parts.headerStyles}
   </style>
 </head>
 <body class="${bodyClass}">
+${parts.header}
+${parts.fileSidebar}
 <main class="markdown-content">
 ${parts.fileTree ? `<div class="file-navigation">
 ${parts.breadcrumbs}${parts.fileTree}</div>
@@ -52,7 +58,7 @@ ${parts.breadcrumbs}${parts.fileTree}</div>
 </main>
 ${parts.sidebar}
 ${parts.annotations}
-${trustedScript(parts.fileTreeScript)}${trustedScript(parts.modifiedAtScript)}${trustedScript(parts.sidebarScript)}${trustedScript(parts.tableOfContentsScript)}
+${trustedScript(parts.headerScript)}${trustedScript(parts.fileTreeScript)}${trustedScript(parts.modifiedAtScript)}${trustedScript(parts.sidebarScript)}${trustedScript(parts.tableOfContentsScript)}
 ${trustedScript(parts.codeBlockScript)}
 ${trustedScript(parts.annotationScript)}
 </body>

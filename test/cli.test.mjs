@@ -45,10 +45,17 @@ test("converts a Markdown directory while preserving its hierarchy", async () =>
   );
   assert.match(home, /class="file-breadcrumbs"/);
   assert.match(home, /class="file-tree-popover-toggle" data-file-tree-toggle/);
-  assert.match(home, /<span aria-current="page">index\.md<\/span>/);
+  assert.match(
+    home,
+    /<button type="button" class="file-tree-popover-toggle"[^>]*><span>index\.md<\/span><svg class="panel-toggle-icon"/,
+  );
+  assert.doesNotMatch(
+    home,
+    /class="file-breadcrumb-separator"[^>]*>\/<\/span>[\s\S]*?<span>index\.md<\/span>/,
+  );
   assert.match(
     guide,
-    /<span>guide<\/span>[\s\S]*<span aria-current="page">start\.md<\/span>/,
+    /<span>guide<\/span>[\s\S]*<button type="button" class="file-tree-popover-toggle"[^>]*><span>start\.md<\/span><svg class="panel-toggle-icon"/,
   );
   assert.doesNotMatch(guide, />docs<\//);
 });

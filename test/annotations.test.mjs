@@ -32,6 +32,21 @@ test("embeds annotations without allowing script element escape", async () => {
           createdAt: "2026-01-01T00:00:00.000Z",
           updatedAt: "2026-01-01T00:00:00.000Z",
         },
+        {
+          id: "archived",
+          selection: {
+            exact: "",
+            prefix: "",
+            suffix: "",
+            headingId: null,
+            startOffset: 0,
+            endOffset: 0,
+          },
+          comment: { body: "Old comment", author: null },
+          status: "resolved",
+          createdAt: "2025-01-01T00:00:00.000Z",
+          updatedAt: "2025-01-01T00:00:00.000Z",
+        },
       ],
     }),
   );
@@ -47,41 +62,54 @@ test("embeds annotations without allowing script element escape", async () => {
   const html = await readFile(output, "utf8");
   assert.match(html, /\\u003c\/script\\u003e/);
   assert.doesNotMatch(html, /<script>alert\(1\)<\/script>/);
-  assert.match(html, /Add comment<\/button>/);
   assert.match(
     html,
-    /data-selection-action="copy"><svg class="action-icon copy-icon"[^>]*>[\s\S]*?<span data-copy-label>Copy<\/span>/,
+    /data-add-document-comment[^>]*>[\s\S]*?<svg class="action-icon add-icon"[^>]*>[\s\S]*?<span>コメントを追加<\/span><\/button>/,
   );
   assert.match(
     html,
-    /data-selection-action="comment"[^>]*><svg class="action-icon add-icon"[^>]*>[\s\S]*?<span>Comment<\/span><\/button>/,
+    /data-selection-action="copy"[^>]*>[\s\S]*?<span data-copy-label>コピー<\/span>/,
   );
   assert.match(
     html,
-    /data-selection-action="ai"><svg class="action-icon copy-icon"[^>]*>[\s\S]*?<span data-copy-label>Copy for AI<\/span>/,
+    /data-selection-action="comment"[^>]*>[\s\S]*?<svg class="action-icon add-icon"[^>]*>[\s\S]*?<span>コメント<\/span><\/button>/,
   );
   assert.match(
     html,
-    /data-sidebar-tab="comments">Comments <span class="sidebar-count" id="annotation-count">1<\/span>/,
+    /data-selection-action="ai"[^>]*>[\s\S]*?<span data-copy-label>AI向けコピー<\/span>/,
+  );
+  assert.match(
+    html,
+    /data-sidebar-tab="comments">コメント <span class="sidebar-count" id="annotation-count">1<\/span>/,
   );
   assert.match(html, /id="sidebar-panel-comments" role="tabpanel"/);
   assert.doesNotMatch(html, /class="table-of-contents sidebar-panel"/);
   assert.match(html, /aria-selected="true"[^>]*data-sidebar-tab="comments"/);
   assert.match(html, /marksites:show-comments/);
-  assert.match(html, /data-add-document-comment disabled/);
+  assert.match(html, /data-add-document-comment[^>]*disabled/);
   assert.match(
     html,
-    /data-copy-all-comments><svg class="action-icon copy-icon"[^>]*>[\s\S]*?<span data-copy-comments-label>Copy<\/span>/,
+    /data-copy-all-comments[^>]*><svg class="action-icon copy-icon"[^>]*>[\s\S]*?<span data-copy-comments-label>コメントをすべてコピー<\/span>/,
   );
+  assert.doesNotMatch(html, /data-archive-all-comments/);
   assert.match(html, /pendingSelection=\{exact:'',prefix:'',suffix:''/);
   assert.match(html, /function updateCurrentFileCount\(\)/);
+  assert.match(
+    html,
+    /document\.querySelectorAll\('\.file-tree a\[aria-current="page"\]'\)/,
+  );
   assert.match(html, /className='annotation-updated'/);
-  assert.match(html, /Updated '\+formatTimestamp\(a\.updatedAt\)/);
+  assert.match(html, /'更新 '\+formatTimestamp\(a\.updatedAt\)/);
+  assert.match(html, /meta\.className='annotation-meta'/);
+  assert.match(html, /kindLabel\.className='annotation-kind'/);
+  assert.match(html, /meta\.append\(kindLabel,updated\)/);
+  assert.doesNotMatch(html, /timeZoneName/);
+  assert.match(html, /kind==='quoted'\?'引用':kind==='unavailable'\?'引用先なし':'文書全体'/);
   assert.match(html, /function sortedAnnotations\(\)/);
-  assert.match(html, /function annotationMetadata\(a,title='Comment'\)/);
-  assert.match(html, /'Document: '\+state\.document/);
-  assert.match(html, /'Heading: '\+headingText/);
-  assert.match(html, /'Comment:',a\.comment\.body/);
+  assert.match(html, /function annotationMetadata\(a,title='コメント'\)/);
+  assert.match(html, /'文書: '\+state\.document/);
+  assert.match(html, /'見出し: '\+headingText/);
+  assert.match(html, /'コメント:',a\.comment\.body/);
   assert.doesNotMatch(html, /'Heading ID: '/);
   assert.doesNotMatch(html, /'Location: '/);
   assert.doesNotMatch(html, /'Status: '/);
@@ -90,6 +118,27 @@ test("embeds annotations without allowing script element escape", async () => {
   assert.match(html, /function headingFor\(node\)\{if\(!node\)return null/);
   assert.match(html, /heading\.compareDocumentPosition\(node\)&Node\.DOCUMENT_POSITION_FOLLOWING/);
   assert.match(html, /function allCommentsMetadata\(\)/);
+  assert.match(html, /filter\(a=>a\.status==='open'\)/);
+  assert.match(html, /groupDefinitions=\[\['comments',''\],\['archived','アーカイブ'\]\]/);
+  assert.match(html, /function classify\(a\)/);
+  assert.doesNotMatch(html, /archiveAllComments/);
+  assert.doesNotMatch(html, /'\/annotations\/archive'/);
+  assert.match(html, /status:'archived'/);
+  assert.match(html, /status:'open'/);
+  assert.match(html, /const groupParameter='comments'/);
+  assert.match(html, /openGroups=new Set/);
+  assert.match(html, /className='annotation-group'/);
+  assert.match(html, /groupBody\.hidden=key==='archived'&&!openGroups\.has\(key\)/);
+  assert.match(html, /if\(key==='archived'\)\{const header=/);
+  assert.doesNotMatch(html, /className='annotation-group-label'/);
+  assert.doesNotMatch(html, /annotation-group-count/);
+  assert.match(html, /context\.textContent=kind==='document'\?'文書全体':'引用先なし'/);
+  assert.match(html, /source\.className='annotation-source'/);
+  assert.match(html, /b\.dataset\.tooltip=label/);
+  assert.match(html, /\[data-tooltip\]:focus-visible::after/);
+  assert.match(html, /class=\\?"action-icon archive-icon/);
+  assert.match(html, /class=\\?"action-icon restore-icon/);
+  assert.match(html, /"status":"archived"/);
   assert.match(html, /const created=method==='POST'/);
   assert.match(html, /focused\.card\?\.focus\(\{preventScroll:true\}\)/);
   assert.match(html, /-webkit-line-clamp:2/);
@@ -105,11 +154,11 @@ test("embeds annotations without allowing script element escape", async () => {
     /\.annotation-card\.is-focused>\.annotation-card-actions/,
   );
   assert.match(html, /actions\.className='annotation-card-actions'/);
-  assert.match(html, /availableActions=\[\['Copy','copy'/);
+  assert.match(html, /availableActions=\[\['コメントをコピー','copy'/);
   assert.match(html, /class=\\?"action-icon copy-icon/);
   assert.match(html, /class=\\?"action-icon edit-icon/);
   assert.match(html, /class=\\?"action-icon delete-icon/);
-  assert.match(html, /b\.setAttribute\('aria-label',label\+' comment'\)/);
+  assert.match(html, /b\.setAttribute\('aria-label',label\)/);
   assert.match(html, /formHome=document\.createComment\('annotation-form-home'\)/);
   assert.match(html, /function openForm\(card=null\)/);
   assert.match(html, /card\.classList\.add\('is-editing'\);card\.append\(form\)/);
@@ -123,11 +172,15 @@ test("embeds annotations without allowing script element escape", async () => {
   assert.match(html, /e\.pointerType!==\x27touch\x27/);
   assert.match(html, /\.annotation-card\.is-focused\{/);
   assert.match(html, /\.annotation-highlight\.is-focused\{/);
-  assert.match(html, /\.annotation-card\{[^}]*border-radius:8px/);
+  assert.match(html, /\.annotation-card\{[^}]*margin:0;[^}]*border:0;/);
+  assert.doesNotMatch(html, /\.annotation-card\{[^}]*border-radius/);
   assert.match(html, /\.annotations-panel button\{[^}]*border-radius:6px/);
   assert.match(html, /\.annotation-card\{[^}]*font-size:\.8125rem/);
   assert.match(html, /\.annotation-quote\{[^}]*font-size:\.75rem/);
-  assert.match(html, /\.annotation-updated\{[^}]*font-size:\.6875rem/);
+  assert.match(html, /\.annotation-meta\{[^}]*font-size:\.6875rem/);
+  assert.match(html, /\.annotation-kind\{[^}]*border-radius:999px/);
+  assert.match(html, /\.annotation-group:last-child\{margin-bottom:-12px\}/);
+  assert.match(html, /\.annotations-actions\{[^}]*flex-direction:column/);
   const executableScripts = [
     ...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g),
   ]

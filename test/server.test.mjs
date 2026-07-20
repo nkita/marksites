@@ -104,7 +104,7 @@ test("serves static output and annotation CRUD", async (t) => {
     },
   );
   assert.equal(updated.status, 200);
-  const oversized = await fetch(
+  const archived = await fetch(
     server.url + "/_marksites/api/v1/annotations/" + id,
     {
       method: "PATCH",
@@ -112,6 +112,20 @@ test("serves static output and annotation CRUD", async (t) => {
       body: JSON.stringify({
         document: "index.md",
         baseRevision: 2,
+        status: "archived",
+      }),
+    },
+  );
+  assert.equal(archived.status, 200);
+  assert.equal((await archived.json()).data.annotations[0].status, "archived");
+  const oversized = await fetch(
+    server.url + "/_marksites/api/v1/annotations/" + id,
+    {
+      method: "PATCH",
+      headers,
+      body: JSON.stringify({
+        document: "index.md",
+        baseRevision: 3,
         comment: { body: "x".repeat(10_001) },
       }),
     },
@@ -139,7 +153,7 @@ test("serves static output and annotation CRUD", async (t) => {
     {
       method: "DELETE",
       headers,
-      body: JSON.stringify({ document: "index.md", baseRevision: 2 }),
+      body: JSON.stringify({ document: "index.md", baseRevision: 3 }),
     },
   );
   assert.equal(deleted.status, 200);
@@ -151,7 +165,7 @@ test("serves static output and annotation CRUD", async (t) => {
       headers,
       body: JSON.stringify({
         document: "index.md",
-        baseRevision: 3,
+        baseRevision: 4,
         selection: {
           exact: "",
           prefix: "",

@@ -18,7 +18,7 @@ export interface RenderOptions {
 }
 
 export interface FileTreeOptions {
-  /** Heading shown above the file tree. Defaults to "Files". */
+  /** Heading shown above the file tree. Defaults to "ファイル". */
   title?: string;
   /** Nested directories and Markdown files to render. */
   items: FileTreeNode[];

@@ -31,17 +31,17 @@ export function createSidebarFeature({
       : ""
   }${
     hasComments
-      ? `<button type="button" class="sidebar-tab" id="sidebar-tab-comments" role="tab" aria-selected="${initialPanel === "comments"}" aria-controls="sidebar-panel-comments" data-sidebar-tab="comments">Comments <span class="sidebar-count" id="annotation-count">${annotationCount}</span></button>`
+      ? `<button type="button" class="sidebar-tab" id="sidebar-tab-comments" role="tab" aria-selected="${initialPanel === "comments"}" aria-controls="sidebar-panel-comments" data-sidebar-tab="comments">コメント <span class="sidebar-count" id="annotation-count">${annotationCount}</span></button>`
       : ""
   }`;
 
-  const markup = `<aside class="document-sidebar" aria-label="Document navigation">
+  const markup = `<aside class="document-sidebar" aria-label="文書ナビゲーション">
   <button type="button" class="sidebar-toggle" aria-expanded="true" aria-controls="document-sidebar-body">
-    <span data-sidebar-toggle-label>${initialPanel === "toc" ? tocTitle : "Comments"}</span>
+    <span data-sidebar-toggle-label>${initialPanel === "toc" ? tocTitle : "コメント"}</span>
     <svg class="panel-toggle-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" /></svg>
   </button>
   <div class="document-sidebar-body" id="document-sidebar-body">
-    <div class="sidebar-tabs" role="tablist" aria-label="Document sidebar">${tabs}</div>
+    <div class="sidebar-tabs" role="tablist" aria-label="文書サイドバー">${tabs}</div>
     <div class="sidebar-panels">
 ${tableOfContents}${annotations}
     </div>
