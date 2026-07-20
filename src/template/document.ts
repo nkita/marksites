@@ -3,6 +3,7 @@ import {
   fileTreeStyles,
   githubMarkdownCss,
   highlightCss,
+  highlightThemeStyles,
 } from "./styles.js";
 
 interface DocumentParts {
@@ -39,7 +40,7 @@ export function renderDocument(parts: DocumentParts): string {
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>${parts.title}</title>
   <style>${githubMarkdownCss}</style>
-  ${parts.highlight ? `<style>${highlightCss}</style>` : ""}
+  ${parts.highlight ? `<style>${highlightCss}\n${highlightThemeStyles}</style>` : ""}
   <style>
 ${documentStyles}${parts.regions.fileTree ? `\n${fileTreeStyles}` : ""}${parts.assets.styles.join("")}
   </style>

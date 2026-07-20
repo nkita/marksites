@@ -6,6 +6,8 @@ test("highlights fenced code with a supported language", () => {
   const html = markdownToHtml("```javascript\nconst answer = 42;\n```\n");
 
   assert.match(html, /class="hljs language-javascript"/);
+  assert.match(html, /body\[data-theme="dark"\] \.hljs/);
+  assert.match(html, /--codeBlock-bgColor:#161b22/);
   assert.match(html, /hljs-keyword/);
   assert.match(html, /hljs-number/);
   assert.match(html, /data-code-action="copy"/);

@@ -13,6 +13,15 @@ export const highlightCss = readFileSync(
   "utf8",
 );
 
+export const highlightThemeStyles = `body[data-theme="dark"] .hljs{color:var(--codeBlock-fgColor);background:var(--codeBlock-bgColor)}
+body[data-theme="dark"] :is(.hljs-doctag,.hljs-keyword,.hljs-meta .hljs-keyword,.hljs-template-tag,.hljs-template-variable,.hljs-type,.hljs-variable.language_){color:var(--color-prettylights-syntax-keyword)}
+body[data-theme="dark"] :is(.hljs-title,.hljs-title.class_,.hljs-title.function_){color:var(--color-prettylights-syntax-entity)}
+body[data-theme="dark"] :is(.hljs-attr,.hljs-attribute,.hljs-literal,.hljs-meta,.hljs-number,.hljs-operator,.hljs-variable,.hljs-selector-attr,.hljs-selector-class,.hljs-selector-id){color:var(--color-prettylights-syntax-constant)}
+body[data-theme="dark"] :is(.hljs-regexp,.hljs-string,.hljs-meta .hljs-string){color:var(--color-prettylights-syntax-string)}
+body[data-theme="dark"] :is(.hljs-built_in,.hljs-symbol){color:var(--color-prettylights-syntax-variable)}
+body[data-theme="dark"] :is(.hljs-comment,.hljs-code,.hljs-formula){color:var(--color-prettylights-syntax-comment)}
+body[data-theme="dark"] :is(.hljs-name,.hljs-quote,.hljs-selector-tag,.hljs-selector-pseudo){color:var(--color-prettylights-syntax-entity-tag)}`;
+
 export const documentStyles = `    body.markdown-body { box-sizing: border-box; min-width: 200px; width: calc(100% - 64px); max-width: none; margin: 0 32px; padding: 32px 0 0; display: grid; grid-template-columns: minmax(0, 1fr) 300px; grid-template-areas: "content toc"; column-gap: 32px; align-items: start; }
     .markdown-content, .document-sidebar { box-sizing: border-box; }
     .markdown-content { grid-area: content; min-width: 0; margin-bottom: 72px; padding: clamp(28px, 3vw, 52px); border: 1px solid var(--borderColor-muted, #d8dee4); border-radius: 8px; box-shadow: 0 1px 2px rgba(31, 35, 40, 0.04); }
@@ -29,6 +38,7 @@ export const documentStyles = `    body.markdown-body { box-sizing: border-box; 
     .code-tool:focus-visible { outline: 2px solid var(--focus-outlineColor, #0969da); outline-offset: -2px; }
     .code-tool[aria-pressed="true"] { color: var(--fgColor-accent, #0969da); background: var(--bgColor-accent-muted, #ddf4ff); }
     .code-block pre { margin: 0; border-radius: 0; }
+    .code-block pre, .code-block pre code { color: var(--codeBlock-fgColor, #24292f); background: var(--codeBlock-bgColor, #fff); }
     .code-block pre code { display: block; }
     .code-block.is-wrapped pre code { white-space: pre-wrap; overflow-wrap: anywhere; }
     .panel-toggle-icon { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; transition: transform 120ms ease; }

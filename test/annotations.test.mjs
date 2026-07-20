@@ -172,6 +172,14 @@ test("embeds annotations without allowing script element escape", async () => {
   assert.match(html, /e\.pointerType!==\x27touch\x27/);
   assert.match(html, /\.annotation-card\.is-focused\{/);
   assert.match(html, /\.annotation-highlight\.is-focused\{/);
+  assert.match(
+    html,
+    /\.annotation-highlight\{color:inherit;background:var\(--annotation-highlight-bgColor/,
+  );
+  assert.match(
+    html,
+    /\.annotations-panel\{color:var\(--fgColor-default/,
+  );
   assert.match(html, /\.annotation-card\{[^}]*margin:0;[^}]*border:0;/);
   assert.doesNotMatch(html, /\.annotation-card\{[^}]*border-radius/);
   assert.match(html, /\.annotations-panel button\{[^}]*border-radius:6px/);
