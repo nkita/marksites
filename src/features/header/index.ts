@@ -23,7 +23,7 @@ body.markdown-body[data-theme="light"]{color-scheme:light;color:#1f2328;backgrou
 const languageParameter='lang',themeParameter='theme',pageUrl=new URL(location.href),textOriginal=new WeakMap(),attributeOriginal=new WeakMap();
 const english=new Map(${JSON.stringify([
   ["目次", "Outline"], ["コメント", "Comments"], ["ファイル", "Files"], ["アーカイブ", "Archived"],
-  ["コメントを追加", "Add comment"], ["コメントをすべてコピー", "Copy all comments"], ["コメントはありません。", "No comments."], ["このページにコメントはありません。", "No comments on this page."],
+  ["追加", "Add"], ["コピー", "Copy"], ["コメントを追加", "Add comment"], ["コメントをすべてコピー", "Copy all comments"], ["コメントはありません。", "No comments."], ["このページにコメントはありません。", "No comments on this page."],
   ["コピー", "Copy"], ["AI向けコピー", "Copy for AI"], ["折り返す", "Wrap"], ["コピーしました", "Copied"], ["保存", "Save"], ["キャンセル", "Cancel"],
   ["引用", "Quote"], ["引用先なし", "Quote unavailable"], ["文書全体", "Whole document"],
   ["ファイルを検索", "Filter files"], ["一致するファイルはありません", "No matching files"],
@@ -32,7 +32,7 @@ const english=new Map(${JSON.stringify([
   ["選択範囲の操作", "Selection actions"], ["選択範囲をコピー", "Copy selection"], ["AI向けの形式でコピー", "Copy for AI"], ["選択範囲にコメントを追加", "Add comment to selection"], ["文書全体にコメントを追加", "Add comment to document"],
   ["コメントをコピー", "Copy comment"], ["コメントを編集", "Edit comment"], ["コメントをアーカイブ", "Archive comment"], ["コメントを復元", "Restore comment"], ["コメントを削除", "Delete comment"],
   ["アーカイブを開く", "Open archive"], ["アーカイブを閉じる", "Close archive"], ["コメントを保存", "Save comment"], ["編集をキャンセル", "Cancel editing"],
-  ["有効なコメントをすべてコピー", "Copy all active comments"], ["コメントをコピーしました", "Comment copied"], ["コピー失敗", "Copy failed"], ["コピーに失敗しました", "Copy failed"], ["保存中…", "Saving…"], ["保存に失敗しました", "Save failed"], ["このコメントを削除しますか？", "Delete this comment?"],
+  ["有効なコメントをすべてコピー", "Copy all active comments"], ["有効なコメントだけをコピー", "Copy active comments only"], ["有効なコメントをコピー", "Copy active comments"], ["コメントをコピーしました", "Comment copied"], ["コピー失敗", "Copy failed"], ["コピーに失敗しました", "Copy failed"], ["保存中…", "Saving…"], ["保存に失敗しました", "Save failed"], ["このコメントを削除しますか？", "Delete this comment?"],
   ["コメントを追加するにはmarksites serveを起動してください", "Start marksites serve to add comments"], ["別の画面でコメントが更新されました。最新の内容を確認して、もう一度操作してください。", "Comments changed in another window. Review the latest version and try again."],
   ["コードをコピー", "Copy code"], ["長い行を折り返す", "Wrap long lines"], ["折り返しを解除", "Disable line wrapping"], ["コードをコピーしました", "Code copied"], ["コードをコピーできませんでした", "Could not copy code"],
   ["文書ナビゲーション", "Document navigation"], ["文書サイドバー", "Document sidebar"], ["パンくずリスト", "Breadcrumbs"]

@@ -12,8 +12,12 @@ function renderCodeBlockScript(): string {
 (() => {
   const copyText = async (text) => {
     if (navigator.clipboard && window.isSecureContext) {
-      await navigator.clipboard.writeText(text);
-      return;
+      try {
+        await navigator.clipboard.writeText(text);
+        return;
+      } catch {
+        // Continue with the user-gesture-compatible fallback below.
+      }
     }
 
     const textarea = document.createElement('textarea');
@@ -21,9 +25,13 @@ function renderCodeBlockScript(): string {
     textarea.style.position = 'fixed';
     textarea.style.opacity = '0';
     document.body.append(textarea);
+    textarea.focus();
     textarea.select();
-    document.execCommand('copy');
-    textarea.remove();
+    try {
+      if (!document.execCommand('copy')) throw new Error('Copy command failed');
+    } finally {
+      textarea.remove();
+    }
   };
 
   document.addEventListener('click', async (event) => {

@@ -46,9 +46,13 @@ function renderNodes(
     .map((node) => {
       if (node.type === "directory") {
         const path = parentPath ? `${parentPath}/${node.name}` : node.name;
+        const commentCount = countComments(node.children);
+        const count = commentCount
+          ? `<span class="file-tree-comment-count file-tree-directory-comment-count" aria-label="配下のコメント${commentCount}件">${commentCount}</span>`
+          : "";
         return `      <li class="file-tree-directory">
         <details data-folder-id="${folderIds.get(path)}">
-          <summary>${renderFolderIcon()}<span>${escapeHtml(node.name)}</span></summary>
+          <summary>${renderFolderIcon()}<span>${escapeHtml(node.name)}</span>${count}</summary>
           <ul>
 ${renderNodes(node.children, folderIds, path)}
           </ul>
@@ -64,6 +68,19 @@ ${renderNodes(node.children, folderIds, path)}
       return `      <li class="file-tree-file"><a href="${escapeHtml(node.href)}" data-file-name="${escapeHtml(node.name)}"${current}><span class="file-tree-name">${escapeHtml(node.name)}</span>${count}</a></li>`;
     })
     .join("\n");
+}
+
+function countComments(nodes: FileTreeNode[]): number {
+  return nodes.reduce(
+    (total, node) =>
+      total +
+      (node.type === "directory"
+        ? countComments(node.children)
+        : Number.isSafeInteger(node.commentCount) && node.commentCount! > 0
+          ? node.commentCount!
+          : 0),
+    0,
+  );
 }
 
 export function renderFileTree(options?: FileTreeOptions): string {
@@ -229,18 +246,28 @@ export function renderFileTreeScript(enabled: boolean): string {
   copyPath?.addEventListener('click', async () => {
     const path = copyPath.dataset.copyFilePath;
     try {
-      if (navigator.clipboard && location.protocol !== 'file:') {
-        await navigator.clipboard.writeText(path);
-      } else {
+      let copied = false;
+      if (navigator.clipboard && window.isSecureContext) {
+        try {
+          await navigator.clipboard.writeText(path);
+          copied = true;
+        } catch {
+          // Continue with the user-gesture-compatible fallback below.
+        }
+      }
+      if (!copied) {
         const area = document.createElement('textarea');
         area.value = path;
         area.style.position = 'fixed';
         area.style.opacity = '0';
         document.body.append(area);
+        area.focus();
         area.select();
-        const copied = document.execCommand('copy');
-        area.remove();
-        if (!copied) throw new Error('コピーに失敗しました');
+        try {
+          if (!document.execCommand('copy')) throw new Error('コピーに失敗しました');
+        } finally {
+          area.remove();
+        }
       }
       copyPath.setAttribute('aria-label', 'ファイルパスをコピーしました');
       copyPath.title = 'コピーしました';

@@ -37,7 +37,15 @@ test("generates a table of contents with GitHub-style heading IDs", () => {
     html,
     /\.sidebar-toggle\[aria-expanded="false"\] \.panel-toggle-icon/,
   );
-  assert.match(html, /\.sidebar-panels\{display:flex;min-height:0;flex:1\}/);
+  assert.match(
+    html,
+    /\.document-sidebar-body\{display:flex;min-height:0;flex:0 1 auto;flex-direction:column;overflow:hidden\}/,
+  );
+  assert.match(
+    html,
+    /\.sidebar-panels\{display:flex;min-height:0;flex:0 1 auto;align-items:flex-start;overflow:hidden\}/,
+  );
+  assert.match(html, /\.sidebar-panel\{[^}]*max-height:100%;min-height:0;overflow:auto/);
   assert.match(html, /matchMedia\('\(max-width: 900px\)'\)/);
   assert.match(html, /body\.hidden=!expanded/);
 });

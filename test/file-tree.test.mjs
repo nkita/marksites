@@ -37,7 +37,7 @@ test("renders a GitHub-style file tree with a current page", () => {
   assert.match(html, /class="file-tree file-tree-popover"/);
   assert.match(
     html,
-    /<summary><svg class="folder-icon"[^>]*>[\s\S]*?<span>guide<\/span><\/summary>/,
+    /<summary><svg class="folder-icon"[^>]*>[\s\S]*?<span>guide<\/span><span class="file-tree-comment-count file-tree-directory-comment-count" aria-label="配下のコメント3件">3<\/span><\/summary>/,
   );
   assert.match(
     html,
@@ -76,7 +76,8 @@ test("renders a GitHub-style file tree with a current page", () => {
     html,
     /data-copy-file-path="docs\/guide\/getting-started\.md" aria-label="ファイルパスをコピー" title="ファイルパスをコピー"><svg class="action-icon copy-icon"[^>]*>[\s\S]*?<\/svg><\/button>/,
   );
-  assert.match(html, /navigator\.clipboard && location\.protocol !== 'file:'/);
+  assert.match(html, /navigator\.clipboard && window\.isSecureContext/);
+  assert.match(html, /catch \{[\s\S]*?if \(!copied\)/);
   assert.match(html, /document\.execCommand\('copy'\)/);
   assert.doesNotMatch(html, /<span data-copy-label>Copy path<\/span>/);
   assert.match(html, /copyPath\.title = 'コピーしました'/);
@@ -114,6 +115,11 @@ test("renders a GitHub-style file tree with a current page", () => {
   assert.match(
     html,
     /class="file-tree-comment-count" aria-label="コメント3件">3<\/span>/,
+  );
+  assert.match(html, /\.file-tree-directory-comment-count \{ float: right;/);
+  assert.match(
+    html,
+    /\.file-tree details\[open\] > summary > \.file-tree-directory-comment-count \{ display: none; \}/,
   );
   assert.match(html, /dataset\.fileName\.toLocaleLowerCase\(\)/);
   assert.match(html, /name\.includes\(query\)/);
@@ -156,4 +162,36 @@ test("does not alter the document shell without file tree options", () => {
   assert.doesNotMatch(html, /<body class="markdown-body has-file-tree">/);
   assert.doesNotMatch(html, /file-tree-filter-input/);
   assert.doesNotMatch(html, /file-tree-collapse-all/);
+});
+
+test("sums comment counts into ancestor directory badges", () => {
+  const html = markdownToHtml("# Guide", {
+    fileTree: {
+      items: [
+        {
+          type: "directory",
+          name: "docs",
+          children: [
+            { type: "file", name: "one.md", href: "one.html", commentCount: 2 },
+            {
+              type: "directory",
+              name: "nested",
+              children: [
+                { type: "file", name: "two.md", href: "two.html", commentCount: 3 },
+                { type: "file", name: "empty.md", href: "empty.html", commentCount: 0 },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+  });
+
+  assert.match(html, /<span>docs<\/span><span class="file-tree-comment-count file-tree-directory-comment-count" aria-label="配下のコメント5件">5<\/span>/);
+  assert.match(html, /<span>nested<\/span><span class="file-tree-comment-count file-tree-directory-comment-count" aria-label="配下のコメント3件">3<\/span>/);
+  assert.doesNotMatch(html, /aria-label="コメント0件"/);
+  assert.match(
+    html,
+    /\.file-tree details\[open\] > summary > \.file-tree-directory-comment-count \{ display: none; \}/,
+  );
 });

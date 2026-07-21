@@ -15,6 +15,9 @@ test("highlights fenced code with a supported language", () => {
   assert.match(html, /data-code-action="wrap"[^>]*>[\s\S]*?class="action-icon wrap-icon"/);
   assert.match(html, /data-code-action="wrap"/);
   assert.match(html, /navigator\.clipboard/);
+  assert.match(html, /navigator\.clipboard && window\.isSecureContext/);
+  assert.match(html, /catch \{[\s\S]*?document\.execCommand\('copy'\)/);
+  assert.match(html, /if \(!document\.execCommand\('copy'\)\) throw/);
 });
 
 test("safely renders unsupported languages as plain code", () => {

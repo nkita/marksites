@@ -107,6 +107,8 @@ export const fileTreeStyles = `    body.markdown-body.has-file-tree { width: 100
     .file-tree a { display: flex; margin: 1px 0; padding: 5px 8px; align-items: center; gap: 6px; overflow: hidden; color: var(--fgColor-muted, #59636e); font-size: 0.875rem; line-height: 1.35; text-decoration: none; white-space: nowrap; border-radius: 5px; }
     .file-tree-name { min-width: 0; flex: 1; overflow: hidden; text-overflow: ellipsis; }
     .file-tree-comment-count { display: inline-flex; min-width: 18px; height: 18px; flex: none; align-items: center; justify-content: center; padding: 0 5px; color: var(--fgColor-muted, #59636e); font-size: 0.6875rem; font-weight: 600; line-height: 18px; background: var(--bgColor-neutral-muted, #818b981f); border-radius: 9px; }
+    .file-tree-directory-comment-count { float: right; margin-left: 6px; }
+    .file-tree details[open] > summary > .file-tree-directory-comment-count { display: none; }
     .file-tree a[aria-current="page"] .file-tree-comment-count { color: var(--fgColor-accent, #0969da); background: var(--bgColor-default, #fff); }
     .file-tree a:hover { color: var(--fgColor-default, #1f2328); background: var(--bgColor-muted, #f6f8fa); text-decoration: none; }
     .file-tree a:focus-visible { outline: 2px solid var(--focus-outlineColor, #0969da); outline-offset: -2px; }
