@@ -4,6 +4,7 @@ import { emptyAnnotationDocument } from "../annotations/model.js";
 import { createAnnotationsFeature } from "../features/annotations/index.js";
 import { createCodeBlocksFeature } from "../features/code-blocks/index.js";
 import { createHeaderFeature } from "../features/header/index.js";
+import { createImageViewerFeature } from "../features/image-viewer/index.js";
 import {
   renderFileTreeScript,
   renderModifiedAtScript,
@@ -41,6 +42,7 @@ function generatedScriptBodies(): Set<string> {
     scriptBody(renderModifiedAtScript(true)),
     scriptBody(renderedToc.script),
     scriptBody(annotations.script),
+    scriptBody(createImageViewerFeature(true).script),
     scriptBody(
       createSidebarFeature({
         tableOfContents: renderedToc.markup,

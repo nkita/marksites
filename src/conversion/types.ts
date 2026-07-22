@@ -10,6 +10,9 @@ export interface MarkdownFile {
   modifiedAt?: string;
   annotations?: AnnotationDocument;
   annotationHash?: string;
+  assetHash?: string;
+  assetOutputs?: string[];
+  rewriteImages?: (token: import("marked").Token) => void;
 }
 
 export interface ManifestFile {
@@ -18,6 +21,8 @@ export interface ManifestFile {
   annotationHash: string;
   output: string;
   annotations: string;
+  assetHash?: string;
+  assets?: string[];
 }
 
 export interface BuildManifest {
@@ -40,4 +45,8 @@ export interface ConversionResult {
   annotationsMoved: number;
   orphanedAnnotations: string[];
   outputRoot: string;
+}
+
+export interface ConversionOptions {
+  onLog?: (message: string) => void;
 }

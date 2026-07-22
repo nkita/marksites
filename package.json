@@ -1,6 +1,6 @@
 {
   "name": "marksites",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Convert Markdown into standalone GitHub-styled HTML.",
   "type": "module",
   "exports": {
@@ -30,14 +30,14 @@
     "node": ">=20"
   },
   "dependencies": {
-    "github-markdown-css": "latest",
+    "github-markdown-css": "5.9.0",
     "github-slugger": "^2.0.0",
     "highlight.js": "^11.11.1",
     "ignore": "^7.0.6",
-    "marked": "latest"
+    "marked": "18.0.6"
   },
   "devDependencies": {
-    "@types/node": "latest",
-    "typescript": "latest"
+    "@types/node": "26.1.1",
+    "typescript": "7.0.2"
   }
 }

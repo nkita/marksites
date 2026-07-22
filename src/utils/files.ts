@@ -4,7 +4,7 @@ import { randomUUID } from "node:crypto";
 
 export async function atomicWriteFile(
   path: string,
-  content: string,
+  content: string | Uint8Array,
 ): Promise<void> {
   await mkdir(dirname(path), { recursive: true });
   const temporary = `${path}.${process.pid}.${randomUUID()}.tmp`;

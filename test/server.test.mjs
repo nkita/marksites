@@ -202,6 +202,37 @@ test("serves static output and annotation CRUD", async (t) => {
   );
 });
 
+test("authorizes the image viewer script and ignores favicon probes", async (t) => {
+  const root = await mkdtemp(join(tmpdir(), "marksites-viewer-csp-"));
+  const input = join(root, "docs"), output = join(root, "site");
+  await mkdir(input);
+  await writeFile(join(input, "image.png"), "image");
+  await writeFile(join(input, "index.md"), "![Preview](image.png)\n");
+  await convertDirectoryDetailed(input, output);
+  const server = await startMarksitesServer({
+    outputRoot: output,
+    entryPath: "index.html",
+    port: 0,
+    projectId: "viewer-test",
+    projectName: "Viewer",
+    documents: new Map([["index.md", ".index.json"]]),
+    onAnnotationsChange: async () => {},
+  });
+  t.after(() => server.close());
+
+  const response = await fetch(server.url);
+  const html = await response.text();
+  const nonce = /script-src 'nonce-([^']+)'/.exec(
+    response.headers.get("content-security-policy") ?? "",
+  )?.[1];
+  assert.ok(nonce);
+  const scripts = [...html.matchAll(/<script data-marksites-script="true"([^>]*)>/g)];
+  assert.ok(scripts.length > 0);
+  assert.ok(scripts.every((match) => match[1].includes(`nonce="${nonce}"`)));
+  assert.match(html, /data-image-viewer/);
+  assert.equal((await fetch(server.url + "/favicon.ico")).status, 204);
+});
+
 test("reports a port conflict", async (t) => {
   const root = await mkdtemp(join(tmpdir(), "marksites-server-port-"));
   const options = {

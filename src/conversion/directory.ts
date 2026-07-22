@@ -40,9 +40,11 @@ import {
 import type {
   BuildManifest,
   ConversionResult,
+  ConversionOptions,
   ManifestFile,
   MarkdownFile,
 } from "./types.js";
+import { prepareImageAssets } from "./assets.js";
 
 async function migrateLegacyMetadata(
   files: MarkdownFile[],
@@ -74,6 +76,38 @@ async function loadSources(files: MarkdownFile[]): Promise<void> {
     file.source = source;
     file.sourceHash = contentHash(file.source);
     file.modifiedAt = sourceStat.mtime.toISOString();
+  }
+}
+
+async function prepareAssets(
+  files: MarkdownFile[],
+  output: string,
+): Promise<void> {
+  for (const file of files) {
+    const assets = await prepareImageAssets(
+      file.source!,
+      file.sourcePath,
+      file.outputPath,
+      output,
+    );
+    file.assetHash = assets.hash;
+    file.assetOutputs = assets.outputs;
+    file.rewriteImages = assets.rewrite;
+  }
+}
+
+async function removeUnusedAssets(
+  previous: BuildManifest | undefined,
+  files: MarkdownFile[],
+  output: string,
+): Promise<void> {
+  const current = new Set(files.flatMap((file) => file.assetOutputs ?? []));
+  const old = new Set(
+    Object.values(previous?.files ?? {}).flatMap((file) => file.assets ?? []),
+  );
+  for (const asset of old) {
+    if (!current.has(asset))
+      await rm(join(output, ...asset.split("/")), { force: true });
   }
 }
 
@@ -174,6 +208,7 @@ async function renderChangedFiles(
   output: string,
   previous: BuildManifest | undefined,
   full: boolean,
+  options: ConversionOptions,
 ): Promise<{
   converted: number;
   skipped: number;
@@ -191,6 +226,7 @@ async function renderChangedFiles(
       old.sourceHash !== file.sourceHash ||
       old.modifiedAt !== file.modifiedAt ||
       old.annotationHash !== file.annotationHash ||
+      old.assetHash !== file.assetHash ||
       !(await pathExists(destination));
     if (changed) {
       await atomicWriteFile(
@@ -205,14 +241,21 @@ async function renderChangedFiles(
               items: buildFileTree(files, file.outputPath),
               breadcrumbs: buildBreadcrumbs(files, file),
             },
-            markedOptions: { walkTokens: rewriteMarkdownLinks },
+            markedOptions: {
+              walkTokens: (token) => {
+                rewriteMarkdownLinks(token);
+                file.rewriteImages?.(token);
+              },
+            },
           },
           file.annotations,
         ),
       );
       converted++;
+      options.onLog?.(`Converted ${file.relativePath} -> ${file.outputPath}`);
     } else {
       skipped++;
+      options.onLog?.(`Skipped ${file.relativePath}`);
     }
     manifestFiles[file.relativePath] = {
       sourceHash: file.sourceHash!,
@@ -220,6 +263,8 @@ async function renderChangedFiles(
       annotationHash: file.annotationHash!,
       output: file.outputPath,
       annotations: file.metadataPath,
+      assetHash: file.assetHash,
+      assets: file.assetOutputs,
     };
   }
   return { converted, skipped, files: manifestFiles };
@@ -228,6 +273,7 @@ async function renderChangedFiles(
 export async function convertDirectoryDetailed(
   input: string,
   outputArgument?: string,
+  options: ConversionOptions = {},
 ): Promise<ConversionResult> {
   const output = outputArgument
     ? resolve(outputArgument)
@@ -252,6 +298,7 @@ export async function convertDirectoryDetailed(
   if (loaded.warning) console.warn(loaded.warning);
   const previous = loaded.manifest;
   await loadSources(files);
+  await prepareAssets(files, output);
   let annotationsMoved = await migrateLegacyMetadata(files, output);
 
   const currentPaths = new Set(files.map((file) => file.relativePath));
@@ -286,12 +333,14 @@ export async function convertDirectoryDetailed(
     output,
     previous,
     full,
+    options,
   );
+  await removeUnusedAssets(previous, files, output);
   await writeManifest(manifestPath, {
     schemaVersion: 1,
     generator: {
       name: "marksites",
-      version: "0.1.0",
+      version: "0.2.0",
       outputCompatibilityVersion: OUTPUT_COMPATIBILITY_VERSION,
       renderFingerprint: fingerprint,
     },

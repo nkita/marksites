@@ -107,3 +107,32 @@ export async function findMarkdownFiles(
   await visit(root, []);
   return files;
 }
+
+export async function findWatchDirectories(
+  root: string,
+  excludedDirectory?: string,
+): Promise<string[]> {
+  const directories: string[] = [];
+  async function visit(
+    directory: string,
+    inheritedRules: Awaited<ReturnType<typeof loadGitignoreRules>>,
+  ): Promise<void> {
+    if (directory !== root && (await pathExists(join(directory, BUILD_MANIFEST)))) return;
+    directories.push(directory);
+    const rules = await loadGitignoreRules(root, directory, inheritedRules);
+    const entries = await readdir(directory, { withFileTypes: true });
+    for (const entry of entries) {
+      if (!entry.isDirectory()) continue;
+      const absolute = join(directory, entry.name);
+      const relativePath = toPosix(relative(root, absolute));
+      if (
+        resolve(absolute) === excludedDirectory ||
+        EXCLUDED_DIRECTORY_NAMES.has(entry.name) ||
+        isGitignored(relativePath, true, rules)
+      ) continue;
+      await visit(absolute, rules);
+    }
+  }
+  await visit(root, []);
+  return directories;
+}

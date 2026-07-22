@@ -60,6 +60,29 @@ test("converts a Markdown directory while preserving its hierarchy", async () =>
   assert.doesNotMatch(guide, />docs<\//);
 });
 
+test("copies local Markdown images to content-addressed assets", async () => {
+  const root = await mkdtemp(join(tmpdir(), "marksites-images-"));
+  const input = join(root, "docs"), output = join(root, "site");
+  await mkdir(join(input, "guide", "images"), { recursive: true });
+  await writeFile(join(input, "guide", "images", "screen.png"), "image-one");
+  await writeFile(join(input, "guide", "page.md"), "![Screen](images/screen.png)\n");
+
+  await convertDirectory(input, output);
+  const first = await readFile(join(output, "guide", "page.html"), "utf8");
+  const href = /<img src="([^"]+)" alt="Screen">/.exec(first)?.[1];
+  assert.ok(href);
+  assert.match(href, /^\.\.\/_marksites-assets\/[a-f0-9]{64}\.png$/);
+  assert.equal(await readFile(join(output, "guide", href), "utf8"), "image-one");
+  assert.match(first, /data-image-viewer/);
+  assert.match(first, /data-image-zoom-in/);
+
+  await writeFile(join(input, "guide", "images", "screen.png"), "image-two");
+  const result = await convertDirectory(input, output);
+  const second = await readFile(join(output, "guide", "page.html"), "utf8");
+  assert.equal(result, 1);
+  assert.notEqual(/<img src="([^"]+)" alt="Screen">/.exec(second)?.[1], href);
+});
+
 test("rejects Markdown files that map to the same HTML path", async () => {
   const temporaryDirectory = await mkdtemp(join(tmpdir(), "marksites-cli-"));
   const input = join(temporaryDirectory, "docs");
@@ -71,6 +94,28 @@ test("rejects Markdown files that map to the same HTML path", async () => {
     convertDirectory(input, join(temporaryDirectory, "site")),
     /Multiple Markdown files map to: guide\.html/,
   );
+});
+
+test("verbose reports per-document conversion details", async () => {
+  const root = await mkdtemp(join(tmpdir(), "marksites-verbose-"));
+  const input = join(root, "docs"), output = join(root, "site");
+  await mkdir(input);
+  await writeFile(join(input, "index.md"), "# Home\n");
+
+  const verbose = await execFileAsync(process.execPath, [
+    cliPath,
+    input,
+    output,
+    "--verbose",
+  ]);
+  assert.match(verbose.stdout, /Converted index\.md -> index\.html/);
+
+  const regular = await execFileAsync(process.execPath, [
+    cliPath,
+    input,
+    output,
+  ]);
+  assert.doesNotMatch(regular.stdout, /Skipped index\.md/);
 });
 
 test("rejects invalid serve options", async () => {
@@ -151,6 +196,49 @@ test("serve uses the current directory when paths are omitted", async (t) => {
     await readFile(join(project, "marksites", "index.html"), "utf8"),
     /Project/,
   );
+  child.kill("SIGTERM");
+  await new Promise((done) => child.once("exit", done));
+});
+
+test("watch rebuilds changed and newly added Markdown files", async (t) => {
+  const project = await mkdtemp(join(tmpdir(), "marksites-watch-"));
+  await writeFile(join(project, "index.md"), "# Before\n");
+  const child = spawn(
+    process.execPath,
+    [cliPath, ".", "site", "--watch", "--verbose"],
+    {
+    cwd: project,
+    stdio: ["ignore", "pipe", "pipe"],
+    },
+  );
+  t.after(() => { if (!child.killed) child.kill("SIGTERM"); });
+  let stdout = "";
+  await new Promise((done, fail) => {
+    const timeout = setTimeout(() => fail(new Error("watch did not start")), 5_000);
+    child.stdout.setEncoding("utf8");
+    child.stdout.on("data", (chunk) => {
+      stdout += chunk;
+      if (chunk.includes("Watching ")) { clearTimeout(timeout); done(); }
+    });
+    child.once("error", fail);
+  });
+  await writeFile(join(project, "index.md"), "# After\n");
+  await writeFile(join(project, "new.md"), "# New\n");
+  const deadline = Date.now() + 5_000;
+  while (Date.now() < deadline) {
+    try {
+      const [index, added] = await Promise.all([
+        readFile(join(project, "site", "index.html"), "utf8"),
+        readFile(join(project, "site", "new.html"), "utf8"),
+      ]);
+      if (index.includes("After") && added.includes("New")) break;
+    } catch {}
+    await new Promise((done) => setTimeout(done, 50));
+  }
+  assert.match(await readFile(join(project, "site", "index.html"), "utf8"), /After/);
+  assert.match(await readFile(join(project, "site", "new.html"), "utf8"), /New/);
+  assert.match(stdout, /Watch event (change|rename):/);
+  assert.match(stdout, /Watch rebuild started/);
   child.kill("SIGTERM");
   await new Promise((done) => child.once("exit", done));
 });

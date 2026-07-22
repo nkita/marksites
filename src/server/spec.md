@@ -26,10 +26,11 @@
 - `secureHtml()`: レスポンスごとにnonceを生成し、既知本文かつmarksitesマーカー付きスクリプトだけへnonceを付ける。
 
 CSPは未知のinline script、object、base、frame埋め込みを拒否し、接続先を同一オリジンへ限定する。静的HTMLファイル自体は変更せず、HTTPレスポンス時だけnonceを付ける。
+既知本文には画像ビューアーを含む全featureの埋め込みスクリプトを登録する。
 
 ### `static-files.ts`
 
-- `handleStaticFile()`: GET・HEAD、index解決、entryPath fallback、Content-Type、404・405を処理する。
+- `handleStaticFile()`: GET・HEAD、index解決、entryPath fallback、Content-Type、404・405を処理する。ブラウザによる`/favicon.ico`の自動要求には204を返す。
 - URL decode後の`..`、バックスラッシュ、NUL、出力ルート外パスを拒否する。
 - symlinkのrealpathが出力ルート外なら配信しない。
 - HTMLは`secureHtml()`を通し、それ以外はストリーム配信する。

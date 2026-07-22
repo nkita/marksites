@@ -9,10 +9,11 @@ import type { ConversionResult } from "./conversion/types.js";
 import { MARKSITES_RESERVED_PATH } from "./server/constants.js";
 import { startMarksitesServer } from "./server/server.js";
 import { openBrowser } from "./cli/open-browser.js";
+import { watchConversionInput } from "./conversion/watch.js";
 
 function usage(): never {
   console.error(
-    "Usage:\n  marksites [input.md|input-directory] [output.html|output-directory]\n  marksites serve [input-directory] [output-directory] [--host HOST] [--port PORT] [--open]",
+    "Usage:\n  marksites [input.md|input-directory] [output.html|output-directory] [--watch] [--verbose]\n  marksites serve [input-directory] [output-directory] [--host HOST] [--port PORT] [--open] [--watch] [--verbose]",
   );
   process.exit(1);
 }
@@ -30,10 +31,20 @@ async function serve(args: string[]): Promise<void> {
   let host = "127.0.0.1",
     port: number | undefined,
     shouldOpen = false;
+  let shouldWatch = false;
+  let verbose = false;
   for (let index = 0; index < args.length; index++) {
     const argument = args[index]!;
     if (argument === "--open") {
       shouldOpen = true;
+      continue;
+    }
+    if (argument === "--watch") {
+      shouldWatch = true;
+      continue;
+    }
+    if (argument === "--verbose") {
+      verbose = true;
       continue;
     }
     if (argument === "--host" || argument === "--port") {
@@ -56,7 +67,14 @@ async function serve(args: string[]): Promise<void> {
   const input = resolve(inputArgument);
   if (!(await stat(input)).isDirectory())
     throw new Error(`serve input must be a directory: ${inputArgument}`);
-  const initial = await convertDirectoryDetailed(input, positional[1]);
+  const conversionOptions = {
+    onLog: verbose ? (message: string) => console.log(message) : undefined,
+  };
+  const initial = await convertDirectoryDetailed(
+    input,
+    positional[1],
+    conversionOptions,
+  );
   report(initial);
   const output = initial.outputRoot;
   try {
@@ -94,10 +112,32 @@ async function serve(args: string[]): Promise<void> {
     projectName: basename(input),
     documents,
     onAnnotationsChange: async () => {
-      await convertDirectoryDetailed(input, output);
+      await convertDirectoryDetailed(input, output, conversionOptions);
     },
   });
   console.log(`marksites server: ${server.url}`);
+  const watcher = shouldWatch
+    ? await watchConversionInput(
+        input,
+        output,
+        async () => {
+          const result = await convertDirectoryDetailed(
+            input,
+            output,
+            conversionOptions,
+          );
+          report(result);
+          const nextManifest = JSON.parse(
+            await readFile(join(output, ".marksites-build.json"), "utf8"),
+          ) as typeof manifest;
+          documents.clear();
+          for (const [document, value] of Object.entries(nextManifest.files))
+            documents.set(document, value.annotations);
+        },
+        conversionOptions,
+      )
+    : undefined;
+  if (watcher) console.log(`Watching ${input}`);
   if (shouldOpen) {
     const opened = await openBrowser(server.url);
     if (!opened) {
@@ -111,6 +151,7 @@ async function serve(args: string[]): Promise<void> {
     const close = () => {
       if (closing) return;
       closing = true;
+      watcher?.close();
       server.close().then(done, fail);
     };
     process.once("SIGINT", close);
@@ -120,16 +161,60 @@ async function serve(args: string[]): Promise<void> {
 
 async function main(): Promise<void> {
   if (process.argv[2] === "serve") return serve(process.argv.slice(3));
-  const inputArgument = process.argv[2] ?? ".";
+  const args = process.argv.slice(2);
+  const shouldWatch = args.includes("--watch");
+  const verbose = args.includes("--verbose");
+  const positional = args.filter(
+    (argument) => argument !== "--watch" && argument !== "--verbose",
+  );
+  const unknown = positional.find((argument) => argument.startsWith("--"));
+  if (unknown) throw new Error(`Unknown option: ${unknown}`);
+  if (positional.length > 2) usage();
+  const inputArgument = positional[0] ?? ".";
   const input = resolve(inputArgument);
   const inputStat = await stat(input);
-  const outputArgument = process.argv[3];
+  const outputArgument = positional[1];
+  const conversionOptions = {
+    onLog: verbose ? (message: string) => console.log(message) : undefined,
+  };
   if (inputStat.isDirectory()) {
-    report(await convertDirectoryDetailed(input, outputArgument));
+    const initial = await convertDirectoryDetailed(
+      input,
+      outputArgument,
+      conversionOptions,
+    );
+    report(initial);
+    if (shouldWatch) {
+      const watcher = await watchConversionInput(
+        input,
+        initial.outputRoot,
+        async () => {
+          report(
+            await convertDirectoryDetailed(
+              input,
+              initial.outputRoot,
+              conversionOptions,
+            ),
+          );
+        },
+        conversionOptions,
+      );
+      console.log(`Watching ${input}`);
+      await new Promise<void>((done) => {
+        const close = () => {
+          watcher.close();
+          done();
+        };
+        process.once("SIGINT", close);
+        process.once("SIGTERM", close);
+      });
+    }
     return;
   }
   if (!inputStat.isFile())
     throw new Error(`Input is not a file or directory: ${inputArgument}`);
+  if (shouldWatch) throw new Error("--watch input must be a directory");
+  if (verbose) console.log(`Converting ${input}`);
   console.log(`Created ${await convertFile(input, outputArgument)}`);
 }
 

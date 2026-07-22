@@ -13,6 +13,7 @@ import {
 } from "./features/file-tree/index.js";
 import { createTableOfContentsFeature } from "./features/table-of-contents/index.js";
 import { createSidebarFeature } from "./features/sidebar/index.js";
+import { createImageViewerFeature } from "./features/image-viewer/index.js";
 import { renderDocument } from "./template/document.js";
 import type { RenderOptions } from "./types.js";
 import { escapeHtml } from "./utils/html.js";
@@ -62,6 +63,7 @@ export function renderMarkdown(
       ? `<div class="document-metadata">${modifiedAt}</div>\n`
       : "";
   const annotationFeature = createAnnotationsFeature(annotations);
+  const imageViewer = createImageViewerFeature(/<img\b/i.test(content));
   const sidebar = createSidebarFeature({
     tableOfContents: toc.markup,
     tableOfContentsTitle: toc.title,
@@ -80,10 +82,15 @@ export function renderMarkdown(
       fileTree,
       fileSidebar,
       sidebar: sidebar.markup,
-      overlays: annotationFeature.markup,
+      overlays: `${annotationFeature.markup}${imageViewer.markup}`,
     },
     assets: {
-      styles: [sidebar.styles, annotationFeature.styles, header.styles],
+      styles: [
+        sidebar.styles,
+        annotationFeature.styles,
+        imageViewer.styles,
+        header.styles,
+      ],
       scripts: [
         header.script,
         fileTreeScript,
@@ -92,6 +99,7 @@ export function renderMarkdown(
         toc.script,
         `\n${codeBlocks.renderScript()}\n`,
         `${annotationFeature.script}\n`,
+        ...(imageViewer.script ? [`${imageViewer.script}\n`] : []),
       ],
     },
   });

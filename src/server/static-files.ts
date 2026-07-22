@@ -45,6 +45,11 @@ export async function handleStaticFile(
   }
   const requestedPath =
     decoded === "/" && entryPath ? `/${entryPath}` : decoded;
+  if (requestedPath === "/favicon.ico") {
+    response.writeHead(204, { "cache-control": "public, max-age=86400" });
+    response.end();
+    return;
+  }
   let path = resolve(root, `.${normalize(requestedPath)}`);
   if (!path.startsWith(root + sep) && path !== root)
     return sendJson(response, 403, "Invalid path");

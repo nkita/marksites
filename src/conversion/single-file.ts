@@ -9,6 +9,7 @@ import {
   isMarkdown,
   pathExists,
 } from "./paths.js";
+import { prepareImageAssets } from "./assets.js";
 
 export async function convertFile(
   input: string,
@@ -38,6 +39,12 @@ export async function convertFile(
     stat(input),
   ]);
   await mkdir(dirname(output), { recursive: true });
+  const assets = await prepareImageAssets(
+    markdown,
+    input,
+    basename(output),
+    dirname(output),
+  );
   await atomicWriteFile(
     output,
     renderMarkdown(
@@ -45,6 +52,9 @@ export async function convertFile(
       {
         title: basename(input, extname(input)),
         modifiedAt: sourceStat.mtime.toISOString(),
+        markedOptions: {
+          walkTokens: assets.rewrite,
+        },
       },
       annotations,
     ),
