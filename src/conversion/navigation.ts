@@ -50,6 +50,8 @@ export function buildFileTree(
         .map((file) => ({
           type: "file" as const,
           name: basename(file.relativePath),
+          path: file.relativePath,
+          modifiedAt: file.modifiedAt,
           href: encodeRelativeHref(
             posix.relative(posix.dirname(currentOutputPath), file.outputPath) ||
               posix.basename(file.outputPath),

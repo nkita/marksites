@@ -313,7 +313,7 @@ export async function convertDirectoryDetailed(
     files
       .map(
         (file) =>
-          `${file.relativePath}\0${file.annotations ? countActiveAnnotations(file.annotations) : 0}`,
+          `${file.relativePath}\0${file.modifiedAt}\0${file.annotations ? countActiveAnnotations(file.annotations) : 0}`,
       )
       .sort()
       .join("\n"),

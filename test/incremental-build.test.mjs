@@ -58,6 +58,31 @@ test("rebuilds HTML when only the Markdown update time changes", async () => {
   );
 });
 
+test("rebuilds every page when a file-tree update time changes", async () => {
+  const root = await mkdtemp(join(tmpdir(), "marksites-tree-mtime-"));
+  const input = join(root, "docs"),
+    output = join(root, "site"),
+    source = join(input, "a.md");
+  await mkdir(input);
+  await writeFile(source, "# A\n");
+  await writeFile(join(input, "b.md"), "# B\n");
+  await convertDirectoryDetailed(input, output);
+
+  const modifiedAt = new Date("2026-07-27T20:00:00.000Z");
+  await utimes(source, modifiedAt, modifiedAt);
+  const result = await convertDirectoryDetailed(input, output);
+
+  assert.equal(result.converted, 2);
+  assert.equal(result.skipped, 0);
+  for (const outputFile of ["a.html", "b.html"]) {
+    const html = await readFile(join(output, outputFile), "utf8");
+    assert.match(
+      html,
+      /data-file-path="a\.md" data-directory="" data-modified-at="2026-07-27T20:00:00\.000Z"/,
+    );
+  }
+});
+
 test("rebuilds every file when a file-tree comment count changes", async () => {
   const root = await mkdtemp(join(tmpdir(), "marksites-comment-count-"));
   const input = join(root, "docs"),

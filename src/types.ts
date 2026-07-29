@@ -45,6 +45,10 @@ export interface FileTreeFile {
   name: string;
   href: string;
   current?: boolean;
+  /** Path relative to the converted collection root. Defaults to name. */
+  path?: string;
+  /** ISO 8601 timestamp used by the optional recently updated view. */
+  modifiedAt?: string;
   /** Number of comments associated with the file. Omitted when unavailable. */
   commentCount?: number;
 }

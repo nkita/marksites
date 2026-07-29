@@ -35,7 +35,7 @@
 
 ### `navigation.ts`
 
-- `buildFileTree()`: 全Markdownをディレクトリ木へ変換し、現在ページ基準のURLと各文書のアーカイブされていないコメント件数を生成する。
+- `buildFileTree()`: 全Markdownをディレクトリ木へ変換し、現在ページ基準のURL、ルート相対パス、mtime、有効コメント件数を生成する。
 - `buildBreadcrumbs()`: 入力元ディレクトリの直下から現在文書までのパンくずを作る。入力元ディレクトリ自身の名前は表示パスへ含めず、各階層に`index.md`または`index.markdown`がある場合だけリンクする。
 
 URLの各パスセグメントは`encodeURIComponent()`で符号化する。並び順はディレクトリ優先、次に英語localeによる名前順とする。
@@ -86,4 +86,4 @@ manifestのgenerator versionはパッケージバージョンと一致させる�
 - `convertDirectoryDetailed()`: 探索からmanifest確定までを順番に組み立てる。
 - `convertDirectory()`: 互換用に変換件数だけを返す。
 
-treeHashはMarkdown相対パスと各文書のコメント件数から計算する。ファイル構成またはコメント件数が変わった場合は、全ページに埋め込まれたファイルツリーを更新するため全HTMLを再生成する。コメント本文の編集など件数を変えないメタデータ変更は対象HTMLだけを生成する。renderFingerprintが変わった場合も全HTMLを再生成し、manifestは全変換成功後にだけ更新する。生成結果の条件分岐が変わり代表HTMLの差分だけでは検知できない場合は、出力互換バージョンを更新して全HTMLを再生成する。
+treeHashはMarkdown相対パス、mtime、各文書のコメント件数から計算する。ファイル構成、更新日時、コメント件数のいずれかが変わった場合は、全ページに埋め込まれたファイルツリーと更新順一覧を更新するため全HTMLを再生成する。コメント本文の編集など件数を変えないメタデータ変更は対象HTMLだけを生成する。renderFingerprintが変わった場合も全HTMLを再生成し、manifestは全変換成功後にだけ更新する。生成結果の条件分岐が変わり代表HTMLの差分だけでは検知できない場合は、出力互換バージョンを更新して全HTMLを再生成する。

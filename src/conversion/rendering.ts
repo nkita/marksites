@@ -3,7 +3,7 @@ import type { Token } from "marked";
 import { emptyAnnotationDocument } from "../annotations/model.js";
 import { renderMarkdown } from "../markdown-to-html.js";
 
-export const OUTPUT_COMPATIBILITY_VERSION = 6;
+export const OUTPUT_COMPATIBILITY_VERSION = 7;
 
 export function contentHash(value: string | Buffer): string {
   return `sha256:${createHash("sha256").update(value).digest("hex")}`;
@@ -36,8 +36,10 @@ export function renderFingerprint(): string {
           {
             type: "file",
             name: "index.md",
+            path: "index.md",
             href: "index.html",
             current: true,
+            modifiedAt: "2026-01-01T00:00:00.000Z",
           },
         ],
         breadcrumbs: [{ name: "docs" }, { name: "index.md", current: true }],

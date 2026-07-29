@@ -92,12 +92,17 @@ export const fileTreeStyles = `    body.markdown-body.has-file-tree { width: 100
     .file-tree { box-sizing: border-box; overflow: auto; padding: 12px; color: var(--fgColor-default, #1f2328); background: var(--bgColor-default, #fff); scrollbar-width: thin; scrollbar-color: var(--borderColor-default, #d0d7de) transparent; }
     .file-tree-sidebar { min-height: 0; flex: 1; padding: 10px 12px 16px; }
     .file-tree-popover { position: absolute; z-index: 15; top: calc(100% + 6px); left: 0; width: min(360px, calc(100vw - 48px)); max-height: min(520px, calc(100vh - 96px)); border: 1px solid var(--borderColor-default, #d0d7de); border-radius: 8px; box-shadow: 0 8px 24px rgba(31,35,40,.16); }
+    .file-tree-view-tabs { display: grid; grid-template-columns: 1fr 1fr; margin: 0 0 8px; padding: 2px; background: var(--bgColor-muted, #f6f8fa); border-radius: 6px; }
+    .file-tree-view-tabs button { min-height: 28px; padding: 3px 8px; color: var(--fgColor-muted, #59636e); font: inherit; font-size: 0.75rem; font-weight: 600; background: transparent; border: 0; border-radius: 4px; cursor: pointer; }
+    .file-tree-view-tabs button[aria-selected="true"] { color: var(--fgColor-default, #1f2328); background: var(--bgColor-default, #fff); box-shadow: 0 1px 2px rgba(31,35,40,.12); }
+    .file-tree-view-tabs button:focus-visible { outline: 2px solid var(--focus-outlineColor, #0969da); outline-offset: 1px; }
     .file-tree-filter { margin: 0 0 8px; }
     .file-tree-filter-input { box-sizing: border-box; width: 100%; min-height: 32px; padding: 5px 9px; color: var(--fgColor-default, #1f2328); font: inherit; font-size: 0.8125rem; line-height: 1.4; background: var(--bgColor-default, #fff); border: 1px solid var(--borderColor-default, #d0d7de); border-radius: 6px; outline: none; }
     .file-tree-filter-input::placeholder { color: var(--fgColor-muted, #59636e); }
     .file-tree-filter-input:focus { border-color: var(--borderColor-accent-emphasis, #0969da); box-shadow: 0 0 0 2px var(--bgColor-accent-muted, #ddf4ff); }
     .file-tree-filter-empty { margin: 10px 4px 2px; color: var(--fgColor-muted, #59636e); font-size: 0.8125rem; text-align: center; }
     .file-tree ul { margin: 0; padding: 0; list-style: none; }
+    .file-tree [hidden] { display: none; }
     .file-tree details { margin: 0; }
     .file-tree details > ul { margin-left: 10px; padding-left: 10px; border-left: 1px solid var(--borderColor-muted, #d8dee4); }
     .file-tree summary { padding: 5px 7px; color: var(--fgColor-default, #1f2328); font-size: 0.875rem; font-weight: 600; line-height: 1.35; border-radius: 5px; cursor: pointer; user-select: none; }
@@ -113,6 +118,29 @@ export const fileTreeStyles = `    body.markdown-body.has-file-tree { width: 100
     .file-tree a:hover { color: var(--fgColor-default, #1f2328); background: var(--bgColor-muted, #f6f8fa); text-decoration: none; }
     .file-tree a:focus-visible { outline: 2px solid var(--focus-outlineColor, #0969da); outline-offset: -2px; }
     .file-tree a[aria-current="page"] { color: var(--fgColor-accent, #0969da); font-weight: 600; background: var(--bgColor-accent-muted, #ddf4ff); }
+    .file-tree-date { margin: 10px 0 3px; }
+    .file-tree-date:first-child { margin-top: 4px; }
+    .file-tree-date button { display: flex; width: 100%; min-height: 28px; align-items: center; gap: 4px; padding: 4px 7px; color: var(--fgColor-default, #1f2328); font: inherit; font-size: 0.75rem; font-weight: 600; text-align: left; background: transparent; border: 0; border-radius: 5px; cursor: pointer; }
+    .file-tree-date button:hover { background: var(--bgColor-muted, #f6f8fa); }
+    .file-tree-date button:focus-visible { outline: 2px solid var(--focus-outlineColor, #0969da); outline-offset: -2px; }
+    .file-tree-date button svg { width: 12px; height: 12px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; transition: transform 120ms ease; }
+    .file-tree-date button[aria-expanded="false"] svg { transform: rotate(-90deg); }
+    .file-tree-date button span { min-width: 18px; margin-left: auto; padding: 1px 5px; color: var(--fgColor-muted, #59636e); font-size: 0.6875rem; font-weight: 600; line-height: 16px; text-align: center; background: var(--bgColor-neutral-muted, #818b981f); border-radius: 9px; }
+    .file-tree-recent .is-date-collapsed { display: none; }
+    .file-tree-directory-group { display: flex; min-width: 0; align-items: center; gap: 5px; margin: 7px 4px 2px; padding: 4px 6px; overflow: hidden; color: var(--fgColor-muted, #59636e); font-size: 0.6875rem; font-weight: 600; line-height: 1.25; background: var(--bgColor-muted, #f6f8fa); border-radius: 4px; }
+    .file-tree-directory-group .folder-icon { width: 13px; height: 13px; flex: none; }
+    .file-tree-directory-group span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .file-tree-recent-file a { align-items: flex-start; gap: 7px; }
+    .file-tree-recent-label { display: flex; min-width: 0; flex: 1; flex-direction: column; gap: 1px; }
+    .file-tree-recent-label .file-tree-name { width: 100%; color: var(--fgColor-default, #1f2328); font-size: 0.8125rem; font-weight: 600; }
+    .file-tree-recent-file a:hover .file-tree-name { text-decoration: underline; text-underline-offset: 2px; }
+    .file-tree-directory-path { display: flex; width: 100%; min-width: 0; align-items: center; gap: 4px; overflow: hidden; color: var(--fgColor-muted, #59636e); font-size: 0.6875rem; font-weight: 400; line-height: 1.25; white-space: nowrap; }
+    .file-tree-directory-path .folder-icon { width: 11px; height: 11px; flex: none; margin: 0; }
+    .file-tree-directory-path > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+    .file-tree-recent-file.is-grouped .file-tree-directory-path { display: none; }
+    .file-tree-recent-file .file-tree-comment-count { margin-top: 1px; }
+    .file-tree-recent-file > a > time { width: 34px; flex: none; padding-top: 1px; color: var(--fgColor-muted, #59636e); font-size: 0.6875rem; font-variant-numeric: tabular-nums; line-height: 1.35; }
+    .file-tree-recent-empty { margin: 10px 4px 2px; color: var(--fgColor-muted, #59636e); font-size: 0.8125rem; text-align: center; }
     @media (max-width: 900px) {
       body.markdown-body.has-file-tree, body.markdown-body.has-file-tree.file-sidebar-collapsed { width: calc(100% - 24px); margin: 0 12px; padding: 12px 0 0; grid-template-columns: minmax(0, 1fr); grid-template-areas: "toc" "content"; gap: 16px; }
       .file-sidebar { width: min(280px, calc(100vw - 24px)); box-shadow: 8px 0 24px rgba(31,35,40,.18); }
