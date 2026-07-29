@@ -8,10 +8,11 @@ test("renders Markdown as a standalone GitHub-styled document", () => {
 
   assert.match(html, /^<!doctype html>/);
   assert.match(html, /<html lang="ja">/);
-  assert.match(html, /<title>Example<\/title>/);
+  assert.match(html, /<title>marksites \| Example<\/title>/);
   assert.match(html, /class="markdown-body"/);
   assert.match(html, /class="site-header"/);
-  assert.doesNotMatch(html, /class="site-header-document"/);
+  assert.match(html, /class="site-header-brand"/);
+  assert.doesNotMatch(html, /class="site-header-document-lead"/);
   assert.match(html, /\.site-header-action\{[^}]*background:transparent;border:0;/);
   assert.match(html, /data-theme-toggle/);
   assert.match(html, /data-language-toggle/);
@@ -66,7 +67,7 @@ test("keeps representative standalone HTML byte-compatible", () => {
 
   assert.equal(
     createHash("sha256").update(html).digest("hex"),
-    "0946a8a89a4f866e463aed4ef98f50bc111d5d2da1852d8f6f87fb7a99d8f2e1",
+    "a1a2f98e91aeda492ffe6259d68ce18e6f3bd9652d149fdfcab5b9f49d8132f9",
   );
 });
 
@@ -79,6 +80,7 @@ test("escapes document metadata", () => {
   assert.doesNotMatch(html, /<title><script>/);
   assert.match(html, /&lt;script&gt;/);
   assert.match(html, /lang="en&quot;&gt;&lt;script&gt;"/);
+
 });
 
 test("renders an optional Markdown update timestamp", () => {
@@ -89,6 +91,10 @@ test("renders an optional Markdown update timestamp", () => {
   assert.match(
     html,
     /<time class="document-modified" datetime="2026-07-17T03:00:00\.000Z">更新 2026-07-17 03:00:00<\/time>/,
+  );
+  assert.match(
+    html,
+    /<main class="markdown-content">\s*<div class="document-metadata"><time class="document-modified"/,
   );
   assert.match(html, /date\.getFullYear\(\)/);
   assert.doesNotMatch(html, /timeZoneName/);

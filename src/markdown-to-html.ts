@@ -32,7 +32,10 @@ export function renderMarkdown(
   annotations?: AnnotationDocument,
 ): string {
   const rawTitle = options.title ?? "Markdown文書";
-  const title = escapeHtml(rawTitle);
+  const currentFileName = options.fileTree?.breadcrumbs?.find(
+    (breadcrumb) => breadcrumb.current,
+  )?.name;
+  const title = escapeHtml(`marksites | ${currentFileName ?? rawTitle}`);
   const language = escapeHtml(options.language ?? "ja");
   const highlight = options.highlight ?? true;
   const tocOptions =
@@ -45,7 +48,6 @@ export function renderMarkdown(
     maxDepth: tocOptions.maxDepth ?? 6,
   });
   const codeBlocks = createCodeBlocksFeature(renderer, highlight);
-  const header = createHeaderFeature();
 
   const content = marked.parse(markdown, {
     ...options.markedOptions,
@@ -58,10 +60,12 @@ export function renderMarkdown(
   const fileTreeScript = renderFileTreeScript(fileTree !== "");
   const modifiedAt = renderModifiedAt(options.modifiedAt);
   const breadcrumbs = fileTree
-    ? renderBreadcrumbs(options.fileTree?.breadcrumbs, options.modifiedAt)
-    : modifiedAt
-      ? `<div class="document-metadata">${modifiedAt}</div>\n`
-      : "";
+    ? renderBreadcrumbs(options.fileTree?.breadcrumbs)
+    : `<nav class="file-breadcrumbs" aria-label="ファイルパス"><span aria-current="page">${escapeHtml(rawTitle)}</span></nav>\n`;
+  const header = createHeaderFeature({
+    documentNavigation: breadcrumbs,
+    fileTree,
+  });
   const annotationFeature = createAnnotationsFeature(annotations);
   const imageViewer = createImageViewerFeature(/<img\b/i.test(content));
   const sidebar = createSidebarFeature({
@@ -78,9 +82,10 @@ export function renderMarkdown(
     highlight,
     regions: {
       header: header.markup,
-      breadcrumbs,
-      fileTree,
       fileSidebar,
+      metadata: modifiedAt
+        ? `<div class="document-metadata">${modifiedAt}</div>\n`
+        : "",
       sidebar: sidebar.markup,
       overlays: `${annotationFeature.markup}${imageViewer.markup}`,
     },

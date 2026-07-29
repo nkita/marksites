@@ -67,7 +67,6 @@ export const fileTreeStyles = `    body.markdown-body.has-file-tree { width: 100
     .file-sidebar-close { position: fixed; z-index: 50; top: 13px; left: 12px; display: inline-flex; width: 30px; height: 30px; flex: none; align-items: center; justify-content: center; padding: 0; color: var(--fgColor-muted, #59636e); background: transparent; border: 0; border-radius: 6px; cursor: pointer; }
     .file-sidebar-close:hover { color: var(--fgColor-default, #1f2328); background: var(--button-default-bgColor-hover, #eaeef2); }
     .file-sidebar-close:focus-visible { outline: 2px solid var(--focus-outlineColor, #0969da); outline-offset: -2px; }
-    .file-navigation { position: relative; margin: -12px 0 28px; }
     .file-breadcrumbs { display: flex; align-items: center; gap: 8px; margin: 0; padding-bottom: 14px; border-bottom: 1px solid var(--borderColor-muted, #d8dee4); }
     .file-breadcrumbs ol { display: flex; min-width: 0; min-height: 28px; flex: 0 1 auto; flex-wrap: wrap; align-items: baseline; gap: 6px; margin: 0; padding: 0; list-style: none; }
     .file-breadcrumbs li { display: inline-block; min-width: 0; height: 28px; color: var(--fgColor-muted, #59636e); font-size: 0.875rem; line-height: 28px; }
@@ -83,6 +82,8 @@ export const fileTreeStyles = `    body.markdown-body.has-file-tree { width: 100
     .file-sidebar-open:hover { color: var(--fgColor-default, #1f2328); background: var(--button-default-bgColor-hover, #eaeef2); }
     .file-sidebar-open:focus-visible, .file-tree-popover-toggle:focus-visible { outline: 2px solid var(--focus-outlineColor, #0969da); outline-offset: 2px; }
     .file-tree-popover-toggle:hover { color: var(--fgColor-accent, #0969da); text-decoration: underline; background: transparent; }
+    .file-tree-popover-toggle:disabled { color: var(--fgColor-default, #1f2328); text-decoration: none; cursor: default; }
+    .file-tree-popover-toggle:disabled .panel-toggle-icon { display: none; }
     .file-tree-popover-toggle .panel-toggle-icon { width: 13px; height: 13px; flex: none; transform: translateY(1px); }
     .copy-file-path .copy-icon { transform: none; }
     .file-tree-popover-toggle[aria-expanded="true"] .panel-toggle-icon { transform: translateY(1px) rotate(180deg); }

@@ -55,11 +55,20 @@ test("renders a GitHub-style file tree with a current page", () => {
   assert.doesNotMatch(html, /data-sidebar-tab="comments"/);
   assert.match(
     html,
-    /<main class="markdown-content">[\s\S]*?<div class="file-navigation">[\s\S]*?<nav class="file-tree file-tree-popover"/,
+    /<header class="site-header">[\s\S]*?<div class="site-header-brand">[\s\S]*?<div class="site-header-document-meta">[\s\S]*?<nav class="file-breadcrumbs"[\s\S]*?<nav class="file-tree file-tree-popover"/,
+  );
+  assert.doesNotMatch(html, /class="site-header-document-lead"/);
+  assert.doesNotMatch(html, /<main class="markdown-content">[\s\S]*?class="file-breadcrumbs"/);
+  assert.match(html, /<title>marksites \| getting-started\.md<\/title>/);
+  assert.match(
+    html,
+    /<main class="markdown-content">\s*<div class="document-metadata"><time class="document-modified"/,
   );
   assert.match(html, /class="file-breadcrumbs"/);
   assert.match(html, /<a href="\.\.\/index\.html">docs<\/a>/);
   assert.match(html, /class="file-tree-popover-toggle" data-file-tree-toggle/);
+  assert.match(html, /class="site-header-logo">marksites<\/strong>/);
+  assert.match(html, /\.site-header-logo\{[^}]*color:#fff;[^}]*background:#24292f;[^}]*border-radius:6px/);
   assert.match(
     html,
     /class="file-sidebar-open" data-file-sidebar-open[^>]*hidden/,
@@ -225,10 +234,12 @@ test("renders a GitHub-style file tree with a current page", () => {
   assert.match(html, /event\.key === 'Escape' && !popover\.hidden/);
   assert.match(
     html,
-    /event\.target\.closest\('\.file-navigation,\.file-sidebar'\)/,
+    /event\.target\.closest\('\.site-header-document-meta,\.file-sidebar'\)/,
   );
   assert.match(html, /sidebarOpenButton\.hidden = open/);
   assert.match(html, /sidebarCloseButton\.hidden = !open/);
+  assert.match(html, /popoverToggle\.disabled = open/);
+  assert.match(html, /if \(open && !popover\.hidden\) setPopoverOpen\(false, false, false\)/);
   assert.match(
     html,
     /document\.body\.classList\.toggle\('file-sidebar-collapsed'/,

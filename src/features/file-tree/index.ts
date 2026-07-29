@@ -323,11 +323,14 @@ export function renderFileTreeScript(enabled: boolean): string {
   };
 
   const applySidebarState = (open) => {
+    if (open && !popover.hidden) setPopoverOpen(false, false, false);
     sidebar.hidden = !open;
     sidebarCloseButton.hidden = !open;
     sidebarOpenButton.hidden = open;
     sidebarOpenButton.setAttribute('aria-expanded', String(open));
     document.body.classList.toggle('file-sidebar-collapsed', !open);
+    popoverToggle.disabled = open;
+    popoverToggle.setAttribute('aria-disabled', String(open));
   };
 
   const setSidebarOpen = (open, sync = true) => {
@@ -491,8 +494,8 @@ export function renderFileTreeScript(enabled: boolean): string {
     }
   }
 
-  setPopoverOpen(pageUrl.searchParams.get(popoverParameter) === 'open', false, false);
   applySidebarState(sidebarPreferenceOpen && !compact.matches);
+  setPopoverOpen(pageUrl.searchParams.get(popoverParameter) === 'open' && sidebar.hidden, false, false);
   applyView(activeView, false);
   syncState();
 
@@ -503,7 +506,7 @@ export function renderFileTreeScript(enabled: boolean): string {
   sidebarOpenButton?.addEventListener('click', () => setSidebarOpen(true));
   sidebarCloseButton?.addEventListener('click', () => setSidebarOpen(false));
   document.addEventListener('pointerdown', (event) => {
-    if (popover.hidden || event.target.closest('.file-navigation,.file-sidebar')) return;
+    if (popover.hidden || event.target.closest('.site-header-document-meta,.file-sidebar')) return;
     setPopoverOpen(false);
   });
   document.addEventListener('keydown', (event) => {
@@ -608,14 +611,11 @@ export function renderFileTreeScript(enabled: boolean): string {
 
 export function renderBreadcrumbs(
   breadcrumbs?: FileBreadcrumb[],
-  modifiedAt?: string,
 ): string {
-  const timestamp = renderModifiedAt(modifiedAt);
   if (!breadcrumbs || breadcrumbs.length === 0)
     return `<nav class="file-breadcrumbs" aria-label="パンくずリスト">
   <button type="button" class="file-sidebar-open" data-file-sidebar-open aria-expanded="true" aria-controls="file-sidebar" aria-label="ファイルサイドバーを開く" title="ファイルサイドバーを開く" hidden><svg class="file-sidebar-toggle-icon" viewBox="0 0 16 16" aria-hidden="true"><rect x="1.75" y="2.25" width="12.5" height="11.5" rx="1.5" /><path d="M6 2.5v11M8 5.5L10.5 8 8 10.5" /></svg></button>
   <button type="button" class="file-tree-popover-toggle" data-file-tree-toggle aria-expanded="false" aria-controls="file-tree-popover" aria-haspopup="true" aria-label="ファイルを開く" title="ファイルを開く"><span>ファイル</span><svg class="panel-toggle-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" /></svg></button>
-${timestamp}
 </nav>
 `;
 
@@ -643,7 +643,6 @@ ${items}
   <button type="button" class="file-sidebar-open" data-file-sidebar-open aria-expanded="true" aria-controls="file-sidebar" aria-label="ファイルサイドバーを開く" title="ファイルサイドバーを開く" hidden><svg class="file-sidebar-toggle-icon" viewBox="0 0 16 16" aria-hidden="true"><rect x="1.75" y="2.25" width="12.5" height="11.5" rx="1.5" /><path d="M6 2.5v11M8 5.5L10.5 8 8 10.5" /></svg></button>
 ${trail}  <button type="button" class="file-tree-popover-toggle" data-file-tree-toggle aria-expanded="false" aria-controls="file-tree-popover" aria-haspopup="true" aria-label="ファイルを開く" title="ファイルを開く"><span>${popoverLabel}</span><svg class="panel-toggle-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" /></svg></button>
   <button type="button" class="copy-file-path" data-copy-file-path="${escapeHtml(path)}" aria-label="ファイルパスをコピー" title="ファイルパスをコピー">${renderCopyIcon()}</button>
-${timestamp}
 </nav>
 `;
 }

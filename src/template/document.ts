@@ -13,9 +13,8 @@ interface DocumentParts {
   highlight: boolean;
   regions: {
     header: string;
-    breadcrumbs: string;
-    fileTree: string;
     fileSidebar: string;
+    metadata: string;
     sidebar: string;
     overlays: string;
   };
@@ -26,7 +25,7 @@ interface DocumentParts {
 }
 
 export function renderDocument(parts: DocumentParts): string {
-  const bodyClass = parts.regions.fileTree
+  const bodyClass = parts.regions.fileSidebar
     ? "markdown-body has-file-tree"
     : "markdown-body";
 
@@ -42,16 +41,15 @@ export function renderDocument(parts: DocumentParts): string {
   <style>${githubMarkdownCss}</style>
   ${parts.highlight ? `<style>${highlightCss}\n${highlightThemeStyles}</style>` : ""}
   <style>
-${documentStyles}${parts.regions.fileTree ? `\n${fileTreeStyles}` : ""}${parts.assets.styles.join("")}
+${documentStyles}${parts.regions.fileSidebar ? `\n${fileTreeStyles}` : ""}${parts.assets.styles.join("")}
   </style>
 </head>
 <body class="${bodyClass}">
 ${parts.regions.header}
 ${parts.regions.fileSidebar}
 <main class="markdown-content">
-${parts.regions.fileTree ? `<div class="file-navigation">
-${parts.regions.breadcrumbs}${parts.regions.fileTree}</div>
-` : parts.regions.breadcrumbs}${parts.content}
+${parts.regions.metadata}
+${parts.content}
 </main>
 ${parts.regions.sidebar}
 ${parts.regions.overlays}
