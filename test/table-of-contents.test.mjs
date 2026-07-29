@@ -22,6 +22,7 @@ test("generates a table of contents with GitHub-style heading IDs", () => {
   assert.match(html, /position:sticky/);
   assert.match(html, /top:32px/);
   assert.match(html, /max-height:calc\(100vh - 64px\)/);
+  assert.match(html, /height:calc\(100vh - 64px\);max-height:calc\(100vh - 64px\)/);
   assert.doesNotMatch(html, /\.toc-panel \{ min-height: 100%; \}/);
   assert.match(html, /class="markdown-content"/);
   assert.doesNotMatch(html, /background: #edf2f7/);
@@ -45,7 +46,7 @@ test("generates a table of contents with GitHub-style heading IDs", () => {
     html,
     /\.sidebar-panels\{display:flex;min-height:0;flex:1 1 auto;align-items:stretch;overflow:hidden\}/,
   );
-  assert.match(html, /\.sidebar-panel\{[^}]*height:100%;min-height:0;overflow:auto/);
+  assert.match(html, /\.sidebar-panel\{[^}]*height:100%;min-height:0;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain/);
   assert.match(html, /let currentLink = null/);
   assert.match(html, /active\.link !== currentLink/);
   assert.match(html, /navigation\.scrollTop \+= activeRect\.top - navigationRect\.top/);
