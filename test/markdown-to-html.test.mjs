@@ -67,7 +67,7 @@ test("keeps representative standalone HTML byte-compatible", () => {
 
   assert.equal(
     createHash("sha256").update(html).digest("hex"),
-    "a1a2f98e91aeda492ffe6259d68ce18e6f3bd9652d149fdfcab5b9f49d8132f9",
+    "cb00382cce05fb021f83898e203d5c0c1516908b54d4b817b77e000eb9b43b4a",
   );
 });
 
@@ -90,16 +90,48 @@ test("renders an optional Markdown update timestamp", () => {
 
   assert.match(
     html,
-    /<time class="document-modified" datetime="2026-07-17T03:00:00\.000Z">更新 2026-07-17 03:00:00<\/time>/,
+    /<time class="document-modified" datetime="2026-07-17T03:00:00\.000Z">更新 2026-07-17 03:00<\/time>/,
   );
   assert.match(
     html,
-    /<main class="markdown-content">\s*<div class="document-metadata"><time class="document-modified"/,
+    /class="file-breadcrumbs"[\s\S]*?<span class="site-header-metadata-separator" aria-hidden="true"><\/span>\s*<div class="document-metadata"><time class="document-modified"/,
   );
   assert.match(html, /date\.getFullYear\(\)/);
+  assert.doesNotMatch(html, /pad\(date\.getSeconds\(\)\)/);
   assert.doesNotMatch(html, /timeZoneName/);
   assert.throws(
     () => markdownToHtml("text", { modifiedAt: "not-a-date" }),
     /Invalid modifiedAt timestamp/,
+  );
+});
+
+test("places the update timestamp beside the file path", () => {
+  const html = markdownToHtml("intro\n\n## Details\n\nbody", {
+    modifiedAt: "2026-07-17T03:00:00.000Z",
+  });
+
+  assert.match(
+    html,
+    /class="file-breadcrumbs"[\s\S]*?<span class="site-header-metadata-separator" aria-hidden="true"><\/span>\s*<div class="document-metadata"><time class="document-modified"/,
+  );
+  assert.match(
+    html,
+    /\.site-header-metadata-separator\{width:1px;height:16px;[^}]*background:var\(--borderColor-default/,
+  );
+  assert.match(
+    html,
+    /\.site-header-document-meta \.document-metadata\{display:flex;height:28px;flex:none;align-items:center;margin:0\}/,
+  );
+  assert.match(
+    html,
+    /\.site-header-document-meta \.file-tree-popover-toggle\{top:0\}/,
+  );
+  assert.match(
+    html,
+    /\.site-header-metadata-separator,\.site-header-document-meta \.document-metadata\{display:none\}/,
+  );
+  assert.doesNotMatch(
+    html,
+    /<main class="markdown-content">[\s\S]*?class="document-metadata"/,
   );
 });

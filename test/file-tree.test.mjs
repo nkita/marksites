@@ -62,7 +62,11 @@ test("renders a GitHub-style file tree with a current page", () => {
   assert.match(html, /<title>marksites \| getting-started\.md<\/title>/);
   assert.match(
     html,
-    /<main class="markdown-content">\s*<div class="document-metadata"><time class="document-modified"/,
+    /<nav class="file-breadcrumbs"[\s\S]*?<span class="site-header-metadata-separator" aria-hidden="true"><\/span>\s*<div class="document-metadata"><time class="document-modified"[\s\S]*?<nav class="file-tree file-tree-popover"/,
+  );
+  assert.doesNotMatch(
+    html,
+    /<main class="markdown-content">[\s\S]*?class="document-metadata"/,
   );
   assert.match(html, /class="file-breadcrumbs"/);
   assert.match(html, /<a href="\.\.\/index\.html">docs<\/a>/);
@@ -180,7 +184,7 @@ test("renders a GitHub-style file tree with a current page", () => {
   );
   assert.match(
     html,
-    /<time class="document-modified" datetime="2026-07-17T03:00:00\.000Z">更新 2026-07-17 03:00:00<\/time>/,
+    /<time class="document-modified" datetime="2026-07-17T03:00:00\.000Z">更新 2026-07-17 03:00<\/time>/,
   );
   assert.match(html, /event\.preventDefault\(\)/);
   assert.match(

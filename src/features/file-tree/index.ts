@@ -652,7 +652,7 @@ export function renderModifiedAt(modifiedAt?: string): string {
   const date = new Date(modifiedAt);
   if (Number.isNaN(date.getTime()))
     throw new Error(`Invalid modifiedAt timestamp: ${modifiedAt}`);
-  const label = date.toISOString().slice(0, 19).replace("T", " ");
+  const label = date.toISOString().slice(0, 16).replace("T", " ");
   return `<time class="document-modified" datetime="${date.toISOString()}">更新 ${label}</time>`;
 }
 
@@ -662,6 +662,6 @@ export function renderModifiedAtScript(enabled: boolean): string {
 const element=document.querySelector('.document-modified');if(!element)return;
 const date=new Date(element.dateTime);if(Number.isNaN(date.getTime()))return;
 const pad=value=>String(value).padStart(2,'0');
-element.textContent='更新 '+date.getFullYear()+'-'+pad(date.getMonth()+1)+'-'+pad(date.getDate())+' '+pad(date.getHours())+':'+pad(date.getMinutes())+':'+pad(date.getSeconds());
+element.textContent='更新 '+date.getFullYear()+'-'+pad(date.getMonth()+1)+'-'+pad(date.getDate())+' '+pad(date.getHours())+':'+pad(date.getMinutes());
 })()</script>`;
 }

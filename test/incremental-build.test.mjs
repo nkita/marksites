@@ -54,7 +54,7 @@ test("rebuilds HTML when only the Markdown update time changes", async () => {
   assert.equal(manifest.files["index.md"].modifiedAt, modifiedAt.toISOString());
   assert.match(
     await readFile(join(output, "index.html"), "utf8"),
-    /更新 2026-07-17 03:00:00/,
+    /更新 2026-07-17 03:00/,
   );
 });
 

@@ -64,6 +64,7 @@ export function renderMarkdown(
     : `<nav class="file-breadcrumbs" aria-label="ファイルパス"><span aria-current="page">${escapeHtml(rawTitle)}</span></nav>\n`;
   const header = createHeaderFeature({
     documentNavigation: breadcrumbs,
+    documentMetadata: modifiedAt,
     fileTree,
   });
   const annotationFeature = createAnnotationsFeature(annotations);
@@ -83,9 +84,6 @@ export function renderMarkdown(
     regions: {
       header: header.markup,
       fileSidebar,
-      metadata: modifiedAt
-        ? `<div class="document-metadata">${modifiedAt}</div>\n`
-        : "",
       sidebar: sidebar.markup,
       overlays: `${annotationFeature.markup}${imageViewer.markup}`,
     },

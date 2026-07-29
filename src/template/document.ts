@@ -14,7 +14,6 @@ interface DocumentParts {
   regions: {
     header: string;
     fileSidebar: string;
-    metadata: string;
     sidebar: string;
     overlays: string;
   };
@@ -48,7 +47,6 @@ ${documentStyles}${parts.regions.fileSidebar ? `\n${fileTreeStyles}` : ""}${part
 ${parts.regions.header}
 ${parts.regions.fileSidebar}
 <main class="markdown-content">
-${parts.regions.metadata}
 ${parts.content}
 </main>
 ${parts.regions.sidebar}

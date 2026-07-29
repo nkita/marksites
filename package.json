@@ -10,7 +10,7 @@
     }
   },
   "bin": {
-    "marksites": "./dist/cli.js"
+    "marksites": "dist/cli.js"
   },
   "files": [
     "dist"

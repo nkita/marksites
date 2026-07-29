@@ -26,8 +26,6 @@ export const documentStyles = `    body.markdown-body { box-sizing: border-box; 
     .markdown-content, .document-sidebar { box-sizing: border-box; }
     .markdown-content { grid-area: content; min-width: 0; margin-bottom: 72px; padding: clamp(28px, 3vw, 52px); border: 1px solid var(--borderColor-muted, #d8dee4); border-radius: 8px; box-shadow: 0 1px 2px rgba(31, 35, 40, 0.04); }
     .markdown-content :is(h1, h2, h3, h4, h5, h6) { scroll-margin-top: 32px; }
-    .document-metadata { display: flex; justify-content: flex-end; margin: -12px 0 28px; padding-bottom: 14px; border-bottom: 1px solid var(--borderColor-muted, #d8dee4); }
-    .document-modified { margin-left: auto; color: var(--fgColor-muted, #59636e); font-size: 0.75rem; line-height: 28px; white-space: nowrap; }
     .code-block { margin-bottom: 16px; overflow: hidden; border: 1px solid var(--borderColor-muted, #d8dee4); border-radius: 8px; }
     .code-toolbar { display: flex; min-height: 38px; align-items: center; justify-content: space-between; padding: 0 8px 0 14px; color: var(--fgColor-muted, #59636e); background: var(--bgColor-muted, #f6f8fa); border-bottom: 1px solid var(--borderColor-muted, #d8dee4); }
     .code-language { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
