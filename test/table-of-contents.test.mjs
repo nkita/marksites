@@ -39,13 +39,16 @@ test("generates a table of contents with GitHub-style heading IDs", () => {
   );
   assert.match(
     html,
-    /\.document-sidebar-body\{display:flex;min-height:0;flex:0 1 auto;flex-direction:column;overflow:hidden\}/,
+    /\.document-sidebar-body\{display:flex;min-height:0;flex:1 1 auto;flex-direction:column;overflow:hidden\}/,
   );
   assert.match(
     html,
-    /\.sidebar-panels\{display:flex;min-height:0;flex:0 1 auto;align-items:flex-start;overflow:hidden\}/,
+    /\.sidebar-panels\{display:flex;min-height:0;flex:1 1 auto;align-items:stretch;overflow:hidden\}/,
   );
-  assert.match(html, /\.sidebar-panel\{[^}]*max-height:100%;min-height:0;overflow:auto/);
+  assert.match(html, /\.sidebar-panel\{[^}]*height:100%;min-height:0;overflow:auto/);
+  assert.match(html, /let currentLink = null/);
+  assert.match(html, /active\.link !== currentLink/);
+  assert.match(html, /navigation\.scrollTop \+= activeRect\.top - navigationRect\.top/);
   assert.match(html, /matchMedia\('\(max-width: 900px\)'\)/);
   assert.match(html, /body\.hidden=!expanded/);
 });

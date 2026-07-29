@@ -58,6 +58,7 @@ function renderTableOfContentsScript(): string {
   if (entries.length === 0) return;
 
   let scheduled = false;
+  let currentLink = null;
   const update = () => {
     scheduled = false;
     const marker = Math.min(160, window.innerHeight * 0.25);
@@ -72,11 +73,15 @@ function renderTableOfContentsScript(): string {
       if (entry === active) entry.link.setAttribute('aria-current', 'location');
       else entry.link.removeAttribute('aria-current');
     }
-    const navigationRect = navigation.getBoundingClientRect();
-    const activeRect = active.link.getBoundingClientRect();
-    if (!navigation.hidden && (activeRect.top < navigationRect.top || activeRect.bottom > navigationRect.bottom)) {
-      navigation.scrollTop += activeRect.top - navigationRect.top - navigation.clientHeight / 2;
+    if (!navigation.hidden && active.link !== currentLink) {
+      const navigationRect = navigation.getBoundingClientRect();
+      const activeRect = active.link.getBoundingClientRect();
+      const outside = activeRect.top < navigationRect.top + 12 || activeRect.bottom > navigationRect.bottom - 12;
+      if (outside) {
+        navigation.scrollTop += activeRect.top - navigationRect.top - navigation.clientHeight / 2 + activeRect.height / 2;
+      }
     }
+    currentLink = active.link;
   };
   const schedule = () => {
     if (scheduled) return;

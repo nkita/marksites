@@ -37,7 +37,7 @@
 
 - `createTableOfContentsFeature(renderer, config)`: markedのheading rendererを設定し、GithubSluggerで決定的な見出しIDを生成する。
 - `renderTableOfContents()`: 指定深度内の見出しを階層インデント付きリンクへ変換する。
-- `renderTableOfContentsScript()`: レスポンシブ開閉とスクロール位置に応じた現在見出しの強調を実装する。
+- `renderTableOfContentsScript()`: レスポンシブ開閉とスクロール位置に応じた現在見出しの強調を実装し、現在リンクが目次の表示範囲外へ移動した場合は目次パネルを自動スクロールする。
 
 同一見出しにはGitHub互換の接尾辞を付ける。見出しリンクと現在位置の追従を担当し、サイドバー全体のタブ・レスポンシブ開閉は`sidebar.ts`へ委ねる。
 
