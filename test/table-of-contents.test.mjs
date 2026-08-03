@@ -52,6 +52,11 @@ test("generates a table of contents with GitHub-style heading IDs", () => {
   assert.match(html, /navigation\.scrollTop \+= activeRect\.top - navigationRect\.top/);
   assert.match(html, /matchMedia\('\(max-width: 900px\)'\)/);
   assert.match(html, /body\.hidden=!expanded/);
+  assert.match(html, /const tabParameter='sidebar-tab'/);
+  assert.match(html, /pageUrl\.searchParams\.get\(tabParameter\)/);
+  assert.match(html, /url\.searchParams\.set\(tabParameter,active\)/);
+  assert.match(html, /history\.replaceState\(null,'',updateUrl\(new URL\(location\.href\)\)\)/);
+  assert.match(html, /url\.protocol!==location\.protocol\|\|url\.host!==location\.host\|\|!url\.pathname\.endsWith\('\.html'\)/);
 });
 
 test("supports table of contents options", () => {
