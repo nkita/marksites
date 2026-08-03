@@ -32,6 +32,7 @@ import {
   toLegacyMetadataPaths,
 } from "./paths.js";
 import {
+  GENERATOR_VERSION,
   OUTPUT_COMPATIBILITY_VERSION,
   contentHash,
   renderFingerprint,
@@ -322,6 +323,7 @@ export async function convertDirectoryDetailed(
   const full =
     !previous ||
     loaded.warning !== undefined ||
+    previous.generator.version !== GENERATOR_VERSION ||
     previous.generator.outputCompatibilityVersion !==
       OUTPUT_COMPATIBILITY_VERSION ||
     previous.generator.renderFingerprint !== fingerprint ||
@@ -340,7 +342,7 @@ export async function convertDirectoryDetailed(
     schemaVersion: 1,
     generator: {
       name: "marksites",
-      version: "0.2.0",
+      version: GENERATOR_VERSION,
       outputCompatibilityVersion: OUTPUT_COMPATIBILITY_VERSION,
       renderFingerprint: fingerprint,
     },

@@ -1,8 +1,18 @@
 import { createHash } from "node:crypto";
+import { readFileSync } from "node:fs";
 import type { Token } from "marked";
 import { emptyAnnotationDocument } from "../annotations/model.js";
 import { renderMarkdown } from "../markdown-to-html.js";
 
+interface PackageMetadata {
+  version: string;
+}
+
+const packageMetadata = JSON.parse(
+  readFileSync(new URL("../../package.json", import.meta.url), "utf8"),
+) as PackageMetadata;
+
+export const GENERATOR_VERSION = packageMetadata.version;
 export const OUTPUT_COMPATIBILITY_VERSION = 7;
 
 export function contentHash(value: string | Buffer): string {

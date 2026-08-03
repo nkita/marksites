@@ -12,6 +12,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
 import { convertDirectoryDetailed } from "../dist/cli/directory.js";
+import packageMetadata from "../package.json" with { type: "json" };
 
 test("creates sidecars and skips unchanged HTML", async () => {
   const root = await mkdtemp(join(tmpdir(), "marksites-incremental-"));
@@ -179,7 +180,46 @@ test("records a fingerprint derived from the rendered document", async () => {
   const manifest = JSON.parse(
     await readFile(join(output, ".marksites-build.json"), "utf8"),
   );
+  assert.equal(manifest.generator.version, packageMetadata.version);
   assert.match(manifest.generator.renderFingerprint, /^sha256:[a-f0-9]{64}$/);
+});
+
+test("rebuilds every file when the generator output changes", async () => {
+  const root = await mkdtemp(join(tmpdir(), "marksites-generator-change-"));
+  const input = join(root, "docs"),
+    output = join(root, "site");
+  await mkdir(input);
+  await writeFile(join(input, "a.md"), "# A\n");
+  await writeFile(join(input, "b.md"), "# B\n");
+  await convertDirectoryDetailed(input, output);
+
+  const manifestPath = join(output, ".marksites-build.json");
+  const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+  manifest.generator.renderFingerprint = "sha256:stale-render-output";
+  await writeFile(manifestPath, JSON.stringify(manifest));
+
+  const result = await convertDirectoryDetailed(input, output);
+  assert.equal(result.converted, 2);
+  assert.equal(result.skipped, 0);
+});
+
+test("rebuilds every file when the generator version changes", async () => {
+  const root = await mkdtemp(join(tmpdir(), "marksites-generator-version-"));
+  const input = join(root, "docs"),
+    output = join(root, "site");
+  await mkdir(input);
+  await writeFile(join(input, "a.md"), "# A\n");
+  await writeFile(join(input, "b.md"), "# B\n");
+  await convertDirectoryDetailed(input, output);
+
+  const manifestPath = join(output, ".marksites-build.json");
+  const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+  manifest.generator.version = "0.0.0-stale";
+  await writeFile(manifestPath, JSON.stringify(manifest));
+
+  const result = await convertDirectoryDetailed(input, output);
+  assert.equal(result.converted, 2);
+  assert.equal(result.skipped, 0);
 });
 
 test("honors nested gitignore files and skips generated directories", async () => {
