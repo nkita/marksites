@@ -172,7 +172,7 @@ function renderRecentFiles(nodes: FileTreeNode[]): string {
     const directoryLabel = directory ? `/${directory}` : "/";
     if (grouped)
       output.push(
-        `    <li class="file-tree-directory-group" data-recent-group="${groupId}" title="${escapeHtml(directoryLabel)}">${renderFolderIcon()}<span>${escapeHtml(directoryLabel)}</span></li>`,
+        `    <li class="file-tree-directory-group" data-recent-group="${groupId}" aria-hidden="true">${renderFolderIcon()}<span>${escapeHtml(directoryLabel)}</span></li>`,
       );
     for (; index < end; index++) {
       const file = files[index]!;
@@ -182,8 +182,9 @@ function renderRecentFiles(nodes: FileTreeNode[]): string {
           ? `<span class="file-tree-comment-count" aria-label="コメント${file.commentCount}件">${file.commentCount}</span>`
           : "";
       const time = file.modifiedAt.slice(11, 16);
+      const tooltipDate = `${file.modifiedAt.slice(0, 10)} ${time}`;
       output.push(
-        `    <li class="file-tree-recent-file${grouped ? " is-grouped" : ""}" data-file-path="${escapeHtml(file.path)}" data-directory="${escapeHtml(directory)}" data-modified-at="${file.modifiedAt}"${grouped ? ` data-recent-group="${groupId}"` : ""}><a href="${escapeHtml(file.href)}" title="${escapeHtml(file.path)}"${current}><time datetime="${file.modifiedAt}">${time}</time><span class="file-tree-recent-label"><span class="file-tree-name">${escapeHtml(file.name)}</span><span class="file-tree-directory-path">${renderFolderIcon()}<span>${escapeHtml(directoryLabel)}</span></span></span>${count}</a></li>`,
+        `    <li class="file-tree-recent-file${grouped ? " is-grouped" : ""}" data-file-path="${escapeHtml(file.path)}" data-directory="${escapeHtml(directory)}" data-modified-at="${file.modifiedAt}"${grouped ? ` data-recent-group="${groupId}"` : ""}><a href="${escapeHtml(file.href)}"${current}><span class="file-tree-recent-label"><span class="file-tree-name"><span class="file-tree-name-text">${escapeHtml(file.name)}</span></span></span>${count}<span class="file-tree-directory-tooltip" aria-hidden="true"><span class="file-tree-directory-tooltip-path">${renderFolderIcon()}<span>${escapeHtml(directoryLabel)}</span></span><time datetime="${file.modifiedAt}">${tooltipDate}</time></span></a></li>`,
       );
     }
   }
@@ -262,6 +263,20 @@ export function renderFileTreeScript(enabled: boolean): string {
   let activeView = pageUrl.searchParams.get(viewParameter) === 'recent' ? 'recent' : 'tree';
   const ignoredToggles = new WeakSet();
   const initialOpenState = new Map();
+
+  const positionDirectoryTooltip = (link) => {
+    const name = link.querySelector('.file-tree-name-text');
+    const tooltip = link.querySelector('.file-tree-directory-tooltip');
+    if (!name || !tooltip) return;
+    const nameRect = name.getBoundingClientRect();
+    tooltip.style.left = Math.min(nameRect.right + 8, innerWidth - tooltip.offsetWidth - 8) + 'px';
+    tooltip.style.top = Math.max(8 + tooltip.offsetHeight / 2, Math.min(nameRect.top + nameRect.height / 2, innerHeight - 8 - tooltip.offsetHeight / 2)) + 'px';
+  };
+
+  for (const link of document.querySelectorAll('.file-tree-recent-file > a')) {
+    link.addEventListener('pointerenter', () => positionDirectoryTooltip(link));
+    link.addEventListener('focus', () => positionDirectoryTooltip(link));
+  }
 
   for (const directory of directories) {
     const details = directory.querySelector(':scope > details');
@@ -400,8 +415,8 @@ export function renderFileTreeScript(enabled: boolean): string {
         group.className = 'file-tree-directory-group';
         group.dataset.recentGroup = groupId;
         group.dataset.localDate = dateKey;
+        group.setAttribute('aria-hidden', 'true');
         const directoryLabel = first.dataset.directory ? '/'+first.dataset.directory : '/';
-        group.title = directoryLabel;
         group.innerHTML = ${JSON.stringify(renderFolderIcon())};
         const name = document.createElement('span');
         name.textContent = directoryLabel;
@@ -412,8 +427,8 @@ export function renderFileTreeScript(enabled: boolean): string {
         const file = files[index];
       const date = new Date(file.dataset.modifiedAt);
       file.dataset.localDate = dateKey;
-      const time = file.querySelector('time');
-      time.textContent = pad(date.getHours())+':'+pad(date.getMinutes());
+      const tooltipTime = file.querySelector('.file-tree-directory-tooltip time');
+      tooltipTime.textContent = date.getFullYear()+'-'+pad(date.getMonth()+1)+'-'+pad(date.getDate())+' '+pad(date.getHours())+':'+pad(date.getMinutes());
         if (grouped) {
           file.classList.add('is-grouped');
           file.dataset.recentGroup = groupId;

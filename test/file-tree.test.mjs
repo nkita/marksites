@@ -115,19 +115,37 @@ test("renders a GitHub-style file tree with a current page", () => {
   );
   assert.match(
     html,
-    /title="guide\/getting-started\.md"[^>]*><time datetime="2026-07-17T03:00:00\.000Z">03:00<\/time>[\s\S]*?<span class="file-tree-name">getting-started\.md<\/span><span class="file-tree-directory-path"><svg class="folder-icon"[\s\S]*?<span>\/guide\/<\/span><\/span>/,
+    /<span class="file-tree-name"><span class="file-tree-name-text">getting-started\.md<\/span><\/span>[\s\S]*?<span class="file-tree-directory-tooltip" aria-hidden="true"><span class="file-tree-directory-tooltip-path"><svg class="folder-icon"[\s\S]*?<span>\/guide\/<\/span><\/span><time datetime="2026-07-17T03:00:00\.000Z">2026-07-17 03:00<\/time>/,
   );
+  assert.doesNotMatch(html, /class="file-tree-directory-path"/);
   assert.match(html, /\.file-tree-recent-label \{ display: flex;/);
-  assert.match(html, /\.file-tree-recent-label \.file-tree-name \{[^}]*font-weight: 600;/);
+  assert.match(html, /\.file-tree-recent-label \.file-tree-name \{[^}]*font-weight: 400;/);
   assert.match(html, /\.file-tree-recent-file a:hover \.file-tree-name \{ text-decoration: underline;/);
   assert.match(html, /data-recent-date-toggle aria-expanded="true"/);
   assert.match(html, /aria-label="ファイル1件">1<\/span><\/button>/);
-  assert.match(html, /\.file-tree-recent-file > a > time \{ width: 34px;/);
+  assert.doesNotMatch(html, /\.file-tree-recent-file > a > time/);
   assert.match(html, /const openRecentDates = new Set\(\)/);
   assert.match(html, /if \(latestRecentDate\) openRecentDates\.add\(latestRecentDate\)/);
   assert.match(html, /a\[aria-current="page"\]/);
   assert.match(html, /applyRecentDateState\(query !== ''\)/);
-  assert.match(html, /\.file-tree-directory-path > span \{[^}]*text-overflow: ellipsis;/);
+  assert.match(
+    html,
+    /a:hover \.file-tree-directory-tooltip[^}]*\{ display: flex;/,
+  );
+  assert.match(html, /\.file-tree-directory-tooltip::before \{[^}]*rotate\(45deg\)/);
+  assert.match(html, /\.file-tree-directory-tooltip \{ position: fixed; z-index: 100;/);
+  assert.match(html, /background: var\(--bgColor-default, #fff\); border: 1px solid/);
+  assert.match(html, /tooltipTime\.textContent = date\.getFullYear\(\)/);
+  assert.match(html, /\.file-tree-recent::before \{[^}]*top: 0; bottom: 0; left: 12px; width: 1px;/);
+  assert.match(html, /\.file-tree-date \{[^}]*z-index: 1;[^}]*background: var\(--bgColor-default/);
+  assert.match(html, /\.file-tree-date::before \{[^}]*top: -10px; bottom: -3px; left: 12px; width: 1px;/);
+  assert.doesNotMatch(html, /\.file-tree-date \{[^}]*box-shadow/);
+  assert.match(html, /\.file-tree-recent-file \{ position: relative; margin-left: 22px; \}/);
+  assert.match(html, /\.file-tree-recent-file a \{[^}]*margin-top: 0; margin-bottom: 0;/);
+  assert.match(html, /querySelector\('\.file-tree-name-text'\)/);
+  assert.match(html, /name\.getBoundingClientRect\(\)/);
+  assert.match(html, /nameRect\.right \+ 8/);
+  assert.match(html, /innerWidth - tooltip\.offsetWidth - 8/);
   assert.match(html, /id="file-tree-popover"[^>]*hidden/);
   assert.doesNotMatch(html, /class="file-tree-toggle"/);
   assert.doesNotMatch(html, /file-tree-collapse-all/);
@@ -286,7 +304,7 @@ test("sorts recent files by update time and escapes their paths", () => {
   );
   assert.match(
     html,
-    /title="src\/&lt;newer&gt;\.md"[^>]*>[\s\S]*?<span class="file-tree-name">newer\.md<\/span><span class="file-tree-directory-path"><svg class="folder-icon"[\s\S]*?<span>\/src\/<\/span><\/span>/,
+    /<span class="file-tree-name"><span class="file-tree-name-text">newer\.md<\/span><\/span>[\s\S]*?<span class="file-tree-directory-tooltip" aria-hidden="true"><span class="file-tree-directory-tooltip-path"><svg class="folder-icon"[\s\S]*?<span>\/src\/<\/span>/,
   );
   assert.match(html, /2026年7月27日/);
   assert.match(html, /2026年7月26日/);
@@ -361,7 +379,7 @@ test("groups only consecutive recent files from the same directory", () => {
 
   assert.match(
     html,
-    /class="file-tree-directory-group" data-recent-group="recent-0" title="\/src\/"[\s\S]*?<span>\/src\/<\/span>/,
+    /class="file-tree-directory-group" data-recent-group="recent-0" aria-hidden="true"[\s\S]*?<span>\/src\/<\/span>/,
   );
   assert.equal((html.match(/class="file-tree-directory-group"/g) ?? []).length, 4);
   assert.match(
@@ -370,12 +388,13 @@ test("groups only consecutive recent files from the same directory", () => {
   );
   assert.match(
     html,
-    /class="file-tree-recent-file" data-file-path="src\/three\.md"[^>]*>[\s\S]*?<span class="file-tree-directory-path"><svg class="folder-icon"[\s\S]*?<span>\/src\/<\/span><\/span>/,
+    /class="file-tree-recent-file" data-file-path="src\/three\.md"[^>]*>[\s\S]*?class="file-tree-directory-tooltip" aria-hidden="true"[\s\S]*?<span>\/src\/<\/span>/,
   );
   assert.match(
     html,
-    /class="file-tree-directory-group" data-recent-group="recent-1" title="\/"[\s\S]*?<span>\/<\/span>/,
+    /class="file-tree-directory-group" data-recent-group="recent-1" aria-hidden="true"[\s\S]*?<span>\/<\/span>/,
   );
+  assert.match(html, /\.file-tree-directory-group \{ display: none; \}/);
   assert.match(html, /candidate\.dataset\.directory !== first\.dataset\.directory/);
   assert.match(html, /file\.classList\.add\('is-grouped'\)/);
 });

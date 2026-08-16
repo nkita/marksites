@@ -1,6 +1,6 @@
 {
   "name": "marksites",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "Convert Markdown into standalone GitHub-styled HTML.",
   "type": "module",
   "exports": {

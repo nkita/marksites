@@ -117,7 +117,10 @@ export const fileTreeStyles = `    body.markdown-body.has-file-tree { width: 100
     .file-tree a:hover { color: var(--fgColor-default, #1f2328); background: var(--bgColor-muted, #f6f8fa); text-decoration: none; }
     .file-tree a:focus-visible { outline: 2px solid var(--focus-outlineColor, #0969da); outline-offset: -2px; }
     .file-tree a[aria-current="page"] { color: var(--fgColor-accent, #0969da); font-weight: 600; background: var(--bgColor-accent-muted, #ddf4ff); }
-    .file-tree-date { margin: 10px 0 3px; }
+    .file-tree-recent { position: relative; }
+    .file-tree-recent::before { position: absolute; top: 0; bottom: 0; left: 12px; width: 1px; content: ""; background: var(--borderColor-muted, #d8dee4); }
+    .file-tree-date { position: relative; z-index: 1; margin: 10px 0 3px; background: var(--bgColor-default, #fff); }
+    .file-tree-date::before { position: absolute; top: -10px; bottom: -3px; left: 12px; width: 1px; content: ""; background: var(--bgColor-default, #fff); }
     .file-tree-date:first-child { margin-top: 4px; }
     .file-tree-date button { display: flex; width: 100%; min-height: 28px; align-items: center; gap: 4px; padding: 4px 7px; color: var(--fgColor-default, #1f2328); font: inherit; font-size: 0.75rem; font-weight: 600; text-align: left; background: transparent; border: 0; border-radius: 5px; cursor: pointer; }
     .file-tree-date button:hover { background: var(--bgColor-muted, #f6f8fa); }
@@ -126,19 +129,22 @@ export const fileTreeStyles = `    body.markdown-body.has-file-tree { width: 100
     .file-tree-date button[aria-expanded="false"] svg { transform: rotate(-90deg); }
     .file-tree-date button span { min-width: 18px; margin-left: auto; padding: 1px 5px; color: var(--fgColor-muted, #59636e); font-size: 0.6875rem; font-weight: 600; line-height: 16px; text-align: center; background: var(--bgColor-neutral-muted, #818b981f); border-radius: 9px; }
     .file-tree-recent .is-date-collapsed { display: none; }
-    .file-tree-directory-group { display: flex; min-width: 0; align-items: center; gap: 5px; margin: 7px 4px 2px; padding: 4px 6px; overflow: hidden; color: var(--fgColor-muted, #59636e); font-size: 0.6875rem; font-weight: 600; line-height: 1.25; background: var(--bgColor-muted, #f6f8fa); border-radius: 4px; }
+    .file-tree-directory-group { display: none; }
     .file-tree-directory-group .folder-icon { width: 13px; height: 13px; flex: none; }
     .file-tree-directory-group span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .file-tree-recent-file a { align-items: flex-start; gap: 7px; }
-    .file-tree-recent-label { display: flex; min-width: 0; flex: 1; flex-direction: column; gap: 1px; }
-    .file-tree-recent-label .file-tree-name { width: 100%; color: var(--fgColor-default, #1f2328); font-size: 0.8125rem; font-weight: 600; }
+    .file-tree-recent-file { position: relative; margin-left: 22px; }
+    .file-tree-recent-file a { position: relative; margin-top: 0; margin-bottom: 0; overflow: visible; align-items: flex-start; gap: 7px; }
+    .file-tree-recent-label { display: flex; min-width: 0; flex: 1; }
+    .file-tree-recent-label .file-tree-name { width: 100%; color: var(--fgColor-default, #1f2328); font-size: 0.8125rem; font-weight: 400; }
     .file-tree-recent-file a:hover .file-tree-name { text-decoration: underline; text-underline-offset: 2px; }
-    .file-tree-directory-path { display: flex; width: 100%; min-width: 0; align-items: center; gap: 4px; overflow: hidden; color: var(--fgColor-muted, #59636e); font-size: 0.6875rem; font-weight: 400; line-height: 1.25; white-space: nowrap; }
-    .file-tree-directory-path .folder-icon { width: 11px; height: 11px; flex: none; margin: 0; }
-    .file-tree-directory-path > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-    .file-tree-recent-file.is-grouped .file-tree-directory-path { display: none; }
+    .file-tree-directory-tooltip { position: fixed; z-index: 100; top: 0; left: 0; display: none; max-width: min(240px, calc(100vw - 16px)); flex-direction: column; align-items: flex-start; gap: 3px; padding: 6px 8px; color: var(--fgColor-default, #1f2328); font-size: 0.6875rem; font-weight: 400; line-height: 1.35; white-space: nowrap; background: var(--bgColor-default, #fff); border: 1px solid var(--borderColor-default, #d0d7de); border-radius: 5px; box-shadow: 0 2px 8px rgba(31,35,40,.16); transform: translateY(-50%); pointer-events: none; }
+    .file-tree-directory-tooltip::before { position: absolute; top: 50%; right: calc(100% - 4px); width: 7px; height: 7px; content: ""; background: var(--bgColor-default, #fff); border: 0 solid var(--borderColor-default, #d0d7de); border-width: 0 0 1px 1px; transform: translateY(-50%) rotate(45deg); }
+    .file-tree-directory-tooltip-path { display: flex; max-width: 220px; align-items: center; gap: 5px; overflow: hidden; }
+    .file-tree-directory-tooltip-path .folder-icon { width: 12px; height: 12px; flex: none; margin: 0; }
+    .file-tree-directory-tooltip-path > span { overflow: hidden; text-overflow: ellipsis; }
+    .file-tree-directory-tooltip > time { color: var(--fgColor-muted, #59636e); font-variant-numeric: tabular-nums; }
+    .file-tree-recent-file a:hover .file-tree-directory-tooltip, .file-tree-recent-file a:focus-visible .file-tree-directory-tooltip { display: flex; }
     .file-tree-recent-file .file-tree-comment-count { margin-top: 1px; }
-    .file-tree-recent-file > a > time { width: 34px; flex: none; padding-top: 1px; color: var(--fgColor-muted, #59636e); font-size: 0.6875rem; font-variant-numeric: tabular-nums; line-height: 1.35; }
     .file-tree-recent-empty { margin: 10px 4px 2px; color: var(--fgColor-muted, #59636e); font-size: 0.8125rem; text-align: center; }
     @media (max-width: 900px) {
       body.markdown-body.has-file-tree, body.markdown-body.has-file-tree.file-sidebar-collapsed { width: calc(100% - 24px); margin: 0 12px; padding: 12px 0 0; grid-template-columns: minmax(0, 1fr); grid-template-areas: "toc" "content"; gap: 16px; }
