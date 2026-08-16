@@ -26,6 +26,7 @@ manifest、文書メタデータ、HTMLなど、途中状態を正本として�
 - `renderAddIcon()`: コメント追加などの作成操作で共有する＋型inline SVGを返す。
 - `renderWrapIcon()`: コードブロックの行折り返し操作を示すinline SVGを返す。
 - `renderEditIcon()`: コメント編集操作を示す鉛筆のinline SVGを返す。
+- `renderCloseIcon()`: ポップアップを閉じる操作を示す×印のinline SVGを返す。
 - `renderDeleteIcon()`: コメント削除操作を示すごみ箱のinline SVGを返す。
 - `renderArchiveIcon()`: コメントのアーカイブ操作を示す保管箱のinline SVGを返す。
 - `renderRestoreIcon()`: アーカイブ済みコメントの復元操作を示す戻る矢印のinline SVGを返す。

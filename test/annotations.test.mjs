@@ -72,6 +72,24 @@ test("embeds annotations without allowing script element escape", async () => {
   );
   assert.match(
     html,
+    /data-selection-action="replace"[^>]*>[\s\S]*?<svg class="action-icon edit-icon"[^>]*>[\s\S]*?<span>文字列置換<\/span><\/button>/,
+  );
+  assert.match(html, /function replaceText\(search,replacement\)/);
+  assert.match(html, /id="text-replace-alert" hidden role="alert"/);
+  assert.match(html, /mark\.className='text-replacement'/);
+  assert.match(html, /class="document-replacement-menu" data-replacement-menu aria-expanded="false"/);
+  assert.match(html, /class="action-icon close-icon"/);
+  assert.match(html, /data-replacement-list/);
+  assert.match(html, /function openReplacementMenu\(search=''\)/);
+  assert.match(html, /openReplacementMenu\(pendingSelection\.exact\)/);
+  assert.match(html, /dataset\.clearReplacement/);
+  assert.match(html, /replaceAlert\.contains\(e\.target\)/);
+  assert.match(html, /data-replacement-error role="alert" hidden/);
+  assert.match(html, /'置換後の文字列を入力してください。'/);
+  assert.match(html, /'置換する文字列が本文内に見つかりません。'/);
+  assert.doesNotMatch(html, /prompt\('置換後の文字列'/);
+  assert.match(
+    html,
     /data-selection-action="comment"[^>]*>[\s\S]*?<svg class="action-icon add-icon"[^>]*>[\s\S]*?<span>コメント<\/span><\/button>/,
   );
   assert.match(

@@ -14,6 +14,10 @@ export function renderEditIcon(): string {
   return '<svg class="action-icon edit-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="m10.5 2.5 3 3-7.75 7.75-3.5.5.5-3.5Z"/><path d="m9 4 3 3"/></svg>';
 }
 
+export function renderCloseIcon(): string {
+  return '<svg class="action-icon close-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="m4 4 8 8M12 4l-8 8"/></svg>';
+}
+
 export function renderDeleteIcon(): string {
   return '<svg class="action-icon delete-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 5h9M6 2.5h4l.75 2.5h-5.5Z"/><path d="m4.5 5 .5 8.5h6L11.5 5M7 7.5v3.5m2-3.5v3.5"/></svg>';
 }
