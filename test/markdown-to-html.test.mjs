@@ -67,7 +67,7 @@ test("keeps representative standalone HTML byte-compatible", () => {
 
   assert.equal(
     createHash("sha256").update(html).digest("hex"),
-    "059c5fde132e8d42efe56d3af4f67d25afa4cf2e2c1ce1c3807d451f430d8dc3",
+    "13fc7d711dc29f5e6dea161926adf54b8fbf4f8e8777c10aeed0e5d468e17505",
   );
 });
 

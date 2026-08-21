@@ -7,6 +7,7 @@ interface HeaderFeatureOptions {
   documentNavigation: string;
   documentMetadata: string;
   fileTree: string;
+  documentDiffControl: string;
 }
 
 export function createHeaderFeature(
@@ -14,6 +15,7 @@ export function createHeaderFeature(
     documentNavigation: "",
     documentMetadata: "",
     fileTree: "",
+    documentDiffControl: "",
   },
 ): HeaderFeature {
   const markup = `<header class="site-header">
@@ -23,6 +25,7 @@ export function createHeaderFeature(
 ${options.documentNavigation}${options.documentMetadata ? `      <span class="site-header-metadata-separator" aria-hidden="true"></span>\n      <div class="document-metadata">${options.documentMetadata}</div>\n` : ""}${options.fileTree}    </div>
   </div>
   <div class="site-header-actions">
+    ${options.documentDiffControl}
     <button type="button" class="site-header-action" data-theme-toggle aria-label="ダークモードに切り替え" title="ダークモードに切り替え"><svg data-theme-dark-icon viewBox="0 0 16 16" aria-hidden="true"><path d="M13.5 10.2A5.8 5.8 0 015.8 2.5 5.8 5.8 0 1013.5 10.2z" /></svg><svg data-theme-light-icon viewBox="0 0 16 16" aria-hidden="true" hidden><circle cx="8" cy="8" r="2.5"/><path d="M8 1v1.5M8 13.5V15M1 8h1.5M13.5 8H15M3.05 3.05l1.06 1.06M11.89 11.89l1.06 1.06M12.95 3.05l-1.06 1.06M4.11 11.89l-1.06 1.06"/></svg></button>
     <button type="button" class="site-header-action language-toggle" data-language-toggle aria-label="英語に切り替え" title="英語に切り替え"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6"/><path d="M2 8h12M8 2a9 9 0 010 12M8 2a9 9 0 000 12"/></svg><span data-language-label>JA</span></button>
   </div>
@@ -50,6 +53,7 @@ const english=new Map(${JSON.stringify([
   ["アーカイブを開く", "Open archive"], ["アーカイブを閉じる", "Close archive"], ["コメントを保存", "Save comment"], ["編集をキャンセル", "Cancel editing"],
   ["有効なコメントをすべてコピー", "Copy all active comments"], ["有効なコメントだけをコピー", "Copy active comments only"], ["有効なコメントをコピー", "Copy active comments"], ["コメントをコピーしました", "Comment copied"], ["コピー失敗", "Copy failed"], ["コピーに失敗しました", "Copy failed"], ["保存中…", "Saving…"], ["保存に失敗しました", "Save failed"], ["このコメントを削除しますか？", "Delete this comment?"],
   ["コメントを追加するにはmarksites serveを起動してください", "Start marksites serve to add comments"], ["別の画面でコメントが更新されました。最新の内容を確認して、もう一度操作してください。", "Comments changed in another window. Review the latest version and try again."],
+  ["差分を表示", "Show changes"], ["最新版を表示", "Show latest"], ["前回からの変更はありません", "No changes since the previous build"],
   ["コードをコピー", "Copy code"], ["長い行を折り返す", "Wrap long lines"], ["折り返しを解除", "Disable line wrapping"], ["コードをコピーしました", "Code copied"], ["コードをコピーできませんでした", "Could not copy code"],
   ["文書ナビゲーション", "Document navigation"], ["文書サイドバー", "Document sidebar"], ["パンくずリスト", "Breadcrumbs"]
 ])});

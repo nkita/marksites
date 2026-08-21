@@ -13,6 +13,8 @@ export interface MarkdownFile {
   assetHash?: string;
   assetOutputs?: string[];
   rewriteImages?: (token: import("marked").Token) => void;
+  previousSource?: string;
+  historyPath?: string;
 }
 
 export interface ManifestFile {
@@ -23,6 +25,7 @@ export interface ManifestFile {
   annotations: string;
   assetHash?: string;
   assets?: string[];
+  history?: string;
 }
 
 export interface BuildManifest {

@@ -14,6 +14,7 @@ interface DocumentParts {
   regions: {
     header: string;
     fileSidebar: string;
+    diffContent: string;
     sidebar: string;
     overlays: string;
   };
@@ -49,6 +50,7 @@ ${parts.regions.fileSidebar}
 <main class="markdown-content">
 ${parts.content}
 </main>
+${parts.regions.diffContent}
 ${parts.regions.sidebar}
 ${parts.regions.overlays}
 ${parts.assets.scripts.map(trustedScript).join("")}

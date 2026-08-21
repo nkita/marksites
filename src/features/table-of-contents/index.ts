@@ -52,25 +52,27 @@ function renderTableOfContentsScript(): string {
 
   const panel = navigation.querySelector('.toc-panel');
   const links = [...panel.querySelectorAll('a[href^="#"]')];
-  const entries = links
-    .map((link) => ({ link, heading: document.getElementById(link.getAttribute('href').slice(1)) }))
-    .filter((entry) => entry.heading);
+  const entries = links.map((link) => ({ link, id: link.getAttribute('href').slice(1) }));
   if (entries.length === 0) return;
+
+  const headingFor = (entry) => document.getElementById((document.body.dataset.documentView === 'diff' ? 'diff-' : '') + entry.id);
 
   let scheduled = false;
   let currentLink = null;
   const update = () => {
     scheduled = false;
     const marker = Math.min(160, window.innerHeight * 0.25);
-    let active = entries[0];
+    const available = entries.map(entry => ({ ...entry, heading: headingFor(entry) })).filter(entry => entry.heading);
+    if (available.length === 0) return;
+    let active = available[0];
 
-    for (const entry of entries) {
+    for (const entry of available) {
       if (entry.heading.getBoundingClientRect().top > marker) break;
       active = entry;
     }
 
     for (const entry of entries) {
-      if (entry === active) entry.link.setAttribute('aria-current', 'location');
+      if (entry.link === active.link) entry.link.setAttribute('aria-current', 'location');
       else entry.link.removeAttribute('aria-current');
     }
     if (!navigation.hidden && active.link !== currentLink) {
@@ -91,6 +93,14 @@ function renderTableOfContentsScript(): string {
 
   addEventListener('scroll', schedule, { passive: true });
   addEventListener('resize', schedule);
+  for (const entry of entries) entry.link.addEventListener('click', event => {
+    const heading = headingFor(entry);
+    if (!heading || document.body.dataset.documentView !== 'diff') return;
+    event.preventDefault();
+    heading.scrollIntoView();
+    history.replaceState(null, '', '#diff-' + entry.id);
+  });
+  new MutationObserver(schedule).observe(document.body, { attributes: true, attributeFilter: ['data-document-view'] });
   update();
 })();
 </script>`;

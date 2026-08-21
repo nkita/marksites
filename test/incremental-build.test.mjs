@@ -35,6 +35,29 @@ test("creates sidecars and skips unchanged HTML", async () => {
   );
 });
 
+test("stores one previous Markdown version and embeds its diff", async () => {
+  const root = await mkdtemp(join(tmpdir(), "marksites-history-"));
+  const input = join(root, "docs"),
+    output = join(root, "site"),
+    source = join(input, "index.md");
+  await mkdir(input);
+  await writeFile(source, "# Home\n\nBefore.\n");
+  await convertDirectoryDetailed(input, output);
+  const firstManifest = JSON.parse(
+    await readFile(join(output, ".marksites-build.json"), "utf8"),
+  );
+  const history = firstManifest.files["index.md"].history;
+  assert.match(history, /^\.marksites-history\/[a-f0-9]{64}\.md$/);
+  assert.equal(await readFile(join(output, history), "utf8"), "# Home\n\nBefore.\n");
+
+  await writeFile(source, "# Home\n\nAfter.\n");
+  await convertDirectoryDetailed(input, output);
+  const html = await readFile(join(output, "index.html"), "utf8");
+  assert.match(html, /document-diff-inline-delete">Before<\/del>/);
+  assert.match(html, /document-diff-inline-insert">After<\/ins>/);
+  assert.equal(await readFile(join(output, history), "utf8"), "# Home\n\nAfter.\n");
+});
+
 test("rebuilds HTML when only the Markdown update time changes", async () => {
   const root = await mkdtemp(join(tmpdir(), "marksites-mtime-"));
   const input = join(root, "docs"),

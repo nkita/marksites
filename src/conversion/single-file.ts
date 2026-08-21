@@ -10,6 +10,7 @@ import {
   pathExists,
 } from "./paths.js";
 import { prepareImageAssets } from "./assets.js";
+import { readHistory, toHistoryPath, writeHistory } from "./history.js";
 
 export async function convertFile(
   input: string,
@@ -45,6 +46,9 @@ export async function convertFile(
     basename(output),
     dirname(output),
   );
+  const outputRoot = dirname(output);
+  const historyPath = toHistoryPath(basename(output));
+  const previousSource = await readHistory(outputRoot, historyPath);
   await atomicWriteFile(
     output,
     renderMarkdown(
@@ -57,7 +61,9 @@ export async function convertFile(
         },
       },
       annotations,
+      previousSource,
     ),
   );
+  await writeHistory(outputRoot, historyPath, markdown);
   return output;
 }

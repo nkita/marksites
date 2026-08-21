@@ -46,6 +46,12 @@ import type {
   MarkdownFile,
 } from "./types.js";
 import { prepareImageAssets } from "./assets.js";
+import {
+  readHistory,
+  removeHistory,
+  toHistoryPath,
+  writeHistory,
+} from "./history.js";
 
 async function migrateLegacyMetadata(
   files: MarkdownFile[],
@@ -77,6 +83,20 @@ async function loadSources(files: MarkdownFile[]): Promise<void> {
     file.source = source;
     file.sourceHash = contentHash(file.source);
     file.modifiedAt = sourceStat.mtime.toISOString();
+  }
+}
+
+async function loadHistories(
+  files: MarkdownFile[],
+  previous: BuildManifest | undefined,
+  output: string,
+): Promise<void> {
+  for (const file of files) {
+    file.historyPath = toHistoryPath(file.relativePath);
+    file.previousSource = await readHistory(
+      output,
+      previous?.files[file.relativePath]?.history,
+    );
   }
 }
 
@@ -146,6 +166,7 @@ async function moveRenamedDocuments(
       await rm(oldHtml);
       deleted++;
     }
+    await removeHistory(output, oldData.history);
     warnAboutStaleLinks(files, old);
     removed.splice(removed.indexOf(old), 1);
   }
@@ -199,6 +220,7 @@ async function removeDeletedHtml(
     if (await pathExists(join(output, ...info.annotations.split("/")))) {
       orphaned.push(info.annotations);
     }
+    await removeHistory(output, info.history);
   }
   return { deleted, orphaned };
 }
@@ -250,6 +272,7 @@ async function renderChangedFiles(
             },
           },
           file.annotations,
+          file.previousSource,
         ),
       );
       converted++;
@@ -266,6 +289,7 @@ async function renderChangedFiles(
       annotations: file.metadataPath,
       assetHash: file.assetHash,
       assets: file.assetOutputs,
+      history: file.historyPath,
     };
   }
   return { converted, skipped, files: manifestFiles };
@@ -299,6 +323,7 @@ export async function convertDirectoryDetailed(
   if (loaded.warning) console.warn(loaded.warning);
   const previous = loaded.manifest;
   await loadSources(files);
+  await loadHistories(files, previous, output);
   await prepareAssets(files, output);
   let annotationsMoved = await migrateLegacyMetadata(files, output);
 
@@ -337,6 +362,9 @@ export async function convertDirectoryDetailed(
     full,
     options,
   );
+  for (const file of files) {
+    await writeHistory(output, file.historyPath!, file.source!);
+  }
   await removeUnusedAssets(previous, files, output);
   await writeManifest(manifestPath, {
     schemaVersion: 1,

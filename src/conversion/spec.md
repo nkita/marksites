@@ -9,7 +9,7 @@
 ### `types.ts`
 
 - `MarkdownFile`: 入力絶対パス、Markdown相対パス、HTML相対パス、メタデータ相対パス、ビルド中の本文・ハッシュを保持する。
-- `ManifestFile`: 前回成功時のsourceHash、annotationHash、assetHash、HTML・メタデータ・画像アセットパスを保持する。
+- `ManifestFile`: 前回成功時のsourceHash、annotationHash、assetHash、HTML・メタデータ・画像アセット・Markdown履歴パスを保持する。
 - `BuildManifest`: schema version、生成互換情報、treeHash、文書別状態を表す。
 - `ConversionResult`: CLI表示に必要な変換・スキップ・削除・作成・移動件数を返す。
 
@@ -53,6 +53,10 @@ URLの各パスセグメントは`encodeURIComponent()`で符号化する。並�
 
 Markdown画像の相対ローカル参照を解決し、画像内容のSHA-256と元拡張子から`_marksites-assets/<hash>.<ext>`へコピーする。HTMLからは各ページ基準の相対URLへ書き換える。外部URL、data URL、ルート相対URL、存在しない参照は変更しない。画像内容のハッシュと生成アセット一覧を文書単位でmanifestへ保存し、画像変更時に該当HTMLを再生成して未参照になった旧アセットを削除する。
 
+### `history.ts`
+
+前回正常ビルド時のMarkdownを出力先の`.marksites-history/`へ文書パスのSHA-256を名前として1世代だけ保存する。履歴はHTML生成成功後にアトミック更新し、削除文書と一意なリネーム元の履歴を削除する。
+
 ### `watch.ts`
 
 入力配下の対象ディレクトリを`fs.watch`でイベント駆動監視する。変更イベントを短時間まとめて差分変換し、変換後に監視ディレクトリを再探索することで新規ディレクトリも監視対象に加える。同時実行を避け、変換中の追加イベントは次回変換へ繰り越す。現在の出力先、標準除外ディレクトリ、`.gitignore`対象、既存生成ディレクトリは監視しない。任意のログcallbackへイベント種別・対象相対パスと再変換開始を通知する。
@@ -82,7 +86,7 @@ manifestのgenerator versionは実行中パッケージの`package.json`から�
 - `warnAboutStaleLinks()`: リネーム前パスを含む可能性のあるリンクを警告する。
 - `loadMetadata()`: メタデータの作成・検証とannotationHash計算を行う。
 - `removeDeletedHtml()`: 削除Markdownの旧HTMLだけを削除し、メタデータは孤立データとして保持する。
-- `renderChangedFiles()`: 計画上必要なHTMLだけをアトミックに書き込む。
+- `renderChangedFiles()`: 計画上必要なHTMLだけを、前回Markdownとの差分を含めてアトミックに書き込む。
 - `convertDirectoryDetailed()`: 探索からmanifest確定までを順番に組み立てる。
 - `convertDirectory()`: 互換用に変換件数だけを返す。
 

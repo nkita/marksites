@@ -14,6 +14,7 @@ import {
 import { createTableOfContentsFeature } from "./features/table-of-contents/index.js";
 import { createSidebarFeature } from "./features/sidebar/index.js";
 import { createImageViewerFeature } from "./features/image-viewer/index.js";
+import { createDocumentDiffFeature } from "./features/document-diff/index.js";
 import { renderDocument } from "./template/document.js";
 import type { RenderOptions } from "./types.js";
 import { escapeHtml } from "./utils/html.js";
@@ -30,6 +31,7 @@ export function renderMarkdown(
   markdown: string,
   options: RenderOptions = {},
   annotations?: AnnotationDocument,
+  previousMarkdown?: string,
 ): string {
   const rawTitle = options.title ?? "Markdown文書";
   const currentFileName = options.fileTree?.breadcrumbs?.find(
@@ -59,6 +61,11 @@ export function renderMarkdown(
   const fileSidebar = renderFileSidebar(options.fileTree);
   const fileTreeScript = renderFileTreeScript(fileTree !== "");
   const modifiedAt = renderModifiedAt(options.modifiedAt);
+  const documentDiff = createDocumentDiffFeature(
+    markdown,
+    previousMarkdown,
+    options.markedOptions,
+  );
   const breadcrumbs = fileTree
     ? renderBreadcrumbs(options.fileTree?.breadcrumbs)
     : `<nav class="file-breadcrumbs" aria-label="ファイルパス"><span aria-current="page">${escapeHtml(rawTitle)}</span></nav>\n`;
@@ -66,6 +73,7 @@ export function renderMarkdown(
     documentNavigation: breadcrumbs,
     documentMetadata: modifiedAt,
     fileTree,
+    documentDiffControl: documentDiff.control,
   });
   const annotationFeature = createAnnotationsFeature(annotations);
   const imageViewer = createImageViewerFeature(/<img\b/i.test(content));
@@ -84,6 +92,7 @@ export function renderMarkdown(
     regions: {
       header: header.markup,
       fileSidebar,
+      diffContent: `<main class="document-diff-content" aria-label="文書の差分" hidden>\n${documentDiff.content}</main>`,
       sidebar: sidebar.markup,
       overlays: `${annotationFeature.markup}${imageViewer.markup}`,
     },
@@ -93,9 +102,11 @@ export function renderMarkdown(
         annotationFeature.styles,
         imageViewer.styles,
         header.styles,
+        documentDiff.styles,
       ],
       scripts: [
         header.script,
+        documentDiff.script,
         fileTreeScript,
         renderModifiedAtScript(modifiedAt !== ""),
         sidebar.script,
