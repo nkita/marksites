@@ -115,15 +115,21 @@ test("renders a GitHub-style file tree with a current page", () => {
   );
   assert.match(
     html,
-    /<span class="file-tree-name"><span class="file-tree-name-text">getting-started\.md<\/span><\/span>[\s\S]*?<span class="file-tree-directory-tooltip" aria-hidden="true"><span class="file-tree-directory-tooltip-path"><svg class="folder-icon"[\s\S]*?<span>\/guide\/<\/span><\/span><time datetime="2026-07-17T03:00:00\.000Z">2026-07-17 03:00<\/time>/,
+    /<time class="file-tree-recent-time" datetime="2026-07-17T03:00:00\.000Z">03:00<\/time><span class="file-tree-recent-label"><span class="file-tree-name"><span class="file-tree-name-text">getting-started\.md<\/span><\/span>[\s\S]*?<span class="file-tree-directory-tooltip" aria-hidden="true"><span class="file-tree-directory-tooltip-path"><svg class="folder-icon"[\s\S]*?<span>\/guide\/<\/span><\/span><\/span>/,
   );
   assert.doesNotMatch(html, /class="file-tree-directory-path"/);
   assert.match(html, /\.file-tree-recent-label \{ display: flex;/);
-  assert.match(html, /\.file-tree-recent-label \.file-tree-name \{[^}]*font-weight: 400;/);
+  assert.match(
+    html,
+    /\.file-tree-recent \{ position: relative; isolation: isolate; \}/,
+  );
+  assert.match(html, /\.file-tree-recent::before \{[^}]*z-index: -1;/);
+  assert.doesNotMatch(html, /\.file-tree-date::before/);
+  assert.match(html, /\.file-tree-recent-label \.file-tree-name \{ position: relative; top: -1px;[^}]*font-weight: 400;/);
   assert.match(html, /\.file-tree-recent-file a:hover \.file-tree-name \{ text-decoration: underline;/);
   assert.match(html, /data-recent-date-toggle aria-expanded="true"/);
   assert.match(html, /aria-label="ファイル1件">1<\/span><\/button>/);
-  assert.doesNotMatch(html, /\.file-tree-recent-file > a > time/);
+  assert.match(html, /\.file-tree-recent-time \{ width: 32px;[^}]*font-variant-numeric: tabular-nums; text-align: right;/);
   assert.match(html, /const openRecentDates = new Set\(\)/);
   assert.match(html, /if \(latestRecentDate\) openRecentDates\.add\(latestRecentDate\)/);
   assert.match(html, /a\[aria-current="page"\]/);
@@ -135,16 +141,20 @@ test("renders a GitHub-style file tree with a current page", () => {
   assert.match(html, /\.file-tree-directory-tooltip::before \{[^}]*rotate\(45deg\)/);
   assert.match(html, /\.file-tree-directory-tooltip \{ position: fixed; z-index: 100;/);
   assert.match(html, /background: var\(--bgColor-default, #fff\); border: 1px solid/);
-  assert.match(html, /tooltipTime\.textContent = date\.getFullYear\(\)/);
+  assert.doesNotMatch(html, /tooltipTime/);
+  assert.match(html, /rowTime\.textContent = pad\(date\.getHours\(\)\)\+'\:'\+pad\(date\.getMinutes\(\)\)/);
   assert.match(html, /\.file-tree-recent::before \{[^}]*top: 0; bottom: 0; left: 12px; width: 1px;/);
   assert.match(html, /\.file-tree-date \{[^}]*z-index: 1;[^}]*background: var\(--bgColor-default/);
-  assert.match(html, /\.file-tree-date::before \{[^}]*top: -10px; bottom: -3px; left: 12px; width: 1px;/);
   assert.doesNotMatch(html, /\.file-tree-date \{[^}]*box-shadow/);
   assert.match(html, /\.file-tree-recent-file \{ position: relative; margin-left: 22px; \}/);
-  assert.match(html, /\.file-tree-recent-file a \{[^}]*margin-top: 0; margin-bottom: 0;/);
+  assert.match(html, /\.file-tree-recent-file a \{[^}]*margin-top: 0; margin-bottom: 0;[^}]*align-items: center;/);
+  assert.match(html, /\.file-tree-recent-file \.file-tree-comment-count \{ margin-top: 0; \}/);
   assert.match(html, /querySelector\('\.file-tree-name-text'\)/);
+  assert.match(html, /closest\('\.file-tree-recent'\)/);
   assert.match(html, /name\.getBoundingClientRect\(\)/);
-  assert.match(html, /nameRect\.right \+ 8/);
+  assert.match(html, /recent\.getBoundingClientRect\(\)/);
+  assert.match(html, /recentRect\.right \+ 8/);
+  assert.doesNotMatch(html, /nameRect\.right \+ 8/);
   assert.match(html, /innerWidth - tooltip\.offsetWidth - 8/);
   assert.match(html, /id="file-tree-popover"[^>]*hidden/);
   assert.doesNotMatch(html, /class="file-tree-toggle"/);

@@ -16,6 +16,10 @@ test("renders Markdown as a standalone GitHub-styled document", () => {
   assert.match(html, /\.site-header-action\{[^}]*background:transparent;border:0;/);
   assert.match(html, /data-theme-toggle/);
   assert.match(html, /data-language-toggle/);
+  assert.match(html, /data-document-preview-toggle/);
+  assert.match(html, /data-document-source-toggle/);
+  assert.match(html, /<main class="markdown-source-content" aria-label="Markdown原文" hidden><pre><code><span class="markdown-source-line"># Hello<\/span>/);
+  assert.match(html, /const parameter='document-view'/);
   assert.match(html, /data-language-label>JA<\/span>/);
   assert.match(html, /const languageParameter='lang',themeParameter='theme'/);
   assert.match(html, /body\.markdown-body\[data-theme="dark"\]/);
@@ -67,8 +71,36 @@ test("keeps representative standalone HTML byte-compatible", () => {
 
   assert.equal(
     createHash("sha256").update(html).digest("hex"),
-    "18d74248c4d396e79e54dc50db120c9d7783293fe030ae22fa4e518962c618ad",
+    "f8ad229e94376f4814010ecdb2ed9c3f566b7bda7c27b59216d6626d9da31a7f",
   );
+});
+
+test("embeds escaped Markdown source for offline view switching", () => {
+  const markdown = "# Source\n\n<script>alert('x')</script> & value\n";
+  const html = markdownToHtml(markdown);
+
+  assert.match(
+    html,
+    /<main class="markdown-source-content"[^>]*><pre><code><span class="markdown-source-line"># Source<\/span><span class="markdown-source-line"><\/span><span class="markdown-source-line">&lt;script&gt;alert\(&#39;x&#39;\)&lt;\/script&gt; &amp; value<\/span><\/code><\/pre><\/main>/,
+  );
+  assert.match(html, /current\.hidden=!showCurrent/);
+  assert.match(html, /intent==='markdown'\|\|intent==='diff'/);
+  assert.match(html, /document\.body\.dataset\.documentView==='markdown'/);
+  assert.match(html, /\.table-of-contents a\[href\^="#"\]/);
+  assert.match(html, /\["Previewを表示","Show preview"\]/);
+  assert.match(html, /counter-increment:markdown-source-line/);
+  assert.match(html, /\.markdown-source-content\{[^}]*border:0;border-radius:0;box-shadow:none/);
+  assert.match(html, /\.markdown-source-content pre\{[^}]*border:0;border-radius:0/);
+  assert.match(html, /replacementButton\.disabled=!showCurrent/);
+  assert.match(html, /previewButton\.addEventListener\('click',\(\)=>apply\('current'\)\)/);
+  assert.match(html, /\.document-content\{[^}]*border:1px solid[^}]*overflow:hidden\}/);
+  assert.match(html, /\.document-content>\.markdown-content,\.document-content>\.document-diff-content\{margin:0;border:0/);
+  assert.match(html, /\.document-replacement-menu\{margin-left:auto\}/);
+  assert.match(html, /\.document-content-action\{border-radius:6px\}/);
+  assert.match(html, /\.document-content>\.markdown-source-content\{padding-top:0\}/);
+  assert.match(html, /\.markdown-source-line::before\{position:sticky;[^}]*left:0;/);
+  assert.doesNotMatch(html, /data-document-source-wrap/);
+  assert.match(html, /\.markdown-source-content pre::before\{position:sticky;left:47px;[^}]*height:12px;/);
 });
 
 test("escapes document metadata", () => {

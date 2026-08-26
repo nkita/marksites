@@ -14,6 +14,8 @@ interface DocumentParts {
   regions: {
     header: string;
     fileSidebar: string;
+    documentControls: string;
+    sourceContent: string;
     diffContent: string;
     sidebar: string;
     overlays: string;
@@ -47,10 +49,16 @@ ${documentStyles}${parts.regions.fileSidebar ? `\n${fileTreeStyles}` : ""}${part
 <body class="${bodyClass}">
 ${parts.regions.header}
 ${parts.regions.fileSidebar}
+<div class="document-content">
+<div class="document-content-actions" role="toolbar" aria-label="文書表示と操作">
+${parts.regions.documentControls}
+</div>
 <main class="markdown-content">
 ${parts.content}
 </main>
+${parts.regions.sourceContent}
 ${parts.regions.diffContent}
+</div>
 ${parts.regions.sidebar}
 ${parts.regions.overlays}
 ${parts.assets.scripts.map(trustedScript).join("")}

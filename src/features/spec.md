@@ -51,7 +51,11 @@
 
 ### `document-diff/index.ts`
 
-- `createDocumentDiffFeature(current, previous, markedOptions)`: 前回と現在のMarkdownをトップレベルブロック単位で比較し、通常本文から分離した差分本文、固定ヘッダー用切り替えボタン、スタイル、GET状態を引き継ぐブラウザ動作を返す。
+- `createDocumentDiffFeature(current, previous, markedOptions)`: 前回と現在のMarkdownをトップレベルブロック単位で比較し、通常本文から分離した差分本文、固定ヘッダー用切り替えボタン、スタイル、変更有無を返す。
+
+### `document-view/index.ts`
+
+- `createDocumentViewFeature(markdown, hasDiff)`: HTML、エスケープ済みMarkdown原文、差分の排他的な表示、本文右上のMarkdown切り替え、`document-view` URL状態とサイト内リンクへの引き継ぎを所有する。
 
 ### `header/index.ts`
 

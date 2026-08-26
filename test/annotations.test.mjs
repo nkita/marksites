@@ -77,12 +77,19 @@ test("embeds annotations without allowing script element escape", async () => {
   assert.match(html, /function replaceText\(search,replacement\)/);
   assert.match(html, /id="text-replace-alert" hidden role="alert"/);
   assert.match(html, /mark\.className='text-replacement'/);
-  assert.match(html, /class="document-replacement-menu" data-replacement-menu aria-expanded="false"/);
+  assert.match(
+    html,
+    /data-document-source-toggle[\s\S]*?class="document-content-action document-replacement-menu" data-replacement-menu aria-expanded="false"/,
+  );
+  assert.match(html, /replacementButton\.disabled=!showCurrent/);
+  assert.doesNotMatch(html, /data-document-view="markdown"[^}]*document-replacement-menu\{display:none/);
   assert.match(html, /class="action-icon close-icon"/);
   assert.match(html, /data-replacement-list/);
   assert.match(html, /function openReplacementMenu\(search=''\)/);
   assert.match(html, /openReplacementMenu\(pendingSelection\.exact\)/);
   assert.match(html, /dataset\.clearReplacement/);
+  assert.match(html, /if\(e\.target\.closest\('\[data-clear-replacement\]'\)\)e\.stopPropagation\(\)/);
+  assert.match(html, /box-shadow:0 0 0 100vmax rgba\(31,35,40,\.18\)/);
   assert.match(html, /replaceAlert\.contains\(e\.target\)/);
   assert.match(html, /data-replacement-error role="alert" hidden/);
   assert.match(html, /'置換後の文字列を入力してください。'/);

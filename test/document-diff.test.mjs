@@ -20,7 +20,7 @@ test("renders block changes and places the toggle before the theme control", () 
   assert.match(html, /<p>Added paragraph\.<\/p>/);
   assert.match(html, /<h1 id="diff-guide">Guide<\/h1>/);
   assert.match(html, /const parameter='document-view'/);
-  assert.match(html, /url\.searchParams\.set\(parameter,'diff'\)/);
+  assert.match(html, /url\.searchParams\.set\(parameter,intent\)/);
   assert.match(html, /pathname\.endsWith\('\.html'\)/);
   assert.doesNotMatch(html, /data-document-view="diff"\] \.document-sidebar/);
 });
@@ -49,7 +49,9 @@ test("keeps links interactive while showing label and destination changes", () =
   assert.match(html, /aria-label="リンク先の変更"/);
   assert.match(html, /https:\/\/old\.example\/docs<\/del>/);
   assert.match(html, /https:\/\/new\.example\/docs<\/ins>/);
-  assert.doesNotMatch(html, /\[new guide\]\(https:\/\/new\.example\/docs\)/);
+  const diffContent = /<main class="document-diff-content"[^>]*>([\s\S]*?)<\/main>/.exec(html)?.[1];
+  assert.ok(diffContent);
+  assert.doesNotMatch(diffContent, /\[new guide\]\(https:\/\/new\.example\/docs\)/);
 });
 
 test("renders whole added and deleted links as inline elements", () => {

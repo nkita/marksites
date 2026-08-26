@@ -182,9 +182,8 @@ function renderRecentFiles(nodes: FileTreeNode[]): string {
           ? `<span class="file-tree-comment-count" aria-label="コメント${file.commentCount}件">${file.commentCount}</span>`
           : "";
       const time = file.modifiedAt.slice(11, 16);
-      const tooltipDate = `${file.modifiedAt.slice(0, 10)} ${time}`;
       output.push(
-        `    <li class="file-tree-recent-file${grouped ? " is-grouped" : ""}" data-file-path="${escapeHtml(file.path)}" data-directory="${escapeHtml(directory)}" data-modified-at="${file.modifiedAt}"${grouped ? ` data-recent-group="${groupId}"` : ""}><a href="${escapeHtml(file.href)}"${current}><span class="file-tree-recent-label"><span class="file-tree-name"><span class="file-tree-name-text">${escapeHtml(file.name)}</span></span></span>${count}<span class="file-tree-directory-tooltip" aria-hidden="true"><span class="file-tree-directory-tooltip-path">${renderFolderIcon()}<span>${escapeHtml(directoryLabel)}</span></span><time datetime="${file.modifiedAt}">${tooltipDate}</time></span></a></li>`,
+        `    <li class="file-tree-recent-file${grouped ? " is-grouped" : ""}" data-file-path="${escapeHtml(file.path)}" data-directory="${escapeHtml(directory)}" data-modified-at="${file.modifiedAt}"${grouped ? ` data-recent-group="${groupId}"` : ""}><a href="${escapeHtml(file.href)}"${current}><time class="file-tree-recent-time" datetime="${file.modifiedAt}">${time}</time><span class="file-tree-recent-label"><span class="file-tree-name"><span class="file-tree-name-text">${escapeHtml(file.name)}</span></span></span>${count}<span class="file-tree-directory-tooltip" aria-hidden="true"><span class="file-tree-directory-tooltip-path">${renderFolderIcon()}<span>${escapeHtml(directoryLabel)}</span></span></span></a></li>`,
       );
     }
   }
@@ -267,9 +266,11 @@ export function renderFileTreeScript(enabled: boolean): string {
   const positionDirectoryTooltip = (link) => {
     const name = link.querySelector('.file-tree-name-text');
     const tooltip = link.querySelector('.file-tree-directory-tooltip');
-    if (!name || !tooltip) return;
+    const recent = link.closest('.file-tree-recent');
+    if (!name || !tooltip || !recent) return;
     const nameRect = name.getBoundingClientRect();
-    tooltip.style.left = Math.min(nameRect.right + 8, innerWidth - tooltip.offsetWidth - 8) + 'px';
+    const recentRect = recent.getBoundingClientRect();
+    tooltip.style.left = Math.min(recentRect.right + 8, innerWidth - tooltip.offsetWidth - 8) + 'px';
     tooltip.style.top = Math.max(8 + tooltip.offsetHeight / 2, Math.min(nameRect.top + nameRect.height / 2, innerHeight - 8 - tooltip.offsetHeight / 2)) + 'px';
   };
 
@@ -427,8 +428,8 @@ export function renderFileTreeScript(enabled: boolean): string {
         const file = files[index];
       const date = new Date(file.dataset.modifiedAt);
       file.dataset.localDate = dateKey;
-      const tooltipTime = file.querySelector('.file-tree-directory-tooltip time');
-      tooltipTime.textContent = date.getFullYear()+'-'+pad(date.getMonth()+1)+'-'+pad(date.getDate())+' '+pad(date.getHours())+':'+pad(date.getMinutes());
+      const rowTime = file.querySelector('.file-tree-recent-time');
+      rowTime.textContent = pad(date.getHours())+':'+pad(date.getMinutes());
         if (grouped) {
           file.classList.add('is-grouped');
           file.dataset.recentGroup = groupId;
