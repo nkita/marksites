@@ -245,6 +245,24 @@ test("rebuilds every file when the generator version changes", async () => {
   assert.equal(result.skipped, 0);
 });
 
+test("rebuilds every file when the output compatibility version changes", async () => {
+  const root = await mkdtemp(join(tmpdir(), "marksites-output-version-"));
+  const input = join(root, "docs"), output = join(root, "site");
+  await mkdir(input);
+  await writeFile(join(input, "a.md"), "# A\n");
+  await writeFile(join(input, "b.md"), "# B\n");
+  await convertDirectoryDetailed(input, output);
+
+  const manifestPath = join(output, ".marksites-build.json");
+  const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+  manifest.generator.outputCompatibilityVersion -= 1;
+  await writeFile(manifestPath, JSON.stringify(manifest));
+
+  const result = await convertDirectoryDetailed(input, output);
+  assert.equal(result.converted, 2);
+  assert.equal(result.skipped, 0);
+});
+
 test("honors nested gitignore files and skips generated directories", async () => {
   const root = await mkdtemp(join(tmpdir(), "marksites-ignore-"));
   const input = join(root, "project"),

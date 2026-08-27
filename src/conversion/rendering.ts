@@ -13,7 +13,7 @@ const packageMetadata = JSON.parse(
 ) as PackageMetadata;
 
 export const GENERATOR_VERSION = packageMetadata.version;
-export const OUTPUT_COMPATIBILITY_VERSION = 8;
+export const OUTPUT_COMPATIBILITY_VERSION = 9;
 
 export function contentHash(value: string | Buffer): string {
   return `sha256:${createHash("sha256").update(value).digest("hex")}`;
@@ -36,7 +36,7 @@ export function rewriteMarkdownLinks(token: Token): void {
 
 export function renderFingerprint(): string {
   const representativeHtml = renderMarkdown(
-    "## Heading\n\n[Document](guide.md)\n\n![Image](image.png)\n\n```js\nconst value = 1;\n```\n",
+    "## Heading\n\n[Document](guide.md)\n\n![Image](image.png)\n\n| Name | Value |\n| --- | --- |\n| one | 1 |\n\n```js\nconst value = 1;\n```\n",
     {
       title: "marksites-render-fingerprint",
       modifiedAt: "2026-01-01T00:00:00.000Z",

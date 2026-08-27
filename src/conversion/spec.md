@@ -68,7 +68,7 @@ Markdown画像の相対ローカル参照を解決し、画像内容のSHA-256�
 - `loadManifest()`: 未存在は初回ビルド、不正または未対応形式は警告付き全体再変換として扱う。
 - `writeManifest()`: 全処理成功後にアトミック置換する。
 
-manifestのgenerator versionは実行中パッケージの`package.json`から取得し、パッケージバージョンと一致させる。前回のgenerator versionと異なる場合は、既存HTMLを全件再生成する。
+manifestのgenerator versionは実行中パッケージの`package.json`から取得し、パッケージバージョンと一致させる。前回のgenerator versionまたは出力互換バージョンと異なる場合は、既存HTMLを全件再生成する。render fingerprintの代表文書には見出し、リンク、画像、表、コードブロックを含め、条件付きで埋め込む各機能の出力変更も検知する。
 
 マニフェストの各ファイル情報にはMarkdownのISO 8601更新日時を保持し、本文が同一でもmtimeが変化した場合はHTMLを再生成する。隣接する注釈JSONへ生成日時は保存しない。
 

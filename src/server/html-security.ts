@@ -13,6 +13,8 @@ import {
 } from "../features/file-tree/index.js";
 import { createSidebarFeature } from "../features/sidebar/index.js";
 import { createTableOfContentsFeature } from "../features/table-of-contents/index.js";
+import { createTableResizerFeature } from "../features/table-resizer/index.js";
+import { createTableSorterFeature } from "../features/table-sorter/index.js";
 
 function scriptBody(script: string): string {
   return /^<script[^>]*>([\s\S]*)<\/script>$/.exec(script)?.[1] ?? "";
@@ -45,6 +47,8 @@ function generatedScriptBodies(): Set<string> {
     scriptBody(renderedToc.script),
     scriptBody(annotations.script),
     scriptBody(createImageViewerFeature(true).script),
+    scriptBody(createTableResizerFeature(true).script),
+    scriptBody(createTableSorterFeature(true).script),
     scriptBody(createDocumentViewFeature("same", false).script),
     scriptBody(createDocumentViewFeature("after", true).script),
     scriptBody(

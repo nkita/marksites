@@ -41,6 +41,18 @@
 
 同一見出しにはGitHub互換の接尾辞を付ける。見出しリンクと現在位置の追従を担当し、サイドバー全体のタブ・レスポンシブ開閉は`sidebar.ts`へ委ねる。
 
+### `table-resizer/index.ts`
+
+- `createTableResizerFeature(enabled)`: Markdown本文に表がある場合だけ、表の上端から下端まで伸びる各列境界へ列幅変更ハンドルを追加するスタイルとブラウザJavaScriptを返す。
+
+ハンドルはPointer Eventsによるマウス・タッチ・ペンのドラッグと左右矢印キーを受け付ける。列幅は48px以上に制限し、表全体の幅を列幅の合計へ同期する。本文幅を超えた表は横スクロールできる。明示的な`colgroup`または結合された見出しセルを持つ表は変更しない。
+
+### `table-sorter/index.ts`
+
+- `createTableSorterFeature(enabled)`: 表の見出しへ昇順、降順、元の順序を循環するクライアント側ソートを追加する。
+
+比較には数値を自然順として扱う`Intl.Collator`を使い、同値では元の行順を維持する。クリックに加えてEnterとSpaceで操作でき、状態を`aria-sort`とインジケーターへ反映する。列リサイズハンドルの操作ではソートしない。
+
 ### `sidebar/index.ts`
 
 - `createSidebarFeature()`: デフォルトで`目次`と表示する目次と現在ページのコメント一覧を右サイドバーのタブとして構成し、マークアップ、スタイル、ブラウザ動作を返す。
