@@ -46,6 +46,8 @@ const html = markdownToHtml(markdown, {
 言語名を指定したコードブロックは、`highlight.js` によって自動的にハイライトされます。
 コードブロックには、コードをクリップボードへコピーするボタンと、長い行の折り返しを切り替えるボタンも表示されます。
 
+Markdownの表では、列境界をドラッグして列幅を変更できます。見出しをクリックすると、その列を昇順、降順、元の順序へ切り替えられます。列幅変更とソートはマウス、タッチ、キーボードで操作でき、すべて生成HTML内のJavaScriptだけで動作します。
+
 ````markdown
 ```typescript
 const greeting: string = "Hello";
