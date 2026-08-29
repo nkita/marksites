@@ -4,6 +4,8 @@
 
 `src/conversion/`は、単一MarkdownおよびMarkdown集合をHTMLへ変換するための内部ドメインである。探索、パス規則、`.gitignore`、ナビゲーション、ハッシュ、差分管理、実行を所有する。
 
+ディレクトリ変換は入力準備、build plan作成、rename・削除反映、描画、履歴・アセット整理、manifest確定の順に進める。build planはファイルシステムを書き換えない。
+
 ## ファイル
 
 ### `types.ts`
@@ -12,6 +14,14 @@
 - `ManifestFile`: 前回成功時のsourceHash、annotationHash、assetHash、HTML・メタデータ・画像アセット・Markdown履歴パスを保持する。
 - `BuildManifest`: schema version、生成互換情報、treeHash、文書別状態を表す。
 - `ConversionResult`: CLI表示に必要な変換・スキップ・削除・作成・移動件数を返す。
+
+### `preparation.ts`
+
+- Markdown本文とmtime、前回履歴、参照画像アセットを各`MarkdownFile`へ読み込む。
+
+### `build-plan.ts`
+
+- 現在と前回のファイル集合、generator情報、treeHashから削除対象と全件再生成の要否を副作用なしで決定する。
 
 ### `paths.ts`
 

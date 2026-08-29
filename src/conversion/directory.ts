@@ -1,4 +1,4 @@
-import { mkdir, readFile, rename, rm, stat } from "node:fs/promises";
+import { mkdir, rename, rm } from "node:fs/promises";
 import {
   basename,
   dirname,
@@ -10,7 +10,6 @@ import {
   resolve,
   sep,
 } from "node:path";
-import { countActiveAnnotations } from "../annotations/model.js";
 import {
   readAnnotations,
   serializeAnnotations,
@@ -35,7 +34,6 @@ import {
   GENERATOR_VERSION,
   OUTPUT_COMPATIBILITY_VERSION,
   contentHash,
-  renderFingerprint,
   rewriteMarkdownLinks,
 } from "./rendering.js";
 import type {
@@ -45,13 +43,9 @@ import type {
   ManifestFile,
   MarkdownFile,
 } from "./types.js";
-import { prepareImageAssets } from "./assets.js";
-import {
-  readHistory,
-  removeHistory,
-  toHistoryPath,
-  writeHistory,
-} from "./history.js";
+import { removeHistory, writeHistory } from "./history.js";
+import { createBuildPlan, findRemovedPaths } from "./build-plan.js";
+import { loadHistories, loadSources, prepareAssets } from "./preparation.js";
 
 async function migrateLegacyMetadata(
   files: MarkdownFile[],
@@ -72,49 +66,6 @@ async function migrateLegacyMetadata(
     moved++;
   }
   return moved;
-}
-
-async function loadSources(files: MarkdownFile[]): Promise<void> {
-  for (const file of files) {
-    const [source, sourceStat] = await Promise.all([
-      readFile(file.sourcePath, "utf8"),
-      stat(file.sourcePath),
-    ]);
-    file.source = source;
-    file.sourceHash = contentHash(file.source);
-    file.modifiedAt = sourceStat.mtime.toISOString();
-  }
-}
-
-async function loadHistories(
-  files: MarkdownFile[],
-  previous: BuildManifest | undefined,
-  output: string,
-): Promise<void> {
-  for (const file of files) {
-    file.historyPath = toHistoryPath(file.relativePath);
-    file.previousSource = await readHistory(
-      output,
-      previous?.files[file.relativePath]?.history,
-    );
-  }
-}
-
-async function prepareAssets(
-  files: MarkdownFile[],
-  output: string,
-): Promise<void> {
-  for (const file of files) {
-    const assets = await prepareImageAssets(
-      file.source!,
-      file.sourcePath,
-      file.outputPath,
-      output,
-    );
-    file.assetHash = assets.hash;
-    file.assetOutputs = assets.outputs;
-    file.rewriteImages = assets.rewrite;
-  }
 }
 
 async function removeUnusedAssets(
@@ -327,39 +278,19 @@ export async function convertDirectoryDetailed(
   await prepareAssets(files, output);
   let annotationsMoved = await migrateLegacyMetadata(files, output);
 
-  const currentPaths = new Set(files.map((file) => file.relativePath));
-  const removed = Object.keys(previous?.files ?? {}).filter(
-    (path) => !currentPaths.has(path),
-  );
+  const removed = findRemovedPaths(files, previous);
   const renamed = await moveRenamedDocuments(files, previous, output, removed);
   annotationsMoved += renamed.metadataMoved;
   const annotationsCreated = await loadMetadata(files, output);
+  const plan = createBuildPlan(files, previous, loaded.warning, removed);
 
-  const treeHash = contentHash(
-    files
-      .map(
-        (file) =>
-          `${file.relativePath}\0${file.modifiedAt}\0${file.annotations ? countActiveAnnotations(file.annotations) : 0}`,
-      )
-      .sort()
-      .join("\n"),
-  );
-  const fingerprint = renderFingerprint();
-  const full =
-    !previous ||
-    loaded.warning !== undefined ||
-    previous.generator.version !== GENERATOR_VERSION ||
-    previous.generator.outputCompatibilityVersion !==
-      OUTPUT_COMPATIBILITY_VERSION ||
-    previous.generator.renderFingerprint !== fingerprint ||
-    previous.treeHash !== treeHash;
   const removedResult = await removeDeletedHtml(removed, previous, output);
   const rendered = await renderChangedFiles(
     files,
     input,
     output,
     previous,
-    full,
+    plan.full,
     options,
   );
   for (const file of files) {
@@ -372,9 +303,9 @@ export async function convertDirectoryDetailed(
       name: "marksites",
       version: GENERATOR_VERSION,
       outputCompatibilityVersion: OUTPUT_COMPATIBILITY_VERSION,
-      renderFingerprint: fingerprint,
+      renderFingerprint: plan.renderFingerprint,
     },
-    treeHash,
+    treeHash: plan.treeHash,
     files: rendered.files,
   });
   return {

@@ -16,9 +16,7 @@ import { createSidebarFeature } from "./features/sidebar/index.js";
 import { createImageViewerFeature } from "./features/image-viewer/index.js";
 import { createDocumentDiffFeature } from "./features/document-diff/index.js";
 import { createDocumentViewFeature } from "./features/document-view/index.js";
-import { createTableResizerFeature } from "./features/table-resizer/index.js";
-import { createTableSorterFeature } from "./features/table-sorter/index.js";
-import { createTableStickyHeaderFeature } from "./features/table-sticky-header/index.js";
+import { createTablesFeature } from "./features/tables/index.js";
 import { renderDocument } from "./template/document.js";
 import type { RenderOptions } from "./types.js";
 import { escapeHtml } from "./utils/html.js";
@@ -85,11 +83,7 @@ export function renderMarkdown(
   });
   const annotationFeature = createAnnotationsFeature(annotations);
   const imageViewer = createImageViewerFeature(/<img\b/i.test(content));
-  const tableResizer = createTableResizerFeature(/<table\b/i.test(content));
-  const tableSorter = createTableSorterFeature(/<table\b/i.test(content));
-  const tableStickyHeader = createTableStickyHeaderFeature(
-    /<table\b/i.test(content),
-  );
+  const tables = createTablesFeature(/<table\b/i.test(content));
   const sidebar = createSidebarFeature({
     tableOfContents: toc.markup,
     tableOfContentsTitle: toc.title,
@@ -119,9 +113,7 @@ export function renderMarkdown(
         header.styles,
         documentView.styles,
         documentDiff.styles,
-        tableResizer.styles,
-        tableSorter.styles,
-        tableStickyHeader.styles,
+        tables.styles,
       ],
       scripts: [
         header.script,
@@ -133,9 +125,7 @@ export function renderMarkdown(
         `\n${codeBlocks.renderScript()}\n`,
         `${annotationFeature.script}\n`,
         ...(imageViewer.script ? [`${imageViewer.script}\n`] : []),
-        ...(tableSorter.script ? [`${tableSorter.script}\n`] : []),
-        ...(tableResizer.script ? [`${tableResizer.script}\n`] : []),
-        ...(tableStickyHeader.script ? [`${tableStickyHeader.script}\n`] : []),
+        ...tables.scripts.map((script) => `${script}\n`),
       ],
     },
   });

@@ -3,39 +3,8 @@ import { AnnotationRepository } from "./annotation-repository.js";
 import { MARKSITES_API_BASE_PATH } from "./constants.js";
 import { sendJson } from "./response.js";
 import type { MarksitesServerOptions } from "./types.js";
-
-const MAX_REQUEST = 128 * 1024;
-
-async function readBody(request: IncomingMessage): Promise<unknown> {
-  let size = 0;
-  const chunks: Buffer[] = [];
-  for await (const chunk of request) {
-    size += chunk.length;
-    if (size > MAX_REQUEST)
-      throw Object.assign(new Error("Request body is too large"), {
-        statusCode: 413,
-      });
-    chunks.push(chunk);
-  }
-  try {
-    return JSON.parse(Buffer.concat(chunks).toString("utf8"));
-  } catch {
-    throw Object.assign(new Error("Invalid JSON request"), { statusCode: 400 });
-  }
-}
-
-function safeDocument(value: unknown): string {
-  if (
-    typeof value !== "string" ||
-    !value ||
-    value.includes("\\") ||
-    value.startsWith("/") ||
-    value.split("/").includes("..")
-  ) {
-    throw Object.assign(new Error("Invalid document"), { statusCode: 400 });
-  }
-  return value;
-}
+import { readJsonBody, validateDocumentPath } from "./request.js";
+import { httpError } from "./errors.js";
 
 export async function handleApi(
   request: IncomingMessage,
@@ -72,27 +41,22 @@ export async function handleApi(
     return sendJson(
       response,
       200,
-      await repository.get(safeDocument(url.searchParams.get("document"))),
+      await repository.get(validateDocumentPath(url.searchParams.get("document"))),
     );
   if (request.method === "GET" && route === "/annotations/export")
     return sendJson(response, 200, await repository.exportProject());
   if (request.headers["content-type"]?.split(";")[0] !== "application/json")
-    throw Object.assign(new Error("Content-Type must be application/json"), {
-      statusCode: 400,
-    });
-  const input = (await readBody(request)) as Record<string, unknown>;
+    throw httpError("Content-Type must be application/json", 400);
+  const input = (await readJsonBody(request)) as Record<string, unknown>;
   if (request.method === "POST" && route === "/annotations")
     return sendJson(
       response,
       201,
-      await repository.create(safeDocument(input.document), input as never),
+      await repository.create(validateDocumentPath(input.document), input as never),
     );
   if (request.method === "POST" && route === "/annotations/import") {
     if (input.replace === true && input.confirmReplace !== true)
-      throw Object.assign(
-        new Error("Replacing annotations requires confirmReplace"),
-        { statusCode: 400 },
-      );
+      throw httpError("Replacing annotations requires confirmReplace", 400);
     return sendJson(
       response,
       200,
@@ -105,7 +69,7 @@ export async function handleApi(
       response,
       200,
       await repository.update(
-        safeDocument(input.document),
+        validateDocumentPath(input.document),
         decodeURIComponent(match[1]!),
         input as never,
       ),
@@ -115,7 +79,7 @@ export async function handleApi(
       response,
       200,
       await repository.delete(
-        safeDocument(input.document),
+        validateDocumentPath(input.document),
         decodeURIComponent(match[1]!),
         input.baseRevision,
       ),

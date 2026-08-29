@@ -1,85 +1,12 @@
 import { randomBytes } from "node:crypto";
-import { marked, Renderer } from "marked";
-import { emptyAnnotationDocument } from "../annotations/model.js";
-import { createAnnotationsFeature } from "../features/annotations/index.js";
-import { createCodeBlocksFeature } from "../features/code-blocks/index.js";
-import { createHeaderFeature } from "../features/header/index.js";
-import { createImageViewerFeature } from "../features/image-viewer/index.js";
-import { createDocumentDiffFeature } from "../features/document-diff/index.js";
-import { createDocumentViewFeature } from "../features/document-view/index.js";
-import {
-  renderFileTreeScript,
-  renderModifiedAtScript,
-} from "../features/file-tree/index.js";
-import { createSidebarFeature } from "../features/sidebar/index.js";
-import { createTableOfContentsFeature } from "../features/table-of-contents/index.js";
-import { createTableResizerFeature } from "../features/table-resizer/index.js";
-import { createTableSorterFeature } from "../features/table-sorter/index.js";
-import { createTableStickyHeaderFeature } from "../features/table-sticky-header/index.js";
-
-function scriptBody(script: string): string {
-  return /^<script[^>]*>([\s\S]*)<\/script>$/.exec(script)?.[1] ?? "";
-}
-
-function generatedScriptBodies(): Set<string> {
-  const codeRenderer = new Renderer();
-  const code = createCodeBlocksFeature(codeRenderer, true);
-  marked.parse("```js\nconst value = 1;\n```", {
-    renderer: codeRenderer,
-    async: false,
-  });
-  const tocRenderer = new Renderer();
-  const toc = createTableOfContentsFeature(tocRenderer, {
-    enabled: true,
-    title: "目次",
-    minDepth: 2,
-    maxDepth: 6,
-  });
-  marked.parse("## Heading", { renderer: tocRenderer, async: false });
-  const renderedToc = toc.render();
-  const annotations = createAnnotationsFeature(
-    emptyAnnotationDocument("index.md"),
-  );
-  return new Set([
-    scriptBody(code.renderScript()),
-    scriptBody(createHeaderFeature().script),
-    scriptBody(renderFileTreeScript(true)),
-    scriptBody(renderModifiedAtScript(true)),
-    scriptBody(renderedToc.script),
-    scriptBody(annotations.script),
-    scriptBody(createImageViewerFeature(true).script),
-    scriptBody(createTableResizerFeature(true).script),
-    scriptBody(createTableSorterFeature(true).script),
-    scriptBody(createTableStickyHeaderFeature(true).script),
-    scriptBody(createDocumentViewFeature("same", false).script),
-    scriptBody(createDocumentViewFeature("after", true).script),
-    scriptBody(
-      createSidebarFeature({
-        tableOfContents: renderedToc.markup,
-        tableOfContentsTitle: renderedToc.title,
-        annotations: annotations.panel,
-        annotationCount: annotations.count,
-      }).script,
-    ),
-    scriptBody(
-      createSidebarFeature({
-        tableOfContents: "",
-        tableOfContentsTitle: renderedToc.title,
-        annotations: annotations.panel,
-        annotationCount: annotations.count,
-      }).script,
-    ),
-  ]);
-}
-
-const allowedScripts = generatedScriptBodies();
+import { knownFeatureScriptBodies } from "../features/registry.js";
 
 export function secureHtml(source: string): { body: string; csp: string } {
   const nonce = randomBytes(18).toString("base64");
   const body = source.replace(
     /<script data-marksites-script="true">([\s\S]*?)<\/script>/g,
     (whole, content: string) =>
-      allowedScripts.has(content)
+      knownFeatureScriptBodies.has(content)
         ? `<script data-marksites-script="true" nonce="${nonce}">${content}</script>`
         : whole,
   );

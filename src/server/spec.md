@@ -22,8 +22,7 @@
 
 ### `html-security.ts`
 
-- `generatedScriptBodies()`: marksitesが生成する既知のブラウザスクリプト本文を、テーマ・言語切り替えヘッダーと目次・コメントのサイドバー構成を含めて構築する。
-- `secureHtml()`: レスポンスごとにnonceを生成し、既知本文かつmarksitesマーカー付きスクリプトだけへnonceを付ける。
+- `secureHtml()`: レスポンスごとにnonceを生成し、Featureレジストリの既知本文かつmarksitesマーカー付きスクリプトだけへnonceを付ける。
 
 CSPは未知のinline script、object、base、frame埋め込みを拒否し、接続先を同一オリジンへ限定する。静的HTMLファイル自体は変更せず、HTTPレスポンス時だけnonceを付ける。
 既知本文には画像ビューアーを含む全featureの埋め込みスクリプトを登録する。
@@ -37,9 +36,24 @@ CSPは未知のinline script、object、base、frame埋め込みを拒否し、�
 
 ### `api.ts`
 
-- `readBody()`: JSON本文を読み、128KiBを超える要求を413にする。
-- `safeDocument()`: 絶対パス、backslash、`..`を含む文書指定を拒否する。
 - `handleApi()`: HTTP methodとパスを小さなルーターとして振り分ける。
+
+### `request.ts`
+
+- `readJsonBody()`: JSON本文を読み、128KiBを超える要求を413にする。
+- `validateDocumentPath()`: 絶対パス、backslash、`..`を含む文書指定を拒否する。
+
+### `errors.ts`
+
+- `httpError()`: APIで扱うHTTP status付きエラーを生成する。
+
+### `keyed-lock.ts`
+
+- `KeyedLock.run()`: 文書キー単位のPromise queueで並行更新を直列化する。
+
+### `annotation-validation.ts`
+
+- revision競合とコメント本文・選択範囲・件数の上限を検証する。
 
 API:
 
@@ -59,10 +73,9 @@ Originがある場合はサーバー自身のoriginだけを許可する。更�
 
 - `path()`: manifest由来の許可済み文書だけをメタデータパスへ解決し、出力ルート外を拒否する。
 - `get()`、`exportProject()`、`importProject()`: 文書またはプロジェクト単位で読み書きする。
-- `locked()`: 文書単位のPromise queueで並行更新を直列化する。
-- `checkRevision()`: baseRevision不一致を409にする。
+- `locked()`: `KeyedLock`へ文書単位の直列化を委譲する。
 - `create()`、`update()`、`delete()`: revisionを単調増加させ、アトミック保存後にHTML再生成callbackを実行する。削除はコメントをJSONから除外する。
-- `validateLimits()`: コメント本文10,000文字、選択文字20,000文字、前後文各500文字、文書当たり5,000件を上限とする。
+- 入力上限とrevision検証は`annotation-validation.ts`へ委譲する。
 
 作成IDと日時はサーバー側で決定する。JSON保存後のHTML再生成に失敗してもJSONを正本として維持する。
 

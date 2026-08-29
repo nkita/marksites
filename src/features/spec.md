@@ -6,6 +6,14 @@
 
 ## ファイル
 
+### `registry.ts`
+
+生成HTMLへ埋め込める既知のFeatureスクリプト本文を一元管理する。HTTP配信時のCSP nonce付与はこのレジストリに含まれる本文だけを許可し、Markdown由来または改変されたscriptを許可しない。
+
+### `tables/index.ts`
+
+列ソート、列幅変更、固定見出しを一つの表Featureとして構成し、ソート、リサイズ、固定見出しの順でブラウザ動作を初期化する。
+
 ### `code-blocks/index.ts`
 
 - `createCodeBlocksFeature(renderer, highlight)`: markedのcode rendererを設定し、コードブロックの有無を追跡する。
