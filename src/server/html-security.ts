@@ -15,6 +15,7 @@ import { createSidebarFeature } from "../features/sidebar/index.js";
 import { createTableOfContentsFeature } from "../features/table-of-contents/index.js";
 import { createTableResizerFeature } from "../features/table-resizer/index.js";
 import { createTableSorterFeature } from "../features/table-sorter/index.js";
+import { createTableStickyHeaderFeature } from "../features/table-sticky-header/index.js";
 
 function scriptBody(script: string): string {
   return /^<script[^>]*>([\s\S]*)<\/script>$/.exec(script)?.[1] ?? "";
@@ -49,6 +50,7 @@ function generatedScriptBodies(): Set<string> {
     scriptBody(createImageViewerFeature(true).script),
     scriptBody(createTableResizerFeature(true).script),
     scriptBody(createTableSorterFeature(true).script),
+    scriptBody(createTableStickyHeaderFeature(true).script),
     scriptBody(createDocumentViewFeature("same", false).script),
     scriptBody(createDocumentViewFeature("after", true).script),
     scriptBody(
