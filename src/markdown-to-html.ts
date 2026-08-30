@@ -75,12 +75,6 @@ export function renderMarkdown(
   const breadcrumbs = fileTree
     ? renderBreadcrumbs(options.fileTree?.breadcrumbs)
     : `<nav class="file-breadcrumbs" aria-label="ファイルパス"><span aria-current="page">${escapeHtml(rawTitle)}</span></nav>\n`;
-  const header = createHeaderFeature({
-    documentNavigation: breadcrumbs,
-    documentMetadata: modifiedAt,
-    fileTree,
-    documentDiffControl: documentDiff.control,
-  });
   const annotationFeature = createAnnotationsFeature(annotations);
   const imageViewer = createImageViewerFeature(/<img\b/i.test(content));
   const tables = createTablesFeature(/<table\b/i.test(content));
@@ -89,6 +83,14 @@ export function renderMarkdown(
     tableOfContentsTitle: toc.title,
     annotations: annotationFeature.panel,
     annotationCount: annotationFeature.count,
+  });
+  const header = createHeaderFeature({
+    documentNavigation: breadcrumbs,
+    documentMetadata: modifiedAt,
+    fileTree,
+    documentDiffControl: documentDiff.control,
+    hasFileSidebar: fileSidebar !== "",
+    hasDocumentSidebar: sidebar.markup !== "",
   });
 
   return renderDocument({

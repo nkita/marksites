@@ -227,7 +227,7 @@ export function renderFileSidebar(options?: FileTreeOptions): string {
   const title = escapeHtml(options.title ?? "ファイル");
   const contents = renderTreeContents(options.items, folderIds);
 
-  return `<button type="button" class="file-sidebar-close" data-file-sidebar-close aria-label="ファイルサイドバーを閉じる" title="ファイルサイドバーを閉じる"><svg class="file-sidebar-toggle-icon" viewBox="0 0 16 16" aria-hidden="true"><rect x="1.75" y="2.25" width="12.5" height="11.5" rx="1.5" /><path d="M6 2.5v11M10.5 5.5L8 8l2.5 2.5" /></svg></button>
+  return `<button type="button" class="layout-file-sidebar-control" data-file-sidebar-open hidden></button><button type="button" class="layout-file-sidebar-control" data-file-sidebar-close hidden></button>
 <aside class="file-sidebar" id="file-sidebar" aria-label="${title}">
   <div class="file-sidebar-header"><span>${title}</span></div>
   <nav class="file-tree file-tree-sidebar" aria-label="${title}">
@@ -349,13 +349,14 @@ export function renderFileTreeScript(enabled: boolean): string {
     popoverToggle.setAttribute('aria-disabled', String(open));
   };
 
-  const setSidebarOpen = (open, sync = true) => {
+  const setSidebarOpen = (open, sync = true, focus = true) => {
     sidebarPreferenceOpen = open;
     applySidebarState(open);
     if (sync) syncState();
-    if (open) sidebar.querySelector('.file-tree-filter-input').focus();
-    else sidebarOpenButton.focus();
+    if (focus && open) sidebar.querySelector('.file-tree-filter-input').focus();
+    else if (focus) sidebarOpenButton.focus();
   };
+  addEventListener('marksites:set-file-sidebar', (event) => setSidebarOpen(event.detail.open, true, false));
 
   const openRecentDates = new Set();
 
@@ -630,7 +631,6 @@ export function renderBreadcrumbs(
 ): string {
   if (!breadcrumbs || breadcrumbs.length === 0)
     return `<nav class="file-breadcrumbs" aria-label="パンくずリスト">
-  <button type="button" class="file-sidebar-open" data-file-sidebar-open aria-expanded="true" aria-controls="file-sidebar" aria-label="ファイルサイドバーを開く" title="ファイルサイドバーを開く" hidden><svg class="file-sidebar-toggle-icon" viewBox="0 0 16 16" aria-hidden="true"><rect x="1.75" y="2.25" width="12.5" height="11.5" rx="1.5" /><path d="M6 2.5v11M8 5.5L10.5 8 8 10.5" /></svg></button>
   <button type="button" class="file-tree-popover-toggle" data-file-tree-toggle aria-expanded="false" aria-controls="file-tree-popover" aria-haspopup="true" aria-label="ファイルを開く" title="ファイルを開く"><span>ファイル</span><svg class="panel-toggle-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" /></svg></button>
 </nav>
 `;
@@ -656,7 +656,6 @@ ${items}
   const path = breadcrumbs.map((breadcrumb) => breadcrumb.name).join("/");
 
   return `<nav class="file-breadcrumbs" aria-label="パンくずリスト">
-  <button type="button" class="file-sidebar-open" data-file-sidebar-open aria-expanded="true" aria-controls="file-sidebar" aria-label="ファイルサイドバーを開く" title="ファイルサイドバーを開く" hidden><svg class="file-sidebar-toggle-icon" viewBox="0 0 16 16" aria-hidden="true"><rect x="1.75" y="2.25" width="12.5" height="11.5" rx="1.5" /><path d="M6 2.5v11M8 5.5L10.5 8 8 10.5" /></svg></button>
 ${trail}  <button type="button" class="file-tree-popover-toggle" data-file-tree-toggle aria-expanded="false" aria-controls="file-tree-popover" aria-haspopup="true" aria-label="ファイルを開く" title="ファイルを開く"><span>${popoverLabel}</span><svg class="panel-toggle-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" /></svg></button>
   <button type="button" class="copy-file-path" data-copy-file-path="${escapeHtml(path)}" aria-label="ファイルパスをコピー" title="ファイルパスをコピー">${renderCopyIcon()}</button>
 </nav>

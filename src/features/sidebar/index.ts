@@ -32,7 +32,8 @@ export function createSidebarFeature({
       : ""
   }`;
 
-  const markup = `<aside class="document-sidebar" aria-label="文書ナビゲーション">
+  const markup = `<div class="document-sidebar-backdrop" data-sidebar-backdrop></div>
+<aside class="document-sidebar" id="document-sidebar" aria-label="文書ナビゲーション">
   <button type="button" class="sidebar-toggle" aria-expanded="true" aria-controls="document-sidebar-body">
     <span data-sidebar-toggle-label>${initialPanel === "toc" ? tocTitle : "コメント"}</span>
     <svg class="panel-toggle-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" /></svg>
@@ -60,22 +61,28 @@ ${tableOfContents}${annotations}
 .sidebar-panels{display:flex;min-height:0;flex:1 1 auto;align-items:stretch;overflow:hidden}
 .sidebar-panel{box-sizing:border-box;width:100%;height:100%;min-height:0;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;padding:12px;scrollbar-width:thin;scrollbar-color:var(--borderColor-default,#d0d7de) transparent}
 .sidebar-panel[hidden],.document-sidebar-body[hidden]{display:none}
-@media(max-width:900px){.document-sidebar{z-index:10;top:12px;width:auto;max-height:calc(100vh - 24px);box-shadow:0 4px 12px rgba(31,35,40,.08)}.sidebar-toggle{box-sizing:border-box;display:flex;width:100%;min-height:44px;flex:none;align-items:center;justify-content:space-between;padding:8px 12px;color:var(--fgColor-default,#1f2328);font:inherit;font-size:.9375rem;font-weight:700;background:transparent;border:0;cursor:pointer}.sidebar-toggle:focus-visible{outline:2px solid var(--focus-outlineColor,#0969da);outline-offset:-2px}.sidebar-toggle[aria-expanded="false"] .panel-toggle-icon{transform:rotate(-90deg)}.sidebar-tabs{padding-top:0}}
+.document-sidebar-backdrop{display:none}
+@media(min-width:901px){body.document-sidebar-collapsed{grid-template-columns:minmax(0,1fr);grid-template-areas:"content"}body.markdown-body.has-file-tree.document-sidebar-collapsed{grid-template-columns:280px minmax(0,1fr);grid-template-areas:"files content"}body.markdown-body.has-file-tree.file-sidebar-collapsed.document-sidebar-collapsed{grid-template-columns:minmax(0,1fr);grid-template-areas:"content"}.document-sidebar.is-desktop-hidden{display:none}}
+@media(max-width:900px){.document-sidebar{position:fixed;z-index:60;top:68px;right:12px;left:12px;display:none;width:auto;height:min(70vh,calc(100dvh - 80px));max-height:calc(100dvh - 80px);border-radius:8px;box-shadow:0 12px 32px rgba(31,35,40,.24)}.document-sidebar.is-popup-open{display:flex}.document-sidebar-backdrop.is-popup-open{position:fixed;z-index:55;inset:56px 0 0;display:block;background:rgba(31,35,40,.28)}.sidebar-toggle{display:none}.sidebar-tabs{padding-top:10px}}
 @media(prefers-reduced-motion:reduce){.panel-toggle-icon{transition:none}}`;
 
   const script = `<script>(()=>{
 const sidebar=document.querySelector('.document-sidebar');if(!sidebar)return;
-const tabs=[...sidebar.querySelectorAll('[data-sidebar-tab]')],panels=[...sidebar.querySelectorAll('.sidebar-panel')],toggle=sidebar.querySelector('.sidebar-toggle'),body=sidebar.querySelector('.document-sidebar-body'),label=sidebar.querySelector('[data-sidebar-toggle-label]'),compact=matchMedia('(max-width: 900px)');
-const tabParameter='sidebar-tab',pageUrl=new URL(location.href),requestedTab=pageUrl.searchParams.get(tabParameter);
-let active=tabs.some(item=>item.dataset.sidebarTab===requestedTab)?requestedTab:${JSON.stringify(initialPanel)};
-function syncActiveTab(){const updateUrl=url=>{url.searchParams.delete(tabParameter);if(active==='comments')url.searchParams.set(tabParameter,active);return url};history.replaceState(null,'',updateUrl(new URL(location.href)));for(const link of document.querySelectorAll('a[href]')){const rawHref=link.getAttribute('href');if(!rawHref||rawHref.startsWith('#'))continue;const url=new URL(rawHref,location.href);if(url.protocol!==location.protocol||url.host!==location.host||!url.pathname.endsWith('.html'))continue;link.href=updateUrl(url).href}}
-function activate(name,focus=false){const tab=tabs.find(item=>item.dataset.sidebarTab===name);if(!tab)return;active=name;for(const item of tabs){const selected=item===tab;item.setAttribute('aria-selected',String(selected));item.tabIndex=selected?0:-1}for(const panel of panels)panel.hidden=panel.id!=='sidebar-panel-'+name;label.textContent=tab.childNodes[0].textContent.trim();if(compact.matches){body.hidden=false;toggle.setAttribute('aria-expanded','true')}syncActiveTab();if(focus)tab.focus()}
-function setExpanded(expanded){toggle.setAttribute('aria-expanded',String(expanded));body.hidden=!expanded}
+const tabs=[...sidebar.querySelectorAll('[data-sidebar-tab]')],panels=[...sidebar.querySelectorAll('.sidebar-panel')],toggle=sidebar.querySelector('.sidebar-toggle'),body=sidebar.querySelector('.document-sidebar-body'),label=sidebar.querySelector('[data-sidebar-toggle-label]'),popupToggle=document.querySelector('[data-sidebar-popup-toggle]'),backdrop=document.querySelector('[data-sidebar-backdrop]'),compact=matchMedia('(max-width: 900px)');
+const tabParameter='sidebar-tab',visibilityParameter='document-sidebar',pageUrl=new URL(location.href),requestedTab=pageUrl.searchParams.get(tabParameter);
+let active=tabs.some(item=>item.dataset.sidebarTab===requestedTab)?requestedTab:${JSON.stringify(initialPanel)},desktopExpanded=pageUrl.searchParams.get(visibilityParameter)!=='closed';
+function updateUrl(url){url.searchParams.delete(tabParameter);url.searchParams.delete(visibilityParameter);if(active==='comments')url.searchParams.set(tabParameter,active);if(!desktopExpanded)url.searchParams.set(visibilityParameter,'closed');return url}
+function syncState(){history.replaceState(null,'',updateUrl(new URL(location.href)));for(const link of document.querySelectorAll('a[href]')){const rawHref=link.getAttribute('href');if(!rawHref||rawHref.startsWith('#'))continue;const url=new URL(rawHref,location.href);if(url.protocol!==location.protocol||url.host!==location.host||!url.pathname.endsWith('.html'))continue;link.href=updateUrl(url).href}}
+function activate(name,focus=false,open=true){const tab=tabs.find(item=>item.dataset.sidebarTab===name);if(!tab)return;active=name;for(const item of tabs){const selected=item===tab;item.setAttribute('aria-selected',String(selected));item.tabIndex=selected?0:-1}for(const panel of panels)panel.hidden=panel.id!=='sidebar-panel-'+name;label.textContent=tab.childNodes[0].textContent.trim();if(compact.matches&&open)setExpanded(true);syncState();if(focus)tab.focus()}
+function setButtonLabel(expanded){if(!popupToggle)return;const text=expanded?'目次を非表示':'目次を表示';popupToggle.setAttribute('aria-expanded',String(expanded));popupToggle.setAttribute('aria-label',text);popupToggle.title=text}
+function setDesktopExpanded(expanded){desktopExpanded=expanded;sidebar.classList.toggle('is-desktop-hidden',!expanded);document.body.classList.toggle('document-sidebar-collapsed',!expanded);setButtonLabel(expanded);syncState()}
+function setExpanded(expanded,restoreFocus=false){if(!compact.matches){sidebar.classList.remove('is-popup-open');backdrop.classList.remove('is-popup-open');body.hidden=false;setDesktopExpanded(desktopExpanded);return}sidebar.classList.remove('is-desktop-hidden');document.body.classList.remove('document-sidebar-collapsed');sidebar.classList.toggle('is-popup-open',expanded);backdrop.classList.toggle('is-popup-open',expanded);if(popupToggle){popupToggle.setAttribute('aria-expanded',String(expanded));const text=expanded?'目次を閉じる':'目次を開く';popupToggle.setAttribute('aria-label',text);popupToggle.title=text}if(expanded)tabs.find(item=>item.dataset.sidebarTab===active)?.focus();else if(restoreFocus)popupToggle?.focus()}
 tabs.forEach((tab,index)=>{tab.addEventListener('click',()=>activate(tab.dataset.sidebarTab));tab.addEventListener('keydown',event=>{if(event.key!=='ArrowLeft'&&event.key!=='ArrowRight')return;event.preventDefault();const step=event.key==='ArrowRight'?1:-1;activate(tabs[(index+step+tabs.length)%tabs.length].dataset.sidebarTab,true)})});
-toggle.addEventListener('click',()=>setExpanded(toggle.getAttribute('aria-expanded')!=='true'));
-sidebar.addEventListener('click',event=>{if(compact.matches&&event.target.closest('.table-of-contents a'))setExpanded(false)});
+toggle.addEventListener('click',()=>setExpanded(false));popupToggle?.addEventListener('click',()=>compact.matches?setExpanded(!sidebar.classList.contains('is-popup-open')):setDesktopExpanded(!desktopExpanded));backdrop?.addEventListener('click',()=>setExpanded(false,true));
+sidebar.addEventListener('click',event=>{if(compact.matches&&event.target.closest('.table-of-contents a'))setExpanded(false)});addEventListener('keydown',event=>{if(event.key==='Escape'&&sidebar.classList.contains('is-popup-open'))setExpanded(false,true)});
+addEventListener('marksites:set-document-sidebar',event=>compact.matches?setExpanded(event.detail.open):setDesktopExpanded(event.detail.open));
 addEventListener('marksites:show-comments',()=>activate('comments'));
-const sync=()=>setExpanded(!compact.matches);compact.addEventListener('change',sync);activate(active);sync();
+const sync=()=>setExpanded(false);compact.addEventListener('change',sync);activate(active,false,false);sync();
 })()</script>`;
 
   return { markup, styles, script };

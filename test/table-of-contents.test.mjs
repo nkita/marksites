@@ -36,10 +36,6 @@ test("generates a table of contents with GitHub-style heading IDs", () => {
   assert.match(html, /class="panel-toggle-icon"/);
   assert.match(
     html,
-    /\.sidebar-toggle\[aria-expanded="false"\] \.panel-toggle-icon/,
-  );
-  assert.match(
-    html,
     /\.document-sidebar-body\{display:flex;min-height:0;flex:1 1 auto;flex-direction:column;overflow:hidden\}/,
   );
   assert.match(
@@ -51,12 +47,35 @@ test("generates a table of contents with GitHub-style heading IDs", () => {
   assert.match(html, /active\.link !== currentLink/);
   assert.match(html, /navigation\.scrollTop \+= activeRect\.top - navigationRect\.top/);
   assert.match(html, /matchMedia\('\(max-width: 900px\)'\)/);
-  assert.match(html, /body\.hidden=!expanded/);
-  assert.match(html, /const tabParameter='sidebar-tab'/);
+  assert.match(html, /data-layout-menu-toggle/);
+  assert.match(html, /data-language-toggle[\s\S]*data-layout-menu-toggle/);
+  assert.match(html, /data-layout="left-hidden"/);
+  assert.match(html, /data-layout="right-hidden"/);
+  assert.match(html, /data-layout="both-hidden"/);
+  assert.match(html, /data-layout="all-visible"/);
+  assert.match(
+    html,
+    /data-layout="all-visible"[^>]*>[\s\S]*すべて表示[\s\S]*data-layout="right-hidden"[^>]*>[\s\S]*左＋本文[\s\S]*data-layout="left-hidden"[^>]*>[\s\S]*本文＋右[\s\S]*data-layout="both-hidden"[^>]*>[\s\S]*本文のみ/,
+  );
+  assert.match(html, /\["すべて表示","Show all"\]/);
+  assert.match(html, /\["本文のみ","Content only"\]/);
+  assert.match(html, /body\.document-sidebar-collapsed\{grid-template-columns:minmax\(0,1fr\);grid-template-areas:"content"\}/);
+  assert.match(html, /\.document-sidebar\.is-desktop-hidden\{display:none\}/);
+  assert.doesNotMatch(html, /is-desktop-preview/);
+  assert.match(html, /\.document-sidebar\.is-popup-open\{display:flex\}/);
+  assert.match(html, /\.document-sidebar-backdrop\.is-popup-open\{[^}]*position:fixed/);
+  assert.doesNotMatch(html, /showPreview|hidePreview/);
+  assert.match(html, /event\.key==='Escape'/);
+  assert.match(html, /backdrop\?\.addEventListener\('click'/);
+  assert.match(html, /activate\(active,false,false\);sync\(\)/);
+  assert.match(html, /const tabParameter='sidebar-tab',visibilityParameter='document-sidebar'/);
   assert.match(html, /pageUrl\.searchParams\.get\(tabParameter\)/);
   assert.match(html, /url\.searchParams\.set\(tabParameter,active\)/);
   assert.match(html, /history\.replaceState\(null,'',updateUrl\(new URL\(location\.href\)\)\)/);
+  assert.match(html, /url\.searchParams\.set\(visibilityParameter,'closed'\)/);
   assert.match(html, /url\.protocol!==location\.protocol\|\|url\.host!==location\.host\|\|!url\.pathname\.endsWith\('\.html'\)/);
+  assert.match(html, /marksites:set-document-sidebar/);
+  assert.match(html, /marksites:set-file-sidebar/);
 });
 
 test("supports table of contents options", () => {
@@ -75,5 +94,6 @@ test("can disable the table of contents while retaining heading IDs", () => {
 
   assert.doesNotMatch(html, /class="table-of-contents sidebar-panel"/);
   assert.doesNotMatch(html, /document\.querySelector\('\.table-of-contents'\)/);
+  assert.doesNotMatch(html, /class="site-header-action layout-menu-toggle"/);
   assert.match(html, /<h2 id="section">Section<\/h2>/);
 });

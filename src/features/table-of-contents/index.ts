@@ -55,7 +55,7 @@ function renderTableOfContentsScript(): string {
   const entries = links.map((link) => ({ link, id: link.getAttribute('href').slice(1) }));
   if (entries.length === 0) return;
 
-  const headingFor = (entry) => document.getElementById((document.body.dataset.documentView === 'diff' ? 'diff-' : '') + entry.id);
+  const headingFor = (entry) => document.getElementById((document.body.dataset.documentView === 'diff' ? 'diff-' : document.body.dataset.documentView === 'markdown' ? 'markdown-source-' : '') + entry.id);
 
   let scheduled = false;
   let currentLink = null;
@@ -95,10 +95,10 @@ function renderTableOfContentsScript(): string {
   addEventListener('resize', schedule);
   for (const entry of entries) entry.link.addEventListener('click', event => {
     const heading = headingFor(entry);
-    if (!heading || document.body.dataset.documentView !== 'diff') return;
+    if (!heading || !['diff', 'markdown'].includes(document.body.dataset.documentView)) return;
     event.preventDefault();
     heading.scrollIntoView();
-    history.replaceState(null, '', '#diff-' + entry.id);
+    history.replaceState(null, '', '#' + entry.id);
   });
   new MutationObserver(schedule).observe(document.body, { attributes: true, attributeFilter: ['data-document-view'] });
   update();

@@ -73,15 +73,10 @@ test("renders a GitHub-style file tree with a current page", () => {
   assert.match(html, /class="file-tree-popover-toggle" data-file-tree-toggle/);
   assert.match(html, /class="site-header-logo">marksites<\/strong>/);
   assert.match(html, /\.site-header-logo\{[^}]*color:#fff;[^}]*background:#24292f;[^}]*border-radius:6px/);
-  assert.match(
-    html,
-    /class="file-sidebar-open" data-file-sidebar-open[^>]*hidden/,
-  );
-  assert.match(html, /data-file-sidebar-close/);
-  assert.match(
-    html,
-    /data-file-sidebar-close[^>]*>[\s\S]*?<\/button>\n<aside class="file-sidebar"/,
-  );
+  assert.doesNotMatch(html, /class="file-sidebar-(?:open|close)"/);
+  assert.match(html, /class="layout-file-sidebar-control" data-file-sidebar-open hidden/);
+  assert.match(html, /class="layout-file-sidebar-control" data-file-sidebar-close hidden/);
+  assert.match(html, /data-layout-menu-toggle/);
   assert.match(
     html,
     /<span class="file-breadcrumb-separator" aria-hidden="true">\/<\/span>\n  <button type="button" class="file-tree-popover-toggle"[^>]*><span>getting-started\.md<\/span><svg class="panel-toggle-icon"/,
@@ -164,26 +159,11 @@ test("renders a GitHub-style file tree with a current page", () => {
     html,
     /\.file-sidebar \{ grid-area: files; position: fixed; z-index: 45;[^}]*width: 280px;[^}]*border-right: 1px solid/,
   );
-  assert.match(html, /class="file-sidebar-toggle-icon"/);
+  assert.doesNotMatch(html, /class="file-sidebar-toggle-icon"/);
+  assert.doesNotMatch(html, /\.file-sidebar-(?:open|close) \{/);
   assert.match(
     html,
-    /\.file-sidebar-open \{ position: fixed; z-index: 50; top: 13px; left: 12px;[^}]*width: 30px; height: 30px/,
-  );
-  assert.match(
-    html,
-    /\.file-sidebar-close \{ position: fixed; z-index: 50; top: 13px; left: 12px;[^}]*width: 30px; height: 30px/,
-  );
-  assert.match(
-    html,
-    /\.file-sidebar-open \{[^}]*background: transparent; border: 0;/,
-  );
-  assert.match(
-    html,
-    /\.file-sidebar-close \{[^}]*background: transparent; border: 0;/,
-  );
-  assert.match(
-    html,
-    /body\.markdown-body\.has-file-tree \.site-header\{padding-left:56px\}/,
+    /body\.markdown-body\.has-file-tree \.site-header\{padding-left:16px\}/,
   );
   assert.match(
     html,
@@ -198,7 +178,7 @@ test("renders a GitHub-style file tree with a current page", () => {
   assert.match(html, /\.file-sidebar-header \{[^}]*padding: 0 12px;/);
   assert.match(
     html,
-    /\.file-sidebar\[hidden\], \.file-sidebar-open\[hidden\], \.file-sidebar-close\[hidden\] \{ display: none; \}/,
+    /\.file-sidebar\[hidden\], \.layout-file-sidebar-control \{ display: none; \}/,
   );
   assert.match(html, /\.file-breadcrumbs ol \{[^}]*align-items: baseline/);
   assert.match(html, /\.file-breadcrumbs ol \{[^}]*flex: 0 1 auto/);
@@ -278,6 +258,7 @@ test("renders a GitHub-style file tree with a current page", () => {
   );
   assert.match(html, /sidebarOpenButton\?\.addEventListener\('click'/);
   assert.match(html, /sidebarCloseButton\?\.addEventListener\('click'/);
+  assert.match(html, /marksites:set-file-sidebar/);
   assert.match(html, /details\[data-folder-id=/);
   const scripts = [
     ...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g),

@@ -123,6 +123,8 @@ test("embeds annotations without allowing script element escape", async () => {
     /\.sidebar-panels\{display:flex;min-height:0;flex:1 1 auto;align-items:stretch;overflow:hidden\}/,
   );
   assert.match(html, /\.sidebar-panel\{[^}]*height:100%;min-height:0;overflow-x:hidden;overflow-y:auto/);
+  assert.match(html, /data-layout-menu-toggle/);
+  assert.match(html, /\.document-sidebar\.is-popup-open\{display:flex\}/);
   assert.doesNotMatch(html, /class="table-of-contents sidebar-panel"/);
   assert.match(html, /aria-selected="true"[^>]*data-sidebar-tab="comments"/);
   assert.match(html, /marksites:show-comments/);

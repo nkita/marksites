@@ -18,7 +18,7 @@ test("renders Markdown as a standalone GitHub-styled document", () => {
   assert.match(html, /data-language-toggle/);
   assert.match(html, /data-document-preview-toggle/);
   assert.match(html, /data-document-source-toggle/);
-  assert.match(html, /<main class="markdown-source-content" aria-label="Markdown原文" hidden><pre><code><span class="markdown-source-line"># Hello<\/span>/);
+  assert.match(html, /<main class="markdown-source-content" aria-label="Markdown原文" hidden><pre><code><span class="markdown-source-line is-heading" id="markdown-source-hello"># Hello<\/span>/);
   assert.match(html, /const parameter='document-view'/);
   assert.match(html, /data-language-label>JA<\/span>/);
   assert.match(html, /const languageParameter='lang',themeParameter='theme'/);
@@ -71,7 +71,7 @@ test("keeps representative standalone HTML byte-compatible", () => {
 
   assert.equal(
     createHash("sha256").update(html).digest("hex"),
-    "f8ad229e94376f4814010ecdb2ed9c3f566b7bda7c27b59216d6626d9da31a7f",
+    "978aaaa25930f16cd3e57cd6075e10d35f87f8c01cc1f93978002c3adc5d4c65",
   );
 });
 
@@ -81,12 +81,10 @@ test("embeds escaped Markdown source for offline view switching", () => {
 
   assert.match(
     html,
-    /<main class="markdown-source-content"[^>]*><pre><code><span class="markdown-source-line"># Source<\/span><span class="markdown-source-line"><\/span><span class="markdown-source-line">&lt;script&gt;alert\(&#39;x&#39;\)&lt;\/script&gt; &amp; value<\/span><\/code><\/pre><\/main>/,
+    /<main class="markdown-source-content"[^>]*><pre><code><span class="markdown-source-line is-heading" id="markdown-source-source"># Source<\/span><span class="markdown-source-line"><\/span><span class="markdown-source-line is-html">&lt;script&gt;alert\(&#39;x&#39;\)&lt;\/script&gt; &amp; value<\/span><\/code><\/pre><\/main>/,
   );
   assert.match(html, /current\.hidden=!showCurrent/);
   assert.match(html, /intent==='markdown'\|\|intent==='diff'/);
-  assert.match(html, /document\.body\.dataset\.documentView==='markdown'/);
-  assert.match(html, /\.table-of-contents a\[href\^="#"\]/);
   assert.match(html, /\["Previewを表示","Show preview"\]/);
   assert.match(html, /counter-increment:markdown-source-line/);
   assert.match(html, /\.markdown-source-content\{[^}]*border:0;border-radius:0;box-shadow:none/);
@@ -100,7 +98,49 @@ test("embeds escaped Markdown source for offline view switching", () => {
   assert.match(html, /\.document-content>\.markdown-source-content\{padding-top:0\}/);
   assert.match(html, /\.markdown-source-line::before\{position:sticky;[^}]*left:0;/);
   assert.doesNotMatch(html, /data-document-source-wrap/);
+  assert.match(html, /\.markdown-source-content pre\{[^}]*overflow:hidden/);
+  assert.match(html, /\.markdown-source-content code\{[^}]*min-width:0[^}]*white-space:normal/);
+  assert.match(html, /\.markdown-source-line\{[^}]*padding:0 20px 0 56px[^}]*overflow-wrap:anywhere;scroll-margin-top:96px;white-space:pre-wrap/);
+  assert.match(html, /\.markdown-source-line\{padding-right:12px;padding-left:48px;background:linear-gradient\(to right,[^}]*39px 40px,transparent 40px\)/);
+  assert.match(html, /\.markdown-source-line::before\{position:sticky;[^}]*margin-left:-56px;margin-right:8px/);
   assert.match(html, /\.markdown-source-content pre::before\{position:sticky;left:47px;[^}]*height:12px;/);
+});
+
+test("adds safe Markdown syntax styling to the source view", () => {
+  const markdown = [
+    "# **Rich** source",
+    "",
+    "> Quote with [guide](guide.md)",
+    "",
+    "- [x] task with `code` and ~~old~~ text",
+    "",
+    "| Name | Value |",
+    "| --- | --- |",
+    "",
+    "```js",
+    "const unsafe = '<script>';",
+    "```",
+    "",
+    "[unsafe](javascript:alert(1))",
+    "",
+    "## Section",
+  ].join("\n");
+  const html = markdownToHtml(markdown);
+
+  assert.match(html, /class="markdown-source-line is-heading" id="markdown-source-rich-source"># <strong class="markdown-source-strong">\*\*Rich\*\*<\/strong> source/);
+  assert.match(html, /class="markdown-source-line is-quote">&gt; Quote with <a class="markdown-source-link" href="guide\.html">\[guide\]\(guide\.md\)<\/a>/);
+  assert.match(html, /class="markdown-source-line is-list is-task">- \[x\] task with <span class="markdown-source-code-span">`code`<\/span> and <del class="markdown-source-delete">~~old~~<\/del> text/);
+  assert.match(html, /class="markdown-source-line is-table">\| Name \| Value \|/);
+  assert.match(html, /class="markdown-source-line is-code-block is-code-fence">```js/);
+  assert.match(html, /class="markdown-source-line is-code-block">const unsafe = &#39;&lt;script&gt;&#39;;/);
+  assert.match(html, /class="markdown-source-link is-disabled">\[unsafe\]\(javascript:alert\(1\)\)<\/span>/);
+  assert.doesNotMatch(html, /class="markdown-source-link" href="javascript:/);
+  assert.match(html, /\.markdown-source-line\.is-quote\{[^}]*background:linear-gradient/);
+  assert.match(html, /\.markdown-source-line\.is-code-block\{[^}]*background:linear-gradient/);
+  assert.match(html, /<span class="markdown-source-line is-heading" id="markdown-source-section">## Section<\/span>/);
+  assert.match(html, /document\.body\.dataset\.documentView === 'markdown' \? 'markdown-source-'/);
+  assert.match(html, /\['diff', 'markdown'\]\.includes\(document\.body\.dataset\.documentView\)/);
+  assert.doesNotMatch(html, /if\(document\.body\.dataset\.documentView==='markdown'\)apply\('current'\)/);
 });
 
 test("escapes document metadata", () => {

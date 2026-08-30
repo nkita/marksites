@@ -61,10 +61,7 @@ export const fileTreeStyles = `    body.markdown-body.has-file-tree { width: 100
     .file-sidebar { grid-area: files; position: fixed; z-index: 45; top: 0; bottom: 0; left: 0; box-sizing: border-box; display: flex; width: 280px; min-height: 0; flex-direction: column; color: var(--fgColor-default, #1f2328); background: var(--bgColor-default, #fff); border: 0; border-right: 1px solid var(--borderColor-muted, #d8dee4); border-radius: 0; overflow: hidden; }
     .file-sidebar-header { display: flex; min-height: 52px; flex: none; align-items: center; gap: 9px; padding: 0 12px; font-size: 0.875rem; font-weight: 700; border-bottom: 1px solid var(--borderColor-muted, #d8dee4); }
     .file-sidebar-header > span { min-width: 0; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .file-sidebar[hidden], .file-sidebar-open[hidden], .file-sidebar-close[hidden] { display: none; }
-    .file-sidebar-close { position: fixed; z-index: 50; top: 13px; left: 12px; display: inline-flex; width: 30px; height: 30px; flex: none; align-items: center; justify-content: center; padding: 0; color: var(--fgColor-muted, #59636e); background: transparent; border: 0; border-radius: 6px; cursor: pointer; }
-    .file-sidebar-close:hover { color: var(--fgColor-default, #1f2328); background: var(--button-default-bgColor-hover, #eaeef2); }
-    .file-sidebar-close:focus-visible { outline: 2px solid var(--focus-outlineColor, #0969da); outline-offset: -2px; }
+    .file-sidebar[hidden], .layout-file-sidebar-control { display: none; }
     .file-breadcrumbs { display: flex; align-items: center; gap: 8px; margin: 0; padding-bottom: 14px; border-bottom: 1px solid var(--borderColor-muted, #d8dee4); }
     .file-breadcrumbs ol { display: flex; min-width: 0; min-height: 28px; flex: 0 1 auto; flex-wrap: wrap; align-items: baseline; gap: 6px; margin: 0; padding: 0; list-style: none; }
     .file-breadcrumbs li { display: inline-block; min-width: 0; height: 28px; color: var(--fgColor-muted, #59636e); font-size: 0.875rem; line-height: 28px; }
@@ -73,12 +70,10 @@ export const fileTreeStyles = `    body.markdown-body.has-file-tree { width: 100
     .file-breadcrumbs a { display: inline-block; height: 28px; color: var(--fgColor-accent, #0969da); font-weight: 500; line-height: 28px; text-decoration: none; vertical-align: baseline; }
     .file-breadcrumbs a:hover { text-decoration: underline; }
     .file-breadcrumbs [aria-current="page"] { color: var(--fgColor-default, #1f2328); font-weight: 600; white-space: nowrap; }
-    .file-sidebar-open { position: fixed; z-index: 50; top: 13px; left: 12px; display: inline-flex; width: 30px; height: 30px; flex: none; align-items: center; justify-content: center; padding: 0; color: var(--fgColor-muted, #59636e); background: transparent; border: 0; border-radius: 6px; cursor: pointer; }
     .file-tree-popover-toggle { position: relative; top: 1px; display: inline-flex; height: 28px; min-width: 0; flex: none; align-items: center; justify-content: center; gap: 3px; padding: 0; color: var(--fgColor-accent, #0969da); font: inherit; font-size: 0.875rem; font-weight: 600; line-height: 28px; background: transparent; border: 0; border-radius: 4px; cursor: pointer; }
     .file-tree-popover-toggle span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .file-sidebar-toggle-icon { display: block; width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.2; stroke-linecap: round; stroke-linejoin: round; }
-    .file-sidebar-open:hover { color: var(--fgColor-default, #1f2328); background: var(--button-default-bgColor-hover, #eaeef2); }
-    .file-sidebar-open:focus-visible, .file-tree-popover-toggle:focus-visible { outline: 2px solid var(--focus-outlineColor, #0969da); outline-offset: 2px; }
+    .file-tree-popover-toggle:focus-visible { outline: 2px solid var(--focus-outlineColor, #0969da); outline-offset: 2px; }
     .file-tree-popover-toggle:hover { color: var(--fgColor-accent, #0969da); text-decoration: underline; background: transparent; }
     .file-tree-popover-toggle:disabled { color: var(--fgColor-default, #1f2328); text-decoration: none; cursor: default; }
     .file-tree-popover-toggle:disabled .panel-toggle-icon { display: none; }

@@ -13,7 +13,7 @@ const packageMetadata = JSON.parse(
 ) as PackageMetadata;
 
 export const GENERATOR_VERSION = packageMetadata.version;
-export const OUTPUT_COMPATIBILITY_VERSION = 9;
+export const OUTPUT_COMPATIBILITY_VERSION = 10;
 
 export function contentHash(value: string | Buffer): string {
   return `sha256:${createHash("sha256").update(value).digest("hex")}`;
