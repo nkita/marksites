@@ -71,7 +71,7 @@ test("keeps representative standalone HTML byte-compatible", () => {
 
   assert.equal(
     createHash("sha256").update(html).digest("hex"),
-    "978aaaa25930f16cd3e57cd6075e10d35f87f8c01cc1f93978002c3adc5d4c65",
+    "926bfff069d753ad7b19f1c09d1114f81f2fee10002d492f830a5c7928d8e793",
   );
 });
 
@@ -104,6 +104,9 @@ test("embeds escaped Markdown source for offline view switching", () => {
   assert.match(html, /\.markdown-source-line\{padding-right:12px;padding-left:48px;background:linear-gradient\(to right,[^}]*39px 40px,transparent 40px\)/);
   assert.match(html, /\.markdown-source-line::before\{position:sticky;[^}]*margin-left:-56px;margin-right:8px/);
   assert.match(html, /\.markdown-source-content pre::before\{position:sticky;left:47px;[^}]*height:12px;/);
+  assert.match(html, /@media\(hover:hover\)\{\.markdown-source-line:hover\{background:linear-gradient\(to right,color-mix\(in srgb,var\(--bgColor-accent-muted,#ddf4ff\) 35%,var\(--bgColor-default,#fff\)\) 0 47px/);
+  assert.match(html, /\.markdown-source-line:hover::before\{background:color-mix\(in srgb,var\(--bgColor-accent-muted,#ddf4ff\) 35%,var\(--bgColor-default,#fff\)\)\}/);
+  assert.match(html, /@media\(hover:hover\) and \(max-width:600px\)\{\.markdown-source-line:hover\{background:linear-gradient\(to right,[^}]*39px 40px/);
 });
 
 test("adds safe Markdown syntax styling to the source view", () => {
