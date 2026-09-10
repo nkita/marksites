@@ -120,6 +120,7 @@ export function renderMarkdown(
       scripts: [
         header.script,
         documentView.script,
+        documentDiff.script,
         fileTreeScript,
         renderModifiedAtScript(modifiedAt !== ""),
         sidebar.script,

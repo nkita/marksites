@@ -2,345 +2,22 @@ import GithubSlugger from "github-slugger";
 import { marked, Renderer, type MarkedOptions, type Token } from "marked";
 import { escapeHtml, plainTextFromHtml } from "../../utils/html.js";
 import { diffBlocks, type DiffPart } from "./blocks.js";
+import { align, similarity, type Pair } from "./alignment.js";
+import {
+  inlineDiff as renderInlineDiff,
+  codeDiff,
+  type Sides,
+} from "./inline.js";
+import { diffStyles, diffScript } from "./presentation.js";
 
 export interface DocumentDiffFeature {
   content: string;
   control: string;
   styles: string;
+  script: string;
   hasChanges: boolean;
 }
-
-function prefixIds(html: string): string {
-  return html
-    .replace(/\bid="([^"]+)"/g, 'id="diff-$1"')
-    .replace(/\bhref="#([^"]+)"/g, 'href="#diff-$1"');
-}
-
-function wordDiff(previous: string, current: string): string {
-  const segmenter = new Intl.Segmenter("ja", { granularity: "word" });
-  const oldParts = [...segmenter.segment(previous)].map(
-    ({ segment }) => segment,
-  );
-  const newParts = [...segmenter.segment(current)].map(
-    ({ segment }) => segment,
-  );
-  if (oldParts.length * newParts.length > 100_000)
-    return `<del class="document-diff-inline-delete">${escapeHtml(previous)}</del><ins class="document-diff-inline-insert">${escapeHtml(current)}</ins>`;
-  const lengths = Array.from(
-    { length: oldParts.length + 1 },
-    () => new Uint32Array(newParts.length + 1),
-  );
-  for (let oldIndex = oldParts.length - 1; oldIndex >= 0; oldIndex--) {
-    for (let newIndex = newParts.length - 1; newIndex >= 0; newIndex--) {
-      lengths[oldIndex]![newIndex] =
-        oldParts[oldIndex] === newParts[newIndex]
-          ? lengths[oldIndex + 1]![newIndex + 1]! + 1
-          : Math.max(
-              lengths[oldIndex + 1]![newIndex]!,
-              lengths[oldIndex]![newIndex + 1]!,
-            );
-    }
-  }
-  const output: string[] = [];
-  let oldIndex = 0;
-  let newIndex = 0;
-  let kind: "same" | "delete" | "insert" | undefined;
-  let buffer = "";
-  const flush = (): void => {
-    if (!buffer) return;
-    output.push(
-      kind === "delete"
-        ? `<del class="document-diff-inline-delete">${buffer}</del>`
-        : kind === "insert"
-          ? `<ins class="document-diff-inline-insert">${buffer}</ins>`
-          : buffer,
-    );
-    buffer = "";
-  };
-  const append = (nextKind: typeof kind, value: string): void => {
-    if (kind !== nextKind) flush();
-    kind = nextKind;
-    buffer += escapeHtml(value);
-  };
-  while (oldIndex < oldParts.length || newIndex < newParts.length) {
-    if (
-      oldIndex < oldParts.length &&
-      newIndex < newParts.length &&
-      oldParts[oldIndex] === newParts[newIndex]
-    ) {
-      append("same", newParts[newIndex]!);
-      oldIndex++;
-      newIndex++;
-    } else if (
-      newIndex < newParts.length &&
-      (oldIndex === oldParts.length ||
-        lengths[oldIndex]![newIndex + 1]! >
-          lengths[oldIndex + 1]![newIndex]!)
-    ) {
-      append("insert", newParts[newIndex++]!);
-    } else {
-      append("delete", oldParts[oldIndex++]!);
-    }
-  }
-  flush();
-  return output.join("");
-}
-
-function oneToken(raw: string): Token | undefined {
-  const tokens = marked.lexer(raw).filter((token) => token.type !== "space");
-  return tokens.length === 1 ? tokens[0] : undefined;
-}
-
-function inlineTokens(markdown: string): RichToken[] {
-  return marked.Lexer.lexInline(markdown) as RichToken[];
-}
-
-function renderInlineToken(token: RichToken, deleted = false): string {
-  if (token.type === "link") {
-    const href = escapeHtml(String(token.href ?? ""));
-    const title = token.title
-      ? ` title="${escapeHtml(String(token.title))}"`
-      : "";
-    const disabled = deleted
-      ? ' class="document-diff-link-delete" aria-disabled="true" tabindex="-1"'
-      : "";
-    return `<a href="${href}"${title}${disabled}>${marked.parseInline(String(token.text ?? ""), { async: false })}</a>`;
-  }
-  return marked.parseInline(String(token.raw ?? ""), { async: false });
-}
-
-function inlineTokenDiff(previous: string, current: string): string {
-  const oldTokens = inlineTokens(previous);
-  const newTokens = inlineTokens(current);
-  const output: string[] = [];
-  for (let index = 0; index < Math.max(oldTokens.length, newTokens.length); index++) {
-    const oldToken = oldTokens[index];
-    const newToken = newTokens[index];
-    if (!oldToken && newToken) {
-      output.push(`<ins class="document-diff-inline-insert">${renderInlineToken(newToken)}</ins>`);
-      continue;
-    }
-    if (oldToken && !newToken) {
-      output.push(`<del class="document-diff-inline-delete">${renderInlineToken(oldToken, true)}</del>`);
-      continue;
-    }
-    if (!oldToken || !newToken) continue;
-    if (oldToken.type === "text" && newToken.type === "text") {
-      output.push(wordDiff(String(oldToken.text), String(newToken.text)));
-      continue;
-    }
-    if (oldToken.type === newToken.type && ["strong", "em", "del"].includes(newToken.type)) {
-      const tag = newToken.type === "strong" ? "strong" : newToken.type;
-      output.push(`<${tag}>${inlineTokenDiff(String(oldToken.text), String(newToken.text))}</${tag}>`);
-      continue;
-    }
-    if (oldToken.type === "link" && newToken.type === "link") {
-      const oldHref = String(oldToken.href ?? "");
-      const newHref = String(newToken.href ?? "");
-      const title = newToken.title
-        ? ` title="${escapeHtml(String(newToken.title))}"`
-        : "";
-      output.push(`<a href="${escapeHtml(newHref)}"${title}>${inlineTokenDiff(String(oldToken.text ?? ""), String(newToken.text ?? ""))}</a>`);
-      if (oldHref !== newHref || oldToken.title !== newToken.title) {
-        output.push(`<span class="document-diff-link-target" aria-label="リンク先の変更"> (<del class="document-diff-inline-delete">${escapeHtml(oldHref)}</del><span aria-hidden="true"> → </span><ins class="document-diff-inline-insert">${escapeHtml(newHref)}</ins>)</span>`);
-      }
-      continue;
-    }
-    if (oldToken.raw === newToken.raw) {
-      output.push(renderInlineToken(newToken));
-      continue;
-    }
-    output.push(`<del class="document-diff-inline-delete">${renderInlineToken(oldToken, true)}</del><ins class="document-diff-inline-insert">${renderInlineToken(newToken)}</ins>`);
-  }
-  return output.join("");
-}
-
-function paragraphDiff(previous: string, current: string): string | undefined {
-  const oldToken = oneToken(previous);
-  const newToken = oneToken(current);
-  if (oldToken?.type !== "paragraph" || newToken?.type !== "paragraph")
-    return undefined;
-  return `<p>${inlineTokenDiff(String(oldToken.text), String(newToken.text))}</p>\n`;
-}
-
-function codeLineDiff(previous: string[], current: string[]): string[] {
-  const lengths = Array.from(
-    { length: previous.length + 1 },
-    () => new Uint32Array(current.length + 1),
-  );
-  for (let oldIndex = previous.length - 1; oldIndex >= 0; oldIndex--) {
-    for (let newIndex = current.length - 1; newIndex >= 0; newIndex--) {
-      lengths[oldIndex]![newIndex] =
-        previous[oldIndex] === current[newIndex]
-          ? lengths[oldIndex + 1]![newIndex + 1]! + 1
-          : Math.max(
-              lengths[oldIndex + 1]![newIndex]!,
-              lengths[oldIndex]![newIndex + 1]!,
-            );
-    }
-  }
-  const rendered: string[] = [];
-  let oldIndex = 0;
-  let newIndex = 0;
-  while (oldIndex < previous.length || newIndex < current.length) {
-    if (previous[oldIndex] === current[newIndex]) {
-      rendered.push(`<span>${escapeHtml(current[newIndex] ?? "")}</span>`);
-      oldIndex++;
-      newIndex++;
-      continue;
-    }
-    const deleted: string[] = [];
-    const inserted: string[] = [];
-    while (
-      oldIndex < previous.length ||
-      newIndex < current.length
-    ) {
-      if (previous[oldIndex] === current[newIndex]) break;
-      if (
-        newIndex < current.length &&
-        (oldIndex === previous.length ||
-          lengths[oldIndex]![newIndex + 1]! >
-            lengths[oldIndex + 1]![newIndex]!)
-      ) {
-        inserted.push(current[newIndex++]!);
-      } else {
-        deleted.push(previous[oldIndex++]!);
-      }
-    }
-    if (deleted.length === 1 && inserted.length > 1) {
-      const source = new Set(
-        [...new Intl.Segmenter("ja", { granularity: "word" }).segment(deleted[0]!)].map(
-          ({ segment }) => segment,
-        ),
-      );
-      let bestIndex = 0;
-      let bestScore = -1;
-      inserted.forEach((line, index) => {
-        const score = [...new Intl.Segmenter("ja", { granularity: "word" }).segment(line)]
-          .filter(({ segment }) => source.has(segment)).length;
-        if (score > bestScore) {
-          bestIndex = index;
-          bestScore = score;
-        }
-      });
-      inserted.forEach((line, index) => {
-        rendered.push(
-          index === bestIndex
-            ? `<span>${wordDiff(deleted[0]!, line)}</span>`
-            : `<span class="document-diff-structural-insert">${escapeHtml(line)}</span>`,
-        );
-      });
-      continue;
-    }
-    for (let index = 0; index < Math.max(deleted.length, inserted.length); index++) {
-      const oldLine = deleted[index];
-      const newLine = inserted[index];
-      if (oldLine !== undefined && newLine !== undefined)
-        rendered.push(`<span>${wordDiff(oldLine, newLine)}</span>`);
-      else if (oldLine !== undefined)
-        rendered.push(`<span class="document-diff-structural-delete">${escapeHtml(oldLine)}</span>`);
-      else
-        rendered.push(`<span class="document-diff-structural-insert">${escapeHtml(newLine ?? "")}</span>`);
-    }
-  }
-  return rendered;
-}
-
-type RichToken = Token & Record<string, unknown>;
-
-function structuredDiff(
-  previous: DiffPart,
-  current: DiffPart,
-  slugger: GithubSlugger,
-): string | undefined {
-  if (previous.tokenType !== current.tokenType) return undefined;
-  const oldToken = oneToken(previous.raw) as RichToken | undefined;
-  const newToken = oneToken(current.raw) as RichToken | undefined;
-  if (!oldToken || !newToken) return undefined;
-  if (newToken.type === "paragraph") return paragraphDiff(previous.raw, current.raw);
-  if (newToken.type === "heading") {
-    const depth = Number(newToken.depth);
-    const oldText = String(oldToken.text ?? "");
-    const newText = String(newToken.text ?? "");
-    const id = slugger.slug(
-      plainTextFromHtml(marked.parseInline(newText, { async: false })),
-    );
-    return `<h${depth} id="${escapeHtml(id)}">${inlineTokenDiff(oldText, newText)}</h${depth}>\n`;
-  }
-  if (newToken.type === "list") {
-    const oldItems = oldToken.items as Array<RichToken>;
-    const newItems = newToken.items as Array<RichToken>;
-    if (
-      oldToken.ordered !== newToken.ordered ||
-      [...oldItems, ...newItems].some((item) =>
-        (item.tokens as Token[]).some((token) => token.type === "list"),
-      )
-    )
-      return undefined;
-    const tag = newToken.ordered ? "ol" : "ul";
-    const items: string[] = [];
-    for (let index = 0; index < Math.max(oldItems.length, newItems.length); index++) {
-      const oldItem = oldItems[index];
-      const newItem = newItems[index];
-      if (oldItem && newItem)
-        items.push(`<li>${inlineTokenDiff(String(oldItem.text), String(newItem.text))}</li>`);
-      else if (oldItem)
-        items.push(`<li class="document-diff-structural-delete">${escapeHtml(String(oldItem.text))}</li>`);
-      else if (newItem)
-        items.push(`<li class="document-diff-structural-insert">${escapeHtml(String(newItem.text))}</li>`);
-    }
-    return `<${tag}>\n${items.join("\n")}\n</${tag}>\n`;
-  }
-  if (newToken.type === "blockquote") {
-    const oldParagraphs = (oldToken.tokens as RichToken[]).filter((token) => token.type === "paragraph");
-    const newParagraphs = (newToken.tokens as RichToken[]).filter((token) => token.type === "paragraph");
-    const paragraphs: string[] = [];
-    for (let index = 0; index < Math.max(oldParagraphs.length, newParagraphs.length); index++) {
-      const oldParagraph = oldParagraphs[index];
-      const newParagraph = newParagraphs[index];
-      if (oldParagraph && newParagraph)
-        paragraphs.push(`<p>${inlineTokenDiff(String(oldParagraph.text), String(newParagraph.text))}</p>`);
-      else if (oldParagraph)
-        paragraphs.push(`<p class="document-diff-structural-delete">${escapeHtml(String(oldParagraph.text))}</p>`);
-      else if (newParagraph)
-        paragraphs.push(`<p class="document-diff-structural-insert">${escapeHtml(String(newParagraph.text))}</p>`);
-    }
-    return `<blockquote>\n${paragraphs.join("\n")}\n</blockquote>\n`;
-  }
-  if (newToken.type === "table") {
-    const oldHeader = oldToken.header as RichToken[];
-    const newHeader = newToken.header as RichToken[];
-    const oldRows = oldToken.rows as RichToken[][];
-    const newRows = newToken.rows as RichToken[][];
-    const cells = (oldCells: RichToken[] = [], newCells: RichToken[] = [], tag = "td") =>
-      Array.from({ length: Math.max(oldCells.length, newCells.length) }, (_, index) => {
-        const oldCell = oldCells[index], newCell = newCells[index];
-        const oldText = String(oldCell?.text ?? "");
-        const newText = String(newCell?.text ?? "");
-        const kind = oldCell && !newCell ? "delete" : newCell && !oldCell ? "insert" : "";
-        const content = oldCell && newCell
-          ? oldText === newText
-            ? marked.parseInline(newText, { async: false })
-            : inlineTokenDiff(oldText, newText)
-          : marked.parseInline(newText || oldText, { async: false });
-        return `<${tag}${kind ? ` class="document-diff-structural-${kind}"` : ""}>${content}</${tag}>`;
-      }).join("");
-    const rows: string[] = [];
-    for (let index = 0; index < Math.max(oldRows.length, newRows.length); index++) {
-      const oldRow = oldRows[index], newRow = newRows[index];
-      const kind = oldRow && !newRow ? "delete" : newRow && !oldRow ? "insert" : "";
-      rows.push(`<tr${kind ? ` class="document-diff-structural-${kind}"` : ""}>${cells(oldRow, newRow)}</tr>`);
-    }
-    return `<table>\n<thead><tr>${cells(oldHeader, newHeader, "th")}</tr></thead>\n<tbody>${rows.join("\n")}</tbody>\n</table>\n`;
-  }
-  if (newToken.type === "code") {
-    const oldLines = String(oldToken.text ?? "").split("\n");
-    const newLines = String(newToken.text ?? "").split("\n");
-    const language = escapeHtml(String(newToken.lang ?? ""));
-    return `<pre class="document-diff-code"><code${language ? ` class="language-${language}"` : ""}>${codeLineDiff(oldLines, newLines).join("\n")}</code></pre>\n`;
-  }
-  return undefined;
-}
+type RichToken = Token & Record<string, any>;
 
 export function createDocumentDiffFeature(
   current: string,
@@ -349,64 +26,278 @@ export function createDocumentDiffFeature(
 ): DocumentDiffFeature {
   const parts = previous === undefined ? [] : diffBlocks(previous, current);
   const hasChanges = parts.some((part) => part.kind !== "same");
-  const slugger = new GithubSlugger();
-  const diffRenderer = new Renderer();
-  diffRenderer.heading = ({ tokens, depth }) => {
-    const rendered = diffRenderer.parser.parseInline(tokens);
-    const id = slugger.slug(plainTextFromHtml(rendered));
-    return `<h${depth} id="${escapeHtml(id)}">${rendered}</h${depth}>\n`;
-  };
-  const renderedParts: string[] = [];
-  const renderPart = (part: DiffPart): string => {
-    const html = marked.parse(part.raw, {
-      ...markedOptions,
-      renderer: diffRenderer,
-      async: false,
-    });
-    return part.kind === "same"
-      ? html
-      : `<div class="document-diff-block document-diff-${part.kind}">${html}</div>\n`;
-  };
-  if (hasChanges) {
-    for (let index = 0; index < parts.length; index++) {
-      const part = parts[index]!;
-      if (part.kind !== "same") {
-        let end = index;
-        while (end < parts.length && parts[end]!.kind !== "same") end++;
-        const changed = parts.slice(index, end);
-        const deleted = changed.filter((item) => item.kind === "delete");
-        const inserted = changed.filter((item) => item.kind === "insert");
-        for (
-          let changedIndex = 0;
-          changedIndex < Math.max(deleted.length, inserted.length);
-          changedIndex++
-        ) {
-          const oldPart = deleted[changedIndex];
-          const newPart = inserted[changedIndex];
-          if (oldPart && newPart) {
-            const structured = structuredDiff(oldPart, newPart, slugger);
-            if (structured !== undefined) {
-              renderedParts.push(structured);
-              continue;
-            }
-          }
-          if (oldPart) renderedParts.push(renderPart(oldPart));
-          if (newPart) renderedParts.push(renderPart(newPart));
-        }
-        index = end - 1;
-        continue;
+  const inlineDiff = (old: string, current: string) =>
+    renderInlineDiff(old, current, markedOptions);
+  const renderers = [0, 1].map((side) => {
+    const slugger = new GithubSlugger();
+    const renderer = new Renderer();
+    renderer.heading = ({ tokens, depth }) => {
+      const text = renderer.parser.parseInline(tokens);
+      return `<h${depth} id="${escapeHtml(slugger.slug(plainTextFromHtml(text)))}">${text}</h${depth}>\n`;
+    };
+    return renderer;
+  });
+  const render = (raw: string, side: number) =>
+    marked
+      .parse(raw, {
+        ...markedOptions,
+        renderer: renderers[side]!,
+        async: false,
+      })
+      .replace(/\sid="([^"]+)"/g, ` id="${side ? "diff-" : "diff-old-"}$1"`)
+      .replace(/href="#([^"]+)"/g, `href="#${side ? "diff-" : "diff-old-"}$1"`);
+  const token = (raw: string) =>
+    marked.lexer(raw).find((t) => t.type !== "space") as RichToken;
+  const compare = (a: DiffPart, b: DiffPart) =>
+    a.tokenType !== b.tokenType ? 0 : similarity(a.raw, b.raw);
+  const rows: Pair<DiffPart>[] = [];
+  for (let i = 0; i < parts.length; ) {
+    const part = parts[i]!;
+    if (part.kind === "same") {
+      rows.push([part, part]);
+      i++;
+      continue;
+    }
+    const changed: DiffPart[] = [];
+    while (i < parts.length && parts[i]!.kind !== "same")
+      changed.push(parts[i++]!);
+    rows.push(
+      ...align(
+        changed.filter((p) => p.kind === "delete"),
+        changed.filter((p) => p.kind === "insert"),
+        compare,
+      ),
+    );
+  }
+  const structural = (html: string, side: number) =>
+    `<div class="document-diff-block document-diff-${side ? "insert" : "delete"}">${html}</div>`;
+  const slot = (html: string, empty = false) =>
+    `<span data-diff-line${empty ? ' class="document-diff-empty" aria-hidden="true"' : ""}>${html || "&#8203;"}</span>`;
+  const inlineStructural = (html: string, side: number) =>
+    `<span class="document-diff-block document-diff-${side ? "insert" : "delete"}">${html}</span>`;
+  function detail(a: DiffPart, b: DiffPart): Sides | undefined {
+    if (a.tokenType !== b.tokenType) return;
+    const old = token(a.raw),
+      next = token(b.raw);
+    if (old.type === "paragraph" || old.type === "heading") {
+      const words = inlineDiff(String(old.text), String(next.text));
+      return [old, next].map((item, side) => {
+        if (item.type === "paragraph") return `<p>${words[side]}</p>`;
+        // Render original headings first so IDs follow each version's own sequence.
+        return render(side ? b.raw : a.raw, side).replace(
+          /(<h[1-6][^>]*>)[\s\S]*?(<\/h[1-6]>)/,
+          (_match, start, end) => start + words[side] + end,
+        );
+      }) as Sides;
+    }
+    if (old.type === "code") {
+      const pairs = align(
+        String(old.text).split("\n"),
+        String(next.text).split("\n"),
+        similarity,
+      );
+      const output: Sides = ["", ""];
+      for (const [left, right] of pairs) {
+        const cells =
+          left !== undefined && right !== undefined
+            ? codeDiff(left, right)
+            : [
+                left === undefined ? "" : inlineStructural(escapeHtml(left), 0),
+                right === undefined
+                  ? ""
+                  : inlineStructural(escapeHtml(right), 1),
+              ];
+        output[0] += slot(cells[0]!, left === undefined);
+        output[1] += slot(cells[1]!, right === undefined);
       }
-      renderedParts.push(renderPart(part));
+      return output.map(
+        (html) => `<pre class="document-diff-code"><code>${html}</code></pre>`,
+      ) as Sides;
+    }
+    if (old.type === "list" && old.ordered === next.ordered) {
+      // Preserve nested/loose/task list markup as complete blocks.
+      if (
+        [...old.items, ...next.items].some(
+          (item) =>
+            item.task ||
+            item.loose ||
+            item.tokens.some((t: Token) => !["text", "space"].includes(t.type)),
+        )
+      )
+        return;
+      const pairs = align<RichToken>(old.items, next.items, (a, b) =>
+        similarity(a.text, b.text),
+      );
+      const output: Sides = ["", ""];
+      const numbers = [Number(old.start) || 1, Number(next.start) || 1];
+      for (const [left, right] of pairs) {
+        const cells =
+          left && right
+            ? inlineDiff(left.text, right.text)
+            : [
+                left
+                  ? inlineStructural(
+                      marked.parseInline(left.text, { async: false }),
+                      0,
+                    )
+                  : "",
+                right
+                  ? inlineStructural(
+                      marked.parseInline(right.text, { async: false }),
+                      1,
+                    )
+                  : "",
+              ];
+        for (const side of [0, 1]) {
+          const exists = side ? right : left;
+          const value =
+            old.ordered && exists ? ` value="${numbers[side]!++}"` : "";
+          output[side as 0 | 1] +=
+            `<li data-diff-line${value}${exists ? "" : ' class="document-diff-empty" aria-hidden="true"'}>${cells[side] || "&#8203;"}</li>`;
+        }
+      }
+      return output.map((html, side) => {
+        const t = side ? next : old,
+          tag = t.ordered ? "ol" : "ul";
+        return `<${tag}${t.ordered ? ` start="${Number(t.start) || 1}"` : ""}>${html}</${tag}>`;
+      }) as Sides;
+    }
+    if (old.type === "table" && old.header.length === next.header.length) {
+      const output: Sides = ["", ""];
+      const tableRows = align<RichToken[]>(old.rows, next.rows, (a, b) => {
+        const sameKey = a[0]?.text && a[0].text === b[0]?.text;
+        return (
+          similarity(
+            a.map((c) => c.text).join("|"),
+            b.map((c) => c.text).join("|"),
+          ) + (sameKey ? 2 : 0)
+        );
+      });
+      const row = (
+        left: RichToken[] | undefined,
+        right: RichToken[] | undefined,
+        tag: string,
+      ) => {
+        const cells: Sides = ["", ""];
+        for (let i = 0; i < old.header.length; i++) {
+          const a = left?.[i],
+            b = right?.[i];
+          const words =
+            a && b
+              ? inlineDiff(a.text, b.text)
+              : [
+                  a
+                    ? inlineStructural(
+                        marked.parseInline(a.text, { async: false }),
+                        0,
+                      )
+                    : "",
+                  b
+                    ? inlineStructural(
+                        marked.parseInline(b.text, { async: false }),
+                        1,
+                      )
+                    : "",
+                ];
+          for (const side of [0, 1]) {
+            const alignment = (side ? next : old).align[i];
+            cells[side as 0 | 1] +=
+              `<${tag}${["left", "right", "center"].includes(alignment) ? ` style="text-align:${alignment}"` : ""}>${words[side]}</${tag}>`;
+          }
+        }
+        return cells.map(
+          (html, side) =>
+            `<tr data-diff-line${(side ? right : left) ? "" : ' class="document-diff-empty" aria-hidden="true"'}>${html}</tr>`,
+        ) as Sides;
+      };
+      const headers = row(old.header, next.header, "th");
+      for (const [a, b] of tableRows) {
+        const cells = row(a, b, "td");
+        output[0] += cells[0];
+        output[1] += cells[1];
+      }
+      return output.map(
+        (html, side) =>
+          `<div class="document-diff-table"><table><thead>${headers[side]}</thead><tbody>${html}</tbody></table></div>`,
+      ) as Sides;
+    }
+    if (old.type === "blockquote") {
+      const oldChildren = (old.tokens ?? []).filter(
+        (t: Token) => t.type !== "space",
+      );
+      const newChildren = next.tokens.filter((t: Token) => t.type !== "space");
+      if ([...oldChildren, ...newChildren].some((t) => t.type !== "paragraph"))
+        return;
+      const output: Sides = ["", ""];
+      for (const [a, b] of align<RichToken>(oldChildren, newChildren, (a, b) =>
+        similarity(a.text, b.text),
+      )) {
+        const cells =
+          a && b
+            ? inlineDiff(a.text, b.text)
+            : [
+                a
+                  ? inlineStructural(
+                      marked.parseInline(a.text, { async: false }),
+                      0,
+                    )
+                  : "",
+                b
+                  ? inlineStructural(
+                      marked.parseInline(b.text, { async: false }),
+                      1,
+                    )
+                  : "",
+              ];
+        for (const side of [0, 1])
+          output[side as 0 | 1] +=
+            `<p data-diff-line${(side ? b : a) ? "" : ' class="document-diff-empty" aria-hidden="true"'}>${cells[side]}</p>`;
+      }
+      return output.map((html) => `<blockquote>${html}</blockquote>`) as Sides;
     }
   }
-  const content = hasChanges ? prefixIds(renderedParts.join("")) : "";
+  const body = (hasChanges ? rows : [])
+    .map(([a, b]) => {
+      let cells: Sides;
+      if (a && b && a.kind === "same")
+        cells = [render(a.raw, 0), render(b.raw, 1)];
+      else
+        cells =
+          a && b
+            ? (detail(a, b) ?? [
+                structural(render(a.raw, 0), 0),
+                structural(render(b.raw, 1), 1),
+              ])
+            : [
+                a ? structural(render(a.raw, 0), 0) : "",
+                b ? structural(render(b.raw, 1), 1) : "",
+              ];
+      cells = cells.map((html, side) =>
+        html
+          .replace(
+            /\\sid="(?!diff-)([^"]+)"/g,
+            ` id="${side ? "diff-" : "diff-old-"}$1"`,
+          )
+          .replace(
+            /href="#(?!diff-)([^"]+)"/g,
+            `href="#${side ? "diff-" : "diff-old-"}$1"`,
+          ),
+      ) as Sides;
+      return `<div class="document-diff-row">${cells.map((html, side) => `<section class="document-diff-cell document-diff-${side ? "current" : "previous"}${html ? "" : " document-diff-empty"}" aria-label="${side ? "現バージョン" : "前バージョン"}">${html}</section>`).join("")}</div>`;
+    })
+    .join("\n");
+  const content = hasChanges
+    ? `<div class="document-diff-comparison"><div class="document-diff-labels"><span>前バージョン</span><span>現バージョン</span></div>${body}</div>`
+    : "";
   const disabled = hasChanges ? "" : " disabled";
   const label = hasChanges ? "差分を表示" : "前回からの変更はありません";
   const control = `<button type="button" class="site-header-action document-diff-toggle" data-document-diff-toggle aria-label="${label}" title="${label}" aria-pressed="false"${disabled}><svg data-document-diff-icon viewBox="0 0 16 16" aria-hidden="true"><circle cx="4" cy="3" r="1.5"/><circle cx="4" cy="13" r="1.5"/><circle cx="12" cy="5" r="1.5"/><path d="M4 4.5v7M5.5 4h2A4.5 4.5 0 0112 8.5V10"/></svg><svg data-document-current-icon viewBox="0 0 16 16" aria-hidden="true" hidden><path d="M3 1.75h6l4 4v8.5H3z"/><path d="M9 1.75v4h4M5.5 9h5M5.5 11.5h5"/></svg></button>`;
-  const styles = `
-body.markdown-body[data-theme="dark"]{--diff-insert-bg:#58a6ff1a;--diff-delete-bg:#ff7b7226;--diff-delete-fg:#ff938a}body.markdown-body[data-theme="light"]{--diff-insert-bg:#0969da12;--diff-delete-bg:#cf222e18;--diff-delete-fg:#b4232c}
-.document-diff-structural-insert{background:var(--diff-insert-bg,#0969da12);box-shadow:inset 3px 0 var(--fgColor-accent,#0969da)}.document-diff-structural-delete{color:var(--diff-delete-fg,#b4232c);background:var(--diff-delete-bg,#cf222e18);text-decoration:line-through;text-decoration-thickness:2px}.document-diff-code code>span{display:block;min-height:1.5em;white-space:pre-wrap}.document-diff-link-target{margin-inline-start:2px;color:var(--fgColor-muted,#59636e);font-size:.875em;overflow-wrap:anywhere}.document-diff-link-delete{pointer-events:none}
-.document-diff-content{box-sizing:border-box;min-width:0;margin-bottom:72px;padding:clamp(28px,3vw,52px);color:var(--fgColor-default,#1f2328);background:var(--bgColor-default,#fff);border:1px solid var(--borderColor-muted,#d8dee4);border-radius:8px;box-shadow:0 1px 2px rgba(31,35,40,.04)}.document-diff-content[hidden]{display:none}.document-diff-block{position:relative;margin:0 -12px;padding:1px 12px 1px 22px;border-left:2px solid var(--fgColor-muted,#59636e)}.document-diff-block::before{position:absolute;top:3px;left:7px;font-weight:700;line-height:1;content:""}.document-diff-block.document-diff-insert{background:var(--diff-insert-bg,#0969da12);border-left-style:solid;border-left-color:var(--fgColor-accent,#0969da)}.document-diff-block.document-diff-insert::before{color:var(--fgColor-accent,#0969da);content:"+"}.document-diff-block.document-diff-delete{color:var(--diff-delete-fg,#b4232c);background:var(--diff-delete-bg,#cf222e18);border-left-color:var(--diff-delete-fg,#b4232c);border-left-style:dashed;opacity:.9}.document-diff-block.document-diff-delete::before{color:var(--diff-delete-fg,#b4232c);content:"−"}.document-diff-block.document-diff-delete :is(a,button,input,select,textarea){pointer-events:none}.document-diff-inline-insert,.document-diff-inline-delete{padding:1px 2px;border-radius:2px;box-decoration-break:clone;-webkit-box-decoration-break:clone}.document-diff-inline-insert{color:var(--fgColor-default,#1f2328);background:var(--diff-insert-bg,#0969da12);text-decoration-line:underline;text-decoration-style:double;text-decoration-color:var(--fgColor-accent,#0969da);text-underline-offset:3px}.document-diff-inline-delete{color:var(--diff-delete-fg,#b4232c);background:var(--diff-delete-bg,#cf222e18);text-decoration:line-through;text-decoration-thickness:2px}.document-diff-toggle[aria-pressed="true"]{color:var(--fgColor-accent,#0969da);background:var(--bgColor-accent-muted,#ddf4ff)}.document-diff-toggle:disabled{color:var(--fgColor-muted,#59636e);opacity:.45;cursor:not-allowed}.document-diff-toggle svg[hidden]{display:none}@media(max-width:900px){.document-diff-content{margin-bottom:32px}}@media(max-width:600px){.document-diff-content{padding:24px 20px;border-radius:6px}}
-`;
-  return { content, control, styles, hasChanges };
+
+  return {
+    content,
+    control,
+    styles: diffStyles,
+    script: hasChanges ? diffScript : "",
+    hasChanges,
+  };
 }

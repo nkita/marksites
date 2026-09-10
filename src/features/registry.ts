@@ -3,6 +3,7 @@ import { emptyAnnotationDocument } from "../annotations/model.js";
 import { createAnnotationsFeature } from "./annotations/index.js";
 import { createCodeBlocksFeature } from "./code-blocks/index.js";
 import { createDocumentViewFeature } from "./document-view/index.js";
+import { createDocumentDiffFeature } from "./document-diff/index.js";
 import {
   renderFileTreeScript,
   renderModifiedAtScript,
@@ -48,6 +49,7 @@ function createKnownFeatureScriptBodies(): Set<string> {
     ...tables.scripts.map(scriptBody),
     scriptBody(createDocumentViewFeature("same", false).script),
     scriptBody(createDocumentViewFeature("after", true).script),
+    scriptBody(createDocumentDiffFeature("after", "before").script),
     scriptBody(
       createSidebarFeature({
         tableOfContents: renderedToc.markup,

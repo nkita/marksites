@@ -53,8 +53,8 @@ test("stores one previous Markdown version and embeds its diff", async () => {
   await writeFile(source, "# Home\n\nAfter.\n");
   await convertDirectoryDetailed(input, output);
   const html = await readFile(join(output, "index.html"), "utf8");
-  assert.match(html, /document-diff-inline-delete">Before<\/del>/);
-  assert.match(html, /document-diff-inline-insert">After<\/ins>/);
+  assert.match(html, /document-diff-delete"><p>Before\.<\/p>/);
+  assert.match(html, /document-diff-insert"><p>After\.<\/p>/);
   assert.equal(await readFile(join(output, history), "utf8"), "# Home\n\nAfter.\n");
 });
 
