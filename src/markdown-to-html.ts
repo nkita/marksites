@@ -5,8 +5,7 @@ import { createAnnotationsFeature } from "./features/annotations/index.js";
 import type { AnnotationDocument } from "./annotations/model.js";
 import {
   renderBreadcrumbs,
-  renderFileSidebar,
-  renderFileTree,
+  createFileTreeFeature,
   renderFileTreeScript,
   renderModifiedAt,
   renderModifiedAtScript,
@@ -59,8 +58,9 @@ export function renderMarkdown(
     async: false,
   });
   const toc = tableOfContents.render();
-  const fileTree = renderFileTree(options.fileTree);
-  const fileSidebar = renderFileSidebar(options.fileTree);
+  const { markup: fileTree, sidebar: fileSidebar } = createFileTreeFeature(
+    options.fileTree,
+  );
   const fileTreeScript = renderFileTreeScript(fileTree !== "");
   const modifiedAt = renderModifiedAt(options.modifiedAt);
   const documentDiff = createDocumentDiffFeature(

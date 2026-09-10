@@ -45,8 +45,9 @@
 
 ### `navigation.ts`
 
-- `buildFileTree()`: 全Markdownをディレクトリ木へ変換し、現在ページ基準のURL、ルート相対パス、mtime、有効コメント件数を生成する。
-- `buildBreadcrumbs()`: 入力元ディレクトリの直下から現在文書までのパンくずを作る。入力元ディレクトリ自身の名前は表示パスへ含めず、各階層に`index.md`または`index.markdown`がある場合だけリンクする。
+- `createNavigation()`: 描画が必要になった時点でビルド内に一度だけ作り、整列済みディレクトリ木、有効コメント件数、階層別indexを共有する。ビルドをまたぐキャッシュは持たない。
+- `buildFileTree()`（navigationのメソッド）: 全Markdownをディレクトリ木へ変換し、現在ページ基準のURL、ルート相対パス、mtime、有効コメント件数を生成する。
+- `buildBreadcrumbs()`（navigationのメソッド）: 入力元ディレクトリの直下から現在文書までのパンくずを作る。入力元ディレクトリ自身の名前は表示パスへ含めず、各階層に`index.md`または`index.markdown`がある場合だけリンクする。
 
 URLの各パスセグメントは`encodeURIComponent()`で符号化する。並び順はディレクトリ優先、次に英語localeによる名前順とする。
 

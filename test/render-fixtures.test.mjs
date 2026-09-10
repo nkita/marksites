@@ -15,7 +15,7 @@ const fixtures = [
     markdown:
       "# Data\n\n| Name | Value |\n| --- | ---: |\n| two | 2 |\n| ten | 10 |\n",
     options: {},
-    hash: "dde6bc4eec47ead8a1611ef16c3737f3ab240062a7e787ad023602951697d1f2",
+    hash: "8d416930f6d21a6083b40c3ce5c1adfaf502e4cedfedb78f5f4ca8d8d95d6946",
   },
   {
     name: "disabled optional assets",

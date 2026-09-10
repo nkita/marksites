@@ -134,6 +134,11 @@ function renderRecentFiles(nodes: FileTreeNode[]): string {
   const files = collectRecentFiles(nodes);
   if (files.length === 0)
     return `    <li class="file-tree-recent-empty">更新日時のあるファイルはありません</li>`;
+  const dateCounts = new Map<string, number>();
+  for (const file of files) {
+    const date = file.modifiedAt.slice(0, 10);
+    dateCounts.set(date, (dateCounts.get(date) ?? 0) + 1);
+  }
   let currentDate = "";
   let groupNumber = 0;
   const output: string[] = [];
@@ -141,9 +146,7 @@ function renderRecentFiles(nodes: FileTreeNode[]): string {
     const first = files[index]!;
     const date = first.modifiedAt.slice(0, 10);
     if (date !== currentDate) {
-      const dateCount = files.filter((file) =>
-        file.modifiedAt.startsWith(date),
-      ).length;
+      const dateCount = dateCounts.get(date)!;
       output.push(
         `    <li class="file-tree-date" data-date="${date}"><button type="button" data-recent-date-toggle aria-expanded="true"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4"/></svg><time datetime="${date}">${Number(date.slice(0, 4))}年${Number(date.slice(5, 7))}月${Number(date.slice(8, 10))}日</time><span aria-label="ファイル${dateCount}件">${dateCount}</span></button></li>`,
       );
@@ -190,14 +193,18 @@ function renderRecentFiles(nodes: FileTreeNode[]): string {
   return output.join("\n");
 }
 
-export function renderFileTree(options?: FileTreeOptions): string {
-  if (!options || options.items.length === 0) return "";
+export function createFileTreeFeature(options?: FileTreeOptions): {
+  markup: string;
+  sidebar: string;
+} {
+  if (!options || options.items.length === 0) return { markup: "", sidebar: "" };
   const folderIds = createFolderIds(options.items);
   const contents = renderTreeContents(options.items, folderIds);
 
-  return `<nav class="file-tree file-tree-popover" id="file-tree-popover" aria-label="${escapeHtml(options.title ?? "ファイル")}" hidden>
+  const markup = `<nav class="file-tree file-tree-popover" id="file-tree-popover" aria-label="${escapeHtml(options.title ?? "ファイル")}" hidden>
 ${contents}</nav>
 `;
+  return { markup, sidebar: renderFileSidebar(options, contents) };
 }
 
 function renderTreeContents(
@@ -221,11 +228,8 @@ ${renderRecentFiles(items)}
 `;
 }
 
-export function renderFileSidebar(options?: FileTreeOptions): string {
-  if (!options || options.items.length === 0) return "";
-  const folderIds = createFolderIds(options.items);
+function renderFileSidebar(options: FileTreeOptions, contents: string): string {
   const title = escapeHtml(options.title ?? "ファイル");
-  const contents = renderTreeContents(options.items, folderIds);
 
   return `<button type="button" class="layout-file-sidebar-control" data-file-sidebar-open hidden></button><button type="button" class="layout-file-sidebar-control" data-file-sidebar-close hidden></button>
 <aside class="file-sidebar" id="file-sidebar" aria-label="${title}">

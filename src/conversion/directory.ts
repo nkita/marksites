@@ -22,7 +22,7 @@ import {
   loadManifest,
   writeManifest,
 } from "./manifest.js";
-import { buildBreadcrumbs, buildFileTree } from "./navigation.js";
+import { createNavigation } from "./navigation.js";
 import {
   DEFAULT_OUTPUT_DIRECTORY,
   findMarkdownFiles,
@@ -178,7 +178,6 @@ async function removeDeletedHtml(
 
 async function renderChangedFiles(
   files: MarkdownFile[],
-  input: string,
   output: string,
   previous: BuildManifest | undefined,
   full: boolean,
@@ -191,6 +190,7 @@ async function renderChangedFiles(
   let converted = 0;
   let skipped = 0;
   const manifestFiles: Record<string, ManifestFile> = {};
+  let navigation: ReturnType<typeof createNavigation> | undefined;
   for (const file of files) {
     const old = previous?.files[file.relativePath];
     const destination = join(output, ...file.outputPath.split("/"));
@@ -203,6 +203,7 @@ async function renderChangedFiles(
       old.assetHash !== file.assetHash ||
       !(await pathExists(destination));
     if (changed) {
+      navigation ??= createNavigation(files);
       await atomicWriteFile(
         destination,
         renderMarkdown(
@@ -212,8 +213,8 @@ async function renderChangedFiles(
             modifiedAt: file.modifiedAt,
             fileTree: {
               title: "ファイル",
-              items: buildFileTree(files, file.outputPath),
-              breadcrumbs: buildBreadcrumbs(files, file),
+              items: navigation.buildFileTree(file.outputPath),
+              breadcrumbs: navigation.buildBreadcrumbs(file),
             },
             markedOptions: {
               walkTokens: (token) => {
@@ -287,7 +288,6 @@ export async function convertDirectoryDetailed(
   const removedResult = await removeDeletedHtml(removed, previous, output);
   const rendered = await renderChangedFiles(
     files,
-    input,
     output,
     previous,
     plan.full,

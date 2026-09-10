@@ -10,6 +10,8 @@ export function createTableResizerFeature(enabled: boolean): TableResizerFeature
     .table-resizable-container { position: relative; max-width: 100%; margin-bottom: var(--base-size-16); overflow-x: auto; }
     .markdown-content .table-resizable-container table.is-column-resizable { display: table; table-layout: fixed; max-width: none; margin-bottom: 0; overflow: visible; }
     .table-column-resizer { position: absolute; z-index: 2; top: 0; width: 10px; padding: 0; background: transparent; border: 0; transform: translateX(-5px); cursor: col-resize; touch-action: none; user-select: none; }
+    .table-column-resizer:last-child { transform: translateX(-100%); }
+    .table-column-resizer:last-child::after { left: auto; right: 0; }
     .table-column-resizer::after { position: absolute; top: 0; bottom: 0; left: 4px; width: 2px; background: var(--borderColor-accent-emphasis, #0969da); content: ""; opacity: 0; }
     .table-column-resizer:hover::after, .table-column-resizer:focus-visible::after, .table-column-resizer.is-resizing::after { opacity: 1; }
     .table-column-resizer:focus-visible { outline: 2px solid var(--focus-outlineColor, #0969da); outline-offset: -2px; }

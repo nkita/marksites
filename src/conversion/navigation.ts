@@ -12,10 +12,7 @@ function encodeRelativeHref(path: string): string {
   return path.split(posix.sep).map(encodeURIComponent).join("/");
 }
 
-export function buildFileTree(
-  files: MarkdownFile[],
-  currentOutputPath: string,
-): FileTreeNode[] {
+export function createNavigation(files: MarkdownFile[]) {
   const root: MutableDirectory = { directories: new Map(), files: [] };
   for (const file of files) {
     const parts = file.relativePath.split("/");
@@ -31,39 +28,69 @@ export function buildFileTree(
     }
     directory.files.push(file);
   }
-  function render(directory: MutableDirectory): FileTreeNode[] {
+  const sort = (directory: MutableDirectory): void => {
+    directory.directories = new Map(
+      [...directory.directories].sort(([left], [right]) =>
+        left.localeCompare(right, "en"),
+      ),
+    );
+    directory.files.sort((left, right) =>
+      basename(left.relativePath).localeCompare(
+        basename(right.relativePath),
+        "en",
+      ),
+    );
+    for (const child of directory.directories.values()) sort(child);
+  };
+  sort(root);
+  const indexes = new Map<string, MarkdownFile>();
+  const commentCounts = new Map(
+    files.map((file) => [
+      file,
+      file.annotations ? countActiveAnnotations(file.annotations) : 0,
+    ]),
+  );
+  for (const file of files) {
+    const directory = posix.dirname(file.relativePath);
+    if (
+      ["index.md", "index.markdown"].includes(
+        posix.basename(file.relativePath).toLowerCase(),
+      ) &&
+      !indexes.has(directory)
+    ) {
+      indexes.set(directory, file);
+    }
+  }
+  function render(
+    directory: MutableDirectory,
+    currentOutputPath: string,
+  ): FileTreeNode[] {
     return [
-      ...[...directory.directories]
-        .sort(([left], [right]) => left.localeCompare(right, "en"))
-        .map(([name, child]) => ({
-          type: "directory" as const,
-          name,
-          children: render(child),
-        })),
-      ...[...directory.files]
-        .sort((left, right) =>
-          basename(left.relativePath).localeCompare(
-            basename(right.relativePath),
-            "en",
-          ),
-        )
-        .map((file) => ({
-          type: "file" as const,
-          name: basename(file.relativePath),
-          path: file.relativePath,
-          modifiedAt: file.modifiedAt,
-          href: encodeRelativeHref(
-            posix.relative(posix.dirname(currentOutputPath), file.outputPath) ||
-              posix.basename(file.outputPath),
-          ),
-          current: file.outputPath === currentOutputPath,
-          commentCount: file.annotations
-            ? countActiveAnnotations(file.annotations)
-            : 0,
-        })),
+      ...[...directory.directories].map(([name, child]) => ({
+        type: "directory" as const,
+        name,
+        children: render(child, currentOutputPath),
+      })),
+      ...directory.files.map((file) => ({
+        type: "file" as const,
+        name: basename(file.relativePath),
+        path: file.relativePath,
+        modifiedAt: file.modifiedAt,
+        href: encodeRelativeHref(
+          posix.relative(posix.dirname(currentOutputPath), file.outputPath) ||
+            posix.basename(file.outputPath),
+        ),
+        current: file.outputPath === currentOutputPath,
+        commentCount: commentCounts.get(file)!,
+      })),
     ];
   }
-  return render(root);
+  return {
+    buildFileTree: (currentOutputPath: string) =>
+      render(root, currentOutputPath),
+    buildBreadcrumbs: (current: MarkdownFile) =>
+      buildBreadcrumbs(indexes, current),
+  };
 }
 
 function hrefBetween(current: string, target: string): string {
@@ -72,25 +99,17 @@ function hrefBetween(current: string, target: string): string {
   );
 }
 
-export function buildBreadcrumbs(
-  files: MarkdownFile[],
+function buildBreadcrumbs(
+  indexes: Map<string, MarkdownFile>,
   current: MarkdownFile,
 ): FileBreadcrumb[] {
-  const findIndex = (directory: string) =>
-    files.find(
-      (file) =>
-        posix.dirname(file.relativePath) === directory &&
-        ["index.md", "index.markdown"].includes(
-          posix.basename(file.relativePath).toLowerCase(),
-        ),
-    );
   const result: FileBreadcrumb[] = [];
   const parts = current.relativePath.split("/");
   const fileName = parts.pop();
   let directory = "";
   for (const part of parts) {
     directory = directory ? `${directory}/${part}` : part;
-    const index = findIndex(directory);
+    const index = indexes.get(directory);
     result.push({
       name: part,
       href: index
