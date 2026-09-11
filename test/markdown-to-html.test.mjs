@@ -18,6 +18,8 @@ test("renders Markdown as a standalone GitHub-styled document", () => {
   assert.match(html, /data-language-toggle/);
   assert.match(html, /data-document-preview-toggle/);
   assert.match(html, /data-document-source-toggle/);
+  assert.match(html, /data-document-preview-toggle[^>]*>[\s\S]*?<kbd aria-hidden="true">1<\/kbd>/);
+  assert.match(html, /data-document-source-toggle[^>]*>[\s\S]*?<kbd aria-hidden="true">2<\/kbd>/);
   assert.match(html, /<main class="markdown-source-content" aria-label="Markdown原文" hidden><pre><code><span class="markdown-source-line is-heading" id="markdown-source-hello"># Hello<\/span>/);
   assert.match(html, /const parameter='document-view'/);
   assert.match(html, /data-language-label>JA<\/span>/);
@@ -71,7 +73,7 @@ test("keeps representative standalone HTML byte-compatible", () => {
 
   assert.equal(
     createHash("sha256").update(html).digest("hex"),
-    "90f60f664d5d3c97026e3ef8714b4b1fac9c011ce8b30bb3dca57df69786e7bd",
+    "47fc03f9111e339438a6f7071e29c6404bd227042a77b6aef1721409b1bdfd96",
   );
 });
 
@@ -91,6 +93,8 @@ test("embeds escaped Markdown source for offline view switching", () => {
   assert.match(html, /\.markdown-source-content pre\{[^}]*border:0;border-radius:0/);
   assert.doesNotMatch(html, /data-replacement-menu|replacementButton/);
   assert.match(html, /previewButton\.addEventListener\('click',\(\)=>apply\('current'\)\)/);
+  assert.match(html, /const view=\{'1':'current','2':'markdown','3':'diff'\}\[event\.key\]/);
+  assert.match(html, /event\.target\.closest\('input,textarea,select,\[contenteditable\]/);
   assert.match(html, /\.document-content\{[^}]*border:1px solid[^}]*overflow:hidden\}/);
   assert.match(html, /\.document-content>\.markdown-content,\.document-content>\.document-diff-content\{margin:0;border:0/);
   assert.match(html, /\.document-content-action\{border-radius:6px\}/);

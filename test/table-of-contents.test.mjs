@@ -49,10 +49,19 @@ test("generates a table of contents with GitHub-style heading IDs", () => {
   assert.match(html, /matchMedia\('\(max-width: 900px\)'\)/);
   assert.match(html, /data-layout-menu-toggle/);
   assert.match(html, /data-language-toggle[\s\S]*data-layout-menu-toggle/);
+  assert.match(html, /data-layout-menu-toggle data-layout="all-visible"[^>]*>[\s\S]*?class="layout-option-icon" aria-hidden="true"/);
   assert.match(html, /data-layout="left-hidden"/);
   assert.match(html, /data-layout="right-hidden"/);
   assert.match(html, /data-layout="both-hidden"/);
   assert.match(html, /data-layout="all-visible"/);
+  assert.match(html, /data-layout="all-visible"[^>]*>[\s\S]*?<kbd class="layout-shortcut" aria-hidden="true">Q<\/kbd>/);
+  assert.match(html, /data-layout="both-hidden"[^>]*>[\s\S]*?<kbd class="layout-shortcut" aria-hidden="true">R<\/kbd>/);
+  assert.match(html, /const index='qwer'\.indexOf\(event\.key\.toLowerCase\(\)\)/);
+  assert.match(html, /\.layout-menu button::before\{width:12px;flex:none;[^}]*content:""/);
+  assert.match(html, /\.layout-menu button\[aria-checked="true"\]::before\{content:"✓"\}/);
+  assert.match(html, /layoutToggle\.dataset\.layout=current/);
+  assert.match(html, /\.layout-menu-toggle \.layout-option-icon\{box-sizing:border-box;width:16px;height:16px/);
+  assert.match(html, /\.layout-menu-toggle\[data-layout="both-hidden"\] \.layout-option-icon i:last-child\{opacity:\.18\}/);
   assert.match(
     html,
     /data-layout="all-visible"[^>]*>[\s\S]*すべて表示[\s\S]*data-layout="right-hidden"[^>]*>[\s\S]*左＋本文[\s\S]*data-layout="left-hidden"[^>]*>[\s\S]*本文＋右[\s\S]*data-layout="both-hidden"[^>]*>[\s\S]*本文のみ/,
