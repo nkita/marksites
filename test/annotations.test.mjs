@@ -77,12 +77,7 @@ test("embeds annotations without allowing script element escape", async () => {
   assert.match(html, /function replaceText\(search,replacement\)/);
   assert.match(html, /id="text-replace-alert" hidden role="alert"/);
   assert.match(html, /mark\.className='text-replacement'/);
-  assert.match(
-    html,
-    /data-document-source-toggle[\s\S]*?class="document-content-action document-replacement-menu" data-replacement-menu aria-expanded="false"/,
-  );
-  assert.match(html, /replacementButton\.disabled=!showCurrent/);
-  assert.doesNotMatch(html, /data-document-view="markdown"[^}]*document-replacement-menu\{display:none/);
+  assert.doesNotMatch(html, /data-replacement-menu|document-replacement-menu/);
   assert.match(html, /class="action-icon close-icon"/);
   assert.match(html, /data-replacement-list/);
   assert.match(html, /function openReplacementMenu\(search=''\)/);

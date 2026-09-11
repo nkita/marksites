@@ -71,7 +71,7 @@ test("keeps representative standalone HTML byte-compatible", () => {
 
   assert.equal(
     createHash("sha256").update(html).digest("hex"),
-    "f28f3675a5cb09195423e65e4c0dd09576971824a7b9b8498e1845f3fa919b70",
+    "55175b2277894cd8acdfcdb5716da6bf896bde3f6f64f090dfc71c2233fe75ea",
   );
 });
 
@@ -85,15 +85,14 @@ test("embeds escaped Markdown source for offline view switching", () => {
   );
   assert.match(html, /current\.hidden=!showCurrent/);
   assert.match(html, /intent==='markdown'\|\|intent==='diff'/);
-  assert.match(html, /\["Previewを表示","Show preview"\]/);
+  assert.match(html, /\["プレビューを表示","Show preview"\]/);
   assert.match(html, /counter-increment:markdown-source-line/);
   assert.match(html, /\.markdown-source-content\{[^}]*border:0;border-radius:0;box-shadow:none/);
   assert.match(html, /\.markdown-source-content pre\{[^}]*border:0;border-radius:0/);
-  assert.match(html, /replacementButton\.disabled=!showCurrent/);
+  assert.doesNotMatch(html, /data-replacement-menu|replacementButton/);
   assert.match(html, /previewButton\.addEventListener\('click',\(\)=>apply\('current'\)\)/);
   assert.match(html, /\.document-content\{[^}]*border:1px solid[^}]*overflow:hidden\}/);
   assert.match(html, /\.document-content>\.markdown-content,\.document-content>\.document-diff-content\{margin:0;border:0/);
-  assert.match(html, /\.document-replacement-menu\{margin-left:auto\}/);
   assert.match(html, /\.document-content-action\{border-radius:6px\}/);
   assert.match(html, /\.document-content>\.markdown-source-content\{padding-top:0\}/);
   assert.match(html, /\.markdown-source-line::before\{position:sticky;[^}]*left:0;/);

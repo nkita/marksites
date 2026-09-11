@@ -88,7 +88,6 @@ export function renderMarkdown(
     documentNavigation: breadcrumbs,
     documentMetadata: modifiedAt,
     fileTree,
-    documentDiffControl: documentDiff.control,
     hasFileSidebar: fileSidebar !== "",
     hasDocumentSidebar: sidebar.markup !== "",
   });
@@ -101,7 +100,7 @@ export function renderMarkdown(
     regions: {
       header: header.markup,
       fileSidebar,
-      documentControls: `${documentView.control}${annotationFeature.documentControl}`,
+      documentControls: `${documentView.control}${documentDiff.control}`,
       sourceContent: documentView.content,
       diffContent: `<main class="document-diff-content" aria-label="文書の差分" hidden>\n${documentDiff.content}</main>`,
       sidebar: sidebar.markup,

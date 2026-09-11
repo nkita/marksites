@@ -40,7 +40,17 @@ test("renders previous and current versions separately with changed words", () =
   assert.doesNotMatch(right, /Previous/);
   assert.match(left, /id="diff-old-guide"/);
   assert.match(right, /id="diff-guide"/);
-  assert.match(html, /data-document-diff-toggle[\s\S]*data-theme-toggle/);
+  assert.match(
+    html,
+    /data-document-preview-toggle[\s\S]*data-document-source-toggle[\s\S]*data-document-diff-toggle/,
+  );
+  assert.doesNotMatch(
+    /<header class="site-header">[\s\S]*?<\/header>/.exec(html)[0],
+    /data-document-diff-toggle/,
+  );
+  assert.match(html, /data-document-diff-toggle[^>]*><span>差分<\/span><\/button>/);
+  assert.match(html, /\["差分","Diff"\]/);
+  assert.doesNotMatch(html, /data-document-diff-icon|data-document-current-icon/);
   assert.doesNotMatch(
     html,
     /text-decoration:line-through|text-decoration-style:double/,

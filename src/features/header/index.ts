@@ -7,7 +7,6 @@ interface HeaderFeatureOptions {
   documentNavigation: string;
   documentMetadata: string;
   fileTree: string;
-  documentDiffControl: string;
   hasFileSidebar: boolean;
   hasDocumentSidebar: boolean;
 }
@@ -17,7 +16,6 @@ export function createHeaderFeature(
     documentNavigation: "",
     documentMetadata: "",
     fileTree: "",
-    documentDiffControl: "",
     hasFileSidebar: false,
     hasDocumentSidebar: false,
   },
@@ -29,7 +27,6 @@ export function createHeaderFeature(
 ${options.documentNavigation}${options.documentMetadata ? `      <span class="site-header-metadata-separator" aria-hidden="true"></span>\n      <div class="document-metadata">${options.documentMetadata}</div>\n` : ""}${options.fileTree}    </div>
   </div>
   <div class="site-header-actions">
-    ${options.documentDiffControl}
     <button type="button" class="site-header-action" data-theme-toggle aria-label="ダークモードに切り替え" title="ダークモードに切り替え"><svg data-theme-dark-icon viewBox="0 0 16 16" aria-hidden="true"><path d="M13.5 10.2A5.8 5.8 0 015.8 2.5 5.8 5.8 0 1013.5 10.2z" /></svg><svg data-theme-light-icon viewBox="0 0 16 16" aria-hidden="true" hidden><circle cx="8" cy="8" r="2.5"/><path d="M8 1v1.5M8 13.5V15M1 8h1.5M13.5 8H15M3.05 3.05l1.06 1.06M11.89 11.89l1.06 1.06M12.95 3.05l-1.06 1.06M4.11 11.89l-1.06 1.06"/></svg></button>
     <button type="button" class="site-header-action language-toggle" data-language-toggle aria-label="英語に切り替え" title="英語に切り替え"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6"/><path d="M2 8h12M8 2a9 9 0 010 12M8 2a9 9 0 000 12"/></svg><span data-language-label>JA</span></button>
     ${options.hasFileSidebar || options.hasDocumentSidebar ? `<div class="layout-menu-container"><button type="button" class="site-header-action layout-menu-toggle" data-layout-menu-toggle aria-label="レイアウトを変更" title="レイアウトを変更" aria-expanded="false" aria-controls="layout-menu"><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="1.75" y="2.25" width="12.5" height="11.5" rx="1.5"/><path d="M5.5 2.5v11M10.5 2.5v11"/></svg><span>Layout</span></button><div class="layout-menu" id="layout-menu" data-layout-menu role="menu" hidden><div class="layout-menu-heading">Layout</div><button type="button" role="menuitemradio" data-layout="all-visible" aria-checked="true"><span class="layout-option-icon"><i></i><i></i><i></i></span><span>すべて表示</span></button><button type="button" role="menuitemradio" data-layout="right-hidden" aria-checked="false"><span class="layout-option-icon"><i></i><i></i><i></i></span><span>左＋本文</span></button><button type="button" role="menuitemradio" data-layout="left-hidden" aria-checked="false"><span class="layout-option-icon"><i></i><i></i><i></i></span><span>本文＋右</span></button><button type="button" role="menuitemradio" data-layout="both-hidden" aria-checked="false"><span class="layout-option-icon"><i></i><i></i><i></i></span><span>本文のみ</span></button></div></div>` : ""}
@@ -60,7 +57,7 @@ const english=new Map(${JSON.stringify([
   ["アーカイブを開く", "Open archive"], ["アーカイブを閉じる", "Close archive"], ["コメントを保存", "Save comment"], ["編集をキャンセル", "Cancel editing"],
   ["有効なコメントをすべてコピー", "Copy all active comments"], ["有効なコメントだけをコピー", "Copy active comments only"], ["有効なコメントをコピー", "Copy active comments"], ["コメントをコピーしました", "Comment copied"], ["コピー失敗", "Copy failed"], ["コピーに失敗しました", "Copy failed"], ["保存中…", "Saving…"], ["保存に失敗しました", "Save failed"], ["このコメントを削除しますか？", "Delete this comment?"],
   ["コメントを追加するにはmarksites serveを起動してください", "Start marksites serve to add comments"], ["別の画面でコメントが更新されました。最新の内容を確認して、もう一度操作してください。", "Comments changed in another window. Review the latest version and try again."],
-  ["差分を表示", "Show changes"], ["最新版を表示", "Show latest"], ["前回からの変更はありません", "No changes since the previous build"], ["Preview", "Preview"], ["コード", "Code"], ["Previewを表示", "Show preview"], ["コードを表示", "Show code"], ["文書表示と操作", "Document view and actions"],
+  ["差分を表示", "Show changes"], ["最新版を表示", "Show latest"], ["前回からの変更はありません", "No changes since the previous build"], ["プレビュー", "Preview"], ["コード", "Code"], ["差分", "Diff"], ["プレビューを表示", "Show preview"], ["コードを表示", "Show code"], ["文書表示と操作", "Document view and actions"],
   ["コードをコピー", "Copy code"], ["長い行を折り返す", "Wrap long lines"], ["折り返しを解除", "Disable line wrapping"], ["コードをコピーしました", "Code copied"], ["コードをコピーできませんでした", "Could not copy code"],
   ["文書ナビゲーション", "Document navigation"], ["文書サイドバー", "Document sidebar"], ["パンくずリスト", "Breadcrumbs"], ["目次を開く", "Open outline"], ["目次を閉じる", "Close outline"], ["目次を表示", "Show outline"], ["目次を非表示", "Hide outline"], ["レイアウトを変更", "Change layout"], ["すべて表示", "Show all"], ["左＋本文", "Left + content"], ["本文＋右", "Content + right"], ["本文のみ", "Content only"]
 ])});

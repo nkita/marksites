@@ -291,7 +291,7 @@ export function createDocumentDiffFeature(
     : "";
   const disabled = hasChanges ? "" : " disabled";
   const label = hasChanges ? "差分を表示" : "前回からの変更はありません";
-  const control = `<button type="button" class="site-header-action document-diff-toggle" data-document-diff-toggle aria-label="${label}" title="${label}" aria-pressed="false"${disabled}><svg data-document-diff-icon viewBox="0 0 16 16" aria-hidden="true"><circle cx="4" cy="3" r="1.5"/><circle cx="4" cy="13" r="1.5"/><circle cx="12" cy="5" r="1.5"/><path d="M4 4.5v7M5.5 4h2A4.5 4.5 0 0112 8.5V10"/></svg><svg data-document-current-icon viewBox="0 0 16 16" aria-hidden="true" hidden><path d="M3 1.75h6l4 4v8.5H3z"/><path d="M9 1.75v4h4M5.5 9h5M5.5 11.5h5"/></svg></button>`;
+  const control = `<button type="button" class="document-content-action document-diff-toggle" data-document-diff-toggle aria-label="${label}" title="${label}" aria-pressed="false"${disabled}><span>差分</span></button>`;
 
   return {
     content,
