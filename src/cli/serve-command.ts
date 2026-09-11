@@ -29,13 +29,22 @@ async function assertAvailableInternalPath(output: string): Promise<void> {
 }
 
 export async function runServeCommand(parsed: ServeArguments): Promise<void> {
-  const { positional, host, port, open: shouldOpen, watch: shouldWatch, verbose } = parsed;
+  const {
+    positional,
+    host,
+    port,
+    open: shouldOpen,
+    watch: shouldWatch,
+    verbose,
+    historyLimit,
+  } = parsed;
   const inputArgument = positional[0] ?? ".";
   const input = resolve(inputArgument);
   if (!(await stat(input)).isDirectory())
     throw new Error(`serve input must be a directory: ${inputArgument}`);
   const conversionOptions = {
     onLog: verbose ? (message: string) => console.log(message) : undefined,
+    historyLimit,
   };
   const initial = await convertDirectoryDetailed(input, positional[1], conversionOptions);
   reportConversion(initial);

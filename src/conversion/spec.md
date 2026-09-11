@@ -10,8 +10,8 @@
 
 ### `types.ts`
 
-- `MarkdownFile`: 入力絶対パス、Markdown相対パス、HTML相対パス、メタデータ相対パス、ビルド中の本文・ハッシュを保持する。
-- `ManifestFile`: 前回成功時のsourceHash、annotationHash、assetHash、HTML・メタデータ・画像アセット・Markdown履歴パスを保持する。
+- `MarkdownFile`: 入力絶対パス、Markdown相対パス、HTML相対パス、メタデータ相対パス、ビルド中の本文・ハッシュ・差分履歴を保持する。
+- `ManifestFile`: 前回成功時のsourceHash、annotationHash、assetHash、HTML・メタデータ・画像アセット・順序付きMarkdown履歴を保持する。
 - `BuildManifest`: schema version、生成互換情報、treeHash、文書別状態を表す。
 - `ConversionResult`: CLI表示に必要な変換・スキップ・削除・作成・移動件数を返す。
 
@@ -66,7 +66,7 @@ Markdown画像の相対ローカル参照を解決し、画像内容のSHA-256�
 
 ### `history.ts`
 
-前回正常ビルド時のMarkdownを出力先の`.marksites-history/`へ文書パスのSHA-256を名前として1世代だけ保存する。履歴はHTML生成成功後にアトミック更新し、削除文書と一意なリネーム元の履歴を削除する。
+本文が変わるたびに、文書パスとsourceHashから決まる不変なMarkdownスナップショットを出力先の`.marksites-history/`へ保存する。manifestは現在版を含む順序付き履歴を保持し、既定では現在版と過去5世代に制限する。`historyLimit`変更時はHTMLを全件再生成し、正常生成後に上限外のスナップショットを削除する。本文未変更の再生成では世代を追加しない。複数世代形式を持たない旧出力は最新・比較元履歴から移行し、比較元Markdownが残っていない場合は既存HTMLの差分を引き継ぐ。
 
 ### `watch.ts`
 
@@ -97,7 +97,7 @@ manifestのgenerator versionは実行中パッケージの`package.json`から�
 - `warnAboutStaleLinks()`: リネーム前パスを含む可能性のあるリンクを警告する。
 - `loadMetadata()`: メタデータの作成・検証とannotationHash計算を行う。
 - `removeDeletedHtml()`: 削除Markdownの旧HTMLだけを削除し、メタデータは孤立データとして保持する。
-- `renderChangedFiles()`: 計画上必要なHTMLだけを、前回Markdownとの差分を含めてアトミックに書き込む。
+- `renderChangedFiles()`: 計画上必要なHTMLだけを、最新版と保持中の各過去版との差分を含めてアトミックに書き込む。比較結果はHTML内のtemplateへ埋め込み、ブラウザで選択された一つだけを表示する。
 - `convertDirectoryDetailed()`: 探索からmanifest確定までを順番に組み立てる。
 - `convertDirectory()`: 互換用に変換件数だけを返す。
 

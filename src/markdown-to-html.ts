@@ -14,6 +14,7 @@ import { createTableOfContentsFeature } from "./features/table-of-contents/index
 import { createSidebarFeature } from "./features/sidebar/index.js";
 import { createImageViewerFeature } from "./features/image-viewer/index.js";
 import { createDocumentDiffFeature } from "./features/document-diff/index.js";
+import type { DocumentDiffVersion } from "./features/document-diff/index.js";
 import { createDocumentViewFeature } from "./features/document-view/index.js";
 import { createTablesFeature } from "./features/tables/index.js";
 import { renderDocument } from "./template/document.js";
@@ -33,6 +34,8 @@ export function renderMarkdown(
   options: RenderOptions = {},
   annotations?: AnnotationDocument,
   previousMarkdown?: string,
+  preservedDiffContent?: string,
+  previousVersions?: DocumentDiffVersion[],
 ): string {
   const rawTitle = options.title ?? "Markdown文書";
   const currentFileName = options.fileTree?.breadcrumbs?.find(
@@ -67,6 +70,8 @@ export function renderMarkdown(
     markdown,
     previousMarkdown,
     options.markedOptions,
+    preservedDiffContent,
+    previousVersions,
   );
   const documentView = createDocumentViewFeature(
     markdown,

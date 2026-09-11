@@ -9,7 +9,7 @@ import { runServeCommand } from "./cli/serve-command.js";
 
 function usage(): never {
   console.error(
-    "Usage:\n  marksites [input.md|input-directory] [output.html|output-directory] [--watch] [--verbose]\n  marksites serve [input-directory] [output-directory] [--host HOST] [--port PORT] [--open] [--watch] [--verbose]",
+    "Usage:\n  marksites [input.md|input-directory] [output.html|output-directory] [--history-limit COUNT] [--watch] [--verbose]\n  marksites serve [input-directory] [output-directory] [--history-limit COUNT] [--host HOST] [--port PORT] [--open] [--watch] [--verbose]",
   );
   process.exit(1);
 }

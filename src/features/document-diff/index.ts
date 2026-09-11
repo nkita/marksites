@@ -17,15 +17,21 @@ export interface DocumentDiffFeature {
   script: string;
   hasChanges: boolean;
 }
+export interface DocumentDiffVersion {
+  markdown: string;
+  label: string;
+}
 type RichToken = Token & Record<string, any>;
 
-export function createDocumentDiffFeature(
+function createSingleDocumentDiffFeature(
   current: string,
   previous: string | undefined,
   markedOptions: Omit<MarkedOptions, "async" | "renderer"> = {},
+  preservedContent?: string,
 ): DocumentDiffFeature {
   const parts = previous === undefined ? [] : diffBlocks(previous, current);
-  const hasChanges = parts.some((part) => part.kind !== "same");
+  const hasChanges =
+    preservedContent !== undefined || parts.some((part) => part.kind !== "same");
   const inlineDiff = (old: string, current: string) =>
     renderInlineDiff(old, current, markedOptions);
   const renderers = [0, 1].map((side) => {
@@ -286,9 +292,11 @@ export function createDocumentDiffFeature(
       return `<div class="document-diff-row">${cells.map((html, side) => `<section class="document-diff-cell document-diff-${side ? "current" : "previous"}${html ? "" : " document-diff-empty"}" aria-label="${side ? "現バージョン" : "前バージョン"}">${html}</section>`).join("")}</div>`;
     })
     .join("\n");
-  const content = hasChanges
-    ? `<div class="document-diff-comparison"><div class="document-diff-labels"><span>前バージョン</span><span>現バージョン</span></div>${body}</div>`
-    : "";
+  const content =
+    preservedContent ??
+    (hasChanges
+      ? `<div class="document-diff-comparison"><div class="document-diff-labels"><span>前バージョン</span><span>現バージョン</span></div>${body}</div>`
+      : "");
   const disabled = hasChanges ? "" : " disabled";
   const label = hasChanges ? "差分を表示" : "前回からの変更はありません";
   const control = `<button type="button" class="document-content-action document-diff-toggle" data-document-diff-toggle aria-label="${label}" title="${label}" aria-pressed="false"${disabled}><span>差分</span></button>`;
@@ -297,6 +305,58 @@ export function createDocumentDiffFeature(
     content,
     control,
     styles: diffStyles,
+    script: hasChanges ? diffScript : "",
+    hasChanges,
+  };
+}
+
+export function createDocumentDiffFeature(
+  current: string,
+  previous: string | undefined,
+  markedOptions: Omit<MarkedOptions, "async" | "renderer"> = {},
+  preservedContent?: string,
+  versions?: DocumentDiffVersion[],
+): DocumentDiffFeature {
+  if (!versions?.length)
+    return createSingleDocumentDiffFeature(
+      current,
+      previous,
+      markedOptions,
+      preservedContent,
+    );
+  const comparisons = versions
+    .map((version) => ({
+      version,
+      feature: createSingleDocumentDiffFeature(
+        current,
+        version.markdown,
+        markedOptions,
+      ),
+    }))
+    .filter(({ feature }) => feature.hasChanges);
+  if (comparisons.length === 0)
+    return createSingleDocumentDiffFeature(current, previous, markedOptions);
+  const rendered = comparisons.map(({ feature }) => feature);
+  const latest = rendered.length - 1;
+  const contentFor = (index: number) => {
+    const selector = `<span class="document-diff-version-picker"><label class="document-diff-version-label" for="document-diff-version-${index}">比較元</label><select id="document-diff-version-${index}" data-document-diff-version>${comparisons.map(({ version }, optionIndex) => `<option value="${optionIndex}"${optionIndex === index ? " selected" : ""}>${escapeHtml(version.label)}</option>`).join("")}</select></span>`;
+    return rendered[index]!.content.replace(
+      "<span>前バージョン</span>",
+      `<span class="document-diff-previous-label"><span>前バージョン</span>${selector}</span>`,
+    );
+  };
+  const templates = rendered
+    .map(
+      (_feature, index) =>
+        `<template data-document-diff-template="${index}">${contentFor(index)}</template>`,
+    )
+    .join("");
+  const hasChanges = rendered.some((feature) => feature.hasChanges);
+  const label = hasChanges ? "差分を表示" : "前回からの変更はありません";
+  return {
+    ...rendered[latest]!,
+    content: `<div data-document-diff-active>${contentFor(latest)}</div>${templates}`,
+    control: `<button type="button" class="document-content-action document-diff-toggle" data-document-diff-toggle aria-label="${label}" title="${label}" aria-pressed="false"${hasChanges ? "" : " disabled"}><span>差分</span></button>`,
     script: hasChanges ? diffScript : "",
     hasChanges,
   };

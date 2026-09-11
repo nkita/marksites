@@ -83,6 +83,23 @@ async function removeUnusedAssets(
   }
 }
 
+async function removeUnusedHistoryVersions(
+  previous: BuildManifest | undefined,
+  files: MarkdownFile[],
+  output: string,
+): Promise<void> {
+  const current = new Set(
+    files.flatMap((file) =>
+      (file.historyVersions ?? []).map((version) => version.path),
+    ),
+  );
+  for (const version of Object.values(previous?.files ?? {}).flatMap(
+    (file) => file.historyVersions ?? [],
+  )) {
+    if (!current.has(version.path)) await removeHistory(output, version.path);
+  }
+}
+
 async function moveRenamedDocuments(
   files: MarkdownFile[],
   previous: BuildManifest | undefined,
@@ -118,6 +135,9 @@ async function moveRenamedDocuments(
       deleted++;
     }
     await removeHistory(output, oldData.history);
+    await removeHistory(output, oldData.previousHistory);
+    for (const version of oldData.historyVersions ?? [])
+      await removeHistory(output, version.path);
     warnAboutStaleLinks(files, old);
     removed.splice(removed.indexOf(old), 1);
   }
@@ -172,6 +192,9 @@ async function removeDeletedHtml(
       orphaned.push(info.annotations);
     }
     await removeHistory(output, info.history);
+    await removeHistory(output, info.previousHistory);
+    for (const version of info.historyVersions ?? [])
+      await removeHistory(output, version.path);
   }
   return { deleted, orphaned };
 }
@@ -225,6 +248,15 @@ async function renderChangedFiles(
           },
           file.annotations,
           file.previousSource,
+          file.preservedDiffContent,
+          file.historyVersions
+            ?.slice(0, -1)
+            .map((version, index, versions) => ({
+              markdown: version.source!,
+              label: version.modifiedAt
+                ? new Date(version.modifiedAt).toLocaleString("ja-JP")
+                : `過去版 ${versions.length - index}`,
+            })),
         ),
       );
       converted++;
@@ -242,6 +274,15 @@ async function renderChangedFiles(
       assetHash: file.assetHash,
       assets: file.assetOutputs,
       history: file.historyPath,
+      previousHistory:
+        file.previousSource === undefined ? undefined : file.previousHistoryPath,
+      historyVersions: file.historyVersions?.map(
+        ({ sourceHash, path, modifiedAt }) => ({
+          sourceHash,
+          path,
+          modifiedAt,
+        }),
+      ),
     };
   }
   return { converted, skipped, files: manifestFiles };
@@ -275,7 +316,8 @@ export async function convertDirectoryDetailed(
   if (loaded.warning) console.warn(loaded.warning);
   const previous = loaded.manifest;
   await loadSources(files);
-  await loadHistories(files, previous, output);
+  const historyLimit = options.historyLimit ?? 5;
+  await loadHistories(files, previous, output, historyLimit);
   await prepareAssets(files, output);
   let annotationsMoved = await migrateLegacyMetadata(files, output);
 
@@ -283,7 +325,13 @@ export async function convertDirectoryDetailed(
   const renamed = await moveRenamedDocuments(files, previous, output, removed);
   annotationsMoved += renamed.metadataMoved;
   const annotationsCreated = await loadMetadata(files, output);
-  const plan = createBuildPlan(files, previous, loaded.warning, removed);
+  const plan = createBuildPlan(
+    files,
+    previous,
+    loaded.warning,
+    removed,
+    historyLimit,
+  );
 
   const removedResult = await removeDeletedHtml(removed, previous, output);
   const rendered = await renderChangedFiles(
@@ -294,9 +342,24 @@ export async function convertDirectoryDetailed(
     options,
   );
   for (const file of files) {
+    const old = previous?.files[file.relativePath];
+    if (
+      old &&
+      old.sourceHash !== file.sourceHash &&
+      file.latestSource !== undefined
+    ) {
+      await writeHistory(
+        output,
+        file.previousHistoryPath!,
+        file.latestSource,
+      );
+    }
     await writeHistory(output, file.historyPath!, file.source!);
+    for (const version of file.historyVersions ?? [])
+      await writeHistory(output, version.path, version.source!);
   }
   await removeUnusedAssets(previous, files, output);
+  await removeUnusedHistoryVersions(previous, files, output);
   await writeManifest(manifestPath, {
     schemaVersion: 1,
     generator: {
@@ -306,6 +369,7 @@ export async function convertDirectoryDetailed(
       renderFingerprint: plan.renderFingerprint,
     },
     treeHash: plan.treeHash,
+    historyLimit,
     files: rendered.files,
   });
   return {

@@ -8,20 +8,20 @@ const fixtures = [
     name: "basic document",
     markdown: "# Title\n\nParagraph with [link](https://example.com).\n",
     options: {},
-    hash: "e2b7f554e919280acff09989a4f5107d9e3c271ce1ebdfe7760f0b3a794c9a2b",
+    hash: "dd6c5cb0caee47f2ef9a5c69c167d6e0b25985f0e79f2897976c6fb855fa0393",
   },
   {
     name: "interactive table",
     markdown:
       "# Data\n\n| Name | Value |\n| --- | ---: |\n| two | 2 |\n| ten | 10 |\n",
     options: {},
-    hash: "48dc0aa834da8da12bbaa8715817fed665fb68ce323b4c4cb441d5d3fdd63665",
+    hash: "30c918ff9658db40fa235bc9dc4ff85802834d59e9b2307a6b436daea3dedfda",
   },
   {
     name: "disabled optional assets",
     markdown: "# One\n\n## Two\n",
     options: { tableOfContents: false, highlight: false },
-    hash: "d8a6daf0382c500927ba7bd93c4e3456dba32b225a53b0326da5342de52fafaa",
+    hash: "f315d388d5deb569223e9b23bec169c23226a663e3e941642092d514868c0d9b",
   },
   {
     name: "directory navigation",
@@ -52,7 +52,7 @@ const fixtures = [
         ],
       },
     },
-    hash: "de07fd1119acfc6b99bc2e56b76cb9511b4d215455239081014af5ac6182609d",
+    hash: "71c2cf80b68d3835984c25b80cfd3ced3a48152fd8425786e9544da0d81e6450",
   },
 ];
 

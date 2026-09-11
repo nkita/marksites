@@ -4,6 +4,7 @@ import {
   mkdtemp,
   readFile,
   rename,
+  rm,
   stat,
   utimes,
   writeFile,
@@ -56,6 +57,36 @@ test("stores one previous Markdown version and embeds its diff", async () => {
   assert.match(html, /document-diff-delete"><p>Before\.<\/p>/);
   assert.match(html, /document-diff-insert"><p>After\.<\/p>/);
   assert.equal(await readFile(join(output, history), "utf8"), "# Home\n\nAfter.\n");
+  const secondManifest = JSON.parse(
+    await readFile(join(output, ".marksites-build.json"), "utf8"),
+  );
+  const previousHistory = secondManifest.files["index.md"].previousHistory;
+  assert.match(
+    previousHistory,
+    /^\.marksites-history\/[a-f0-9]{64}\.previous\.md$/,
+  );
+  assert.equal(
+    await readFile(join(output, previousHistory), "utf8"),
+    "# Home\n\nBefore.\n",
+  );
+
+  secondManifest.generator.version = "0.0.0-stale";
+  await writeFile(
+    join(output, ".marksites-build.json"),
+    JSON.stringify(secondManifest),
+  );
+  await convertDirectoryDetailed(input, output);
+  const rebuiltHtml = await readFile(join(output, "index.html"), "utf8");
+  assert.match(rebuiltHtml, /document-diff-delete"><p>Before\.<\/p>/);
+  assert.match(rebuiltHtml, /document-diff-insert"><p>After\.<\/p>/);
+
+  await writeFile(source, "# Home\n\nLatest.\n");
+  await convertDirectoryDetailed(input, output);
+  const latestHtml = await readFile(join(output, "index.html"), "utf8");
+  assert.match(latestHtml, /document-diff-inline-delete">After<\/del>/);
+  assert.match(latestHtml, /document-diff-inline-insert">Latest<\/ins>/);
+  assert.match(latestHtml, /data-document-diff-version/);
+  assert.match(latestHtml, /document-diff-delete"><p>Before\.<\/p>/);
 });
 
 test("rebuilds HTML when only the Markdown update time changes", async () => {
@@ -80,6 +111,66 @@ test("rebuilds HTML when only the Markdown update time changes", async () => {
     await readFile(join(output, "index.html"), "utf8"),
     /更新 2026-07-17 03:00/,
   );
+});
+
+test("preserves an embedded diff while migrating old history on a forced rebuild", async () => {
+  const root = await mkdtemp(join(tmpdir(), "marksites-history-migration-"));
+  const input = join(root, "docs"),
+    output = join(root, "site"),
+    source = join(input, "index.md"),
+    manifestPath = join(output, ".marksites-build.json");
+  await mkdir(input);
+  await writeFile(source, "# Home\n\nBefore.\n");
+  await convertDirectoryDetailed(input, output);
+  await writeFile(source, "# Home\n\nAfter.\n");
+  await convertDirectoryDetailed(input, output);
+
+  const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+  await rm(join(output, manifest.files["index.md"].previousHistory));
+  for (const version of manifest.files["index.md"].historyVersions)
+    await rm(join(output, version.path));
+  delete manifest.files["index.md"].previousHistory;
+  delete manifest.files["index.md"].historyVersions;
+  manifest.generator.version = "0.0.0-stale";
+  await writeFile(manifestPath, JSON.stringify(manifest));
+
+  await convertDirectoryDetailed(input, output);
+  const html = await readFile(join(output, "index.html"), "utf8");
+  assert.match(html, /document-diff-delete"><p>Before\.<\/p>/);
+  assert.match(html, /document-diff-insert"><p>After\.<\/p>/);
+  const migrated = JSON.parse(await readFile(manifestPath, "utf8"));
+  assert.equal(migrated.files["index.md"].previousHistory, undefined);
+});
+
+test("keeps the configured number of past versions for current comparisons", async () => {
+  const root = await mkdtemp(join(tmpdir(), "marksites-history-limit-"));
+  const input = join(root, "docs"),
+    output = join(root, "site"),
+    source = join(input, "index.md"),
+    manifestPath = join(output, ".marksites-build.json");
+  await mkdir(input);
+  for (const version of ["A", "B", "C", "D"]) {
+    await writeFile(source, `# ${version}\n`);
+    await convertDirectoryDetailed(input, output, { historyLimit: 2 });
+  }
+
+  const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+  const versions = manifest.files["index.md"].historyVersions;
+  assert.equal(manifest.historyLimit, 2);
+  assert.equal(versions.length, 3);
+  assert.equal(
+    await readFile(join(output, versions[0].path), "utf8"),
+    "# B\n",
+  );
+  const html = await readFile(join(output, "index.html"), "utf8");
+  assert.equal(
+    (/<div data-document-diff-active>([\s\S]*?)<\/div><template/.exec(html)?.[1]
+      .match(/<option value=/g) ?? []).length,
+    2,
+  );
+  assert.match(html, /document-diff-inline-delete">B<\/del>/);
+  assert.match(html, /document-diff-inline-delete">C<\/del>/);
+  assert.doesNotMatch(html, /document-diff-inline-delete">A<\/del>/);
 });
 
 test("rebuilds every page when a file-tree update time changes", async () => {

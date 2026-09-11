@@ -2,6 +2,7 @@ export interface ConvertArguments {
   positional: string[];
   watch: boolean;
   verbose: boolean;
+  historyLimit: number;
 }
 
 export interface ServeArguments extends ConvertArguments {
@@ -15,15 +16,25 @@ function unknownOption(argument: string): never {
 }
 
 export function parseConvertArguments(args: string[]): ConvertArguments | null {
-  const watch = args.includes("--watch");
-  const verbose = args.includes("--verbose");
-  const positional = args.filter(
-    (argument) => argument !== "--watch" && argument !== "--verbose",
-  );
-  const unknown = positional.find((argument) => argument.startsWith("--"));
-  if (unknown) unknownOption(unknown);
+  const positional: string[] = [];
+  let watch = false;
+  let verbose = false;
+  let historyLimit = 5;
+  for (let index = 0; index < args.length; index++) {
+    const argument = args[index]!;
+    if (argument === "--watch") watch = true;
+    else if (argument === "--verbose") verbose = true;
+    else if (argument === "--history-limit") {
+      const value = args[++index];
+      if (!value) return null;
+      historyLimit = Number(value);
+      if (!Number.isInteger(historyLimit) || historyLimit < 1)
+        throw new Error(`Invalid history limit: ${value}`);
+    } else if (argument.startsWith("--")) unknownOption(argument);
+    else positional.push(argument);
+  }
   if (positional.length > 2) return null;
-  return { positional, watch, verbose };
+  return { positional, watch, verbose, historyLimit };
 }
 
 export function parseServeArguments(args: string[]): ServeArguments | null {
@@ -33,6 +44,7 @@ export function parseServeArguments(args: string[]): ServeArguments | null {
   let open = false;
   let watch = false;
   let verbose = false;
+  let historyLimit = 5;
   for (let index = 0; index < args.length; index++) {
     const argument = args[index]!;
     if (argument === "--open") {
@@ -47,14 +59,22 @@ export function parseServeArguments(args: string[]): ServeArguments | null {
       verbose = true;
       continue;
     }
-    if (argument === "--host" || argument === "--port") {
+    if (
+      argument === "--host" ||
+      argument === "--port" ||
+      argument === "--history-limit"
+    ) {
       const value = args[++index];
       if (!value) return null;
       if (argument === "--host") host = value;
-      else {
+      else if (argument === "--port") {
         port = Number(value);
         if (!Number.isInteger(port) || port < 0 || port > 65535)
           throw new Error(`Invalid port: ${value}`);
+      } else {
+        historyLimit = Number(value);
+        if (!Number.isInteger(historyLimit) || historyLimit < 1)
+          throw new Error(`Invalid history limit: ${value}`);
       }
       continue;
     }
@@ -62,5 +82,5 @@ export function parseServeArguments(args: string[]): ServeArguments | null {
     positional.push(argument);
   }
   if (positional.length > 2) return null;
-  return { positional, host, port, open, watch, verbose };
+  return { positional, host, port, open, watch, verbose, historyLimit };
 }

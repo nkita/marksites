@@ -14,7 +14,18 @@ export interface MarkdownFile {
   assetOutputs?: string[];
   rewriteImages?: (token: import("marked").Token) => void;
   previousSource?: string;
+  latestSource?: string;
   historyPath?: string;
+  previousHistoryPath?: string;
+  preservedDiffContent?: string;
+  historyVersions?: HistoryVersion[];
+}
+
+export interface HistoryVersion {
+  sourceHash: string;
+  path: string;
+  modifiedAt?: string;
+  source?: string;
 }
 
 export interface ManifestFile {
@@ -26,6 +37,8 @@ export interface ManifestFile {
   assetHash?: string;
   assets?: string[];
   history?: string;
+  previousHistory?: string;
+  historyVersions?: HistoryVersion[];
 }
 
 export interface BuildManifest {
@@ -37,6 +50,7 @@ export interface BuildManifest {
     renderFingerprint: string;
   };
   treeHash: string;
+  historyLimit?: number;
   files: Record<string, ManifestFile>;
 }
 
@@ -52,4 +66,5 @@ export interface ConversionResult {
 
 export interface ConversionOptions {
   onLog?: (message: string) => void;
+  historyLimit?: number;
 }

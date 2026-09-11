@@ -77,7 +77,7 @@
 
 ### `document-diff/index.ts`
 
-- `createDocumentDiffFeature(current, previous, markedOptions)`: 前回と現在のMarkdownを対応付け、左右比較本文、固定ヘッダー用切り替えボタン、スタイル、行高同期スクリプト、変更有無を返す。registryは行高同期スクリプトもHTTP配信時に許可する。
+- `createDocumentDiffFeature(current, previous, markedOptions, preservedContent, versions)`: 選択可能な過去版と現在のMarkdownを対応付け、左右比較本文、比較元セレクター、固定ヘッダー用切り替えボタン、スタイル、行高同期スクリプト、変更有無を返す。registryは行高同期スクリプトもHTTP配信時に許可する。
 
 ### `document-view/index.ts`
 

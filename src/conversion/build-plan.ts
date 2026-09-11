@@ -29,6 +29,7 @@ export function createBuildPlan(
   previous: BuildManifest | undefined,
   manifestWarning?: string,
   removed = findRemovedPaths(files, previous),
+  historyLimit = 5,
 ): BuildPlan {
   const treeHash = contentHash(
     files
@@ -51,6 +52,7 @@ export function createBuildPlan(
       previous.generator.outputCompatibilityVersion !==
         OUTPUT_COMPATIBILITY_VERSION ||
       previous.generator.renderFingerprint !== fingerprint ||
+      previous.historyLimit !== historyLimit ||
       previous.treeHash !== treeHash,
   };
 }

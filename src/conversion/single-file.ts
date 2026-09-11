@@ -10,11 +10,20 @@ import {
   pathExists,
 } from "./paths.js";
 import { prepareImageAssets } from "./assets.js";
-import { readHistory, toHistoryPath, writeHistory } from "./history.js";
+import {
+  readHistory,
+  toHistoryPath,
+  toPreviousHistoryPath,
+  toVersionHistoryPath,
+  writeHistory,
+} from "./history.js";
+import { contentHash } from "./rendering.js";
+import type { ConversionOptions, HistoryVersion } from "./types.js";
 
 export async function convertFile(
   input: string,
   outputArgument?: string,
+  options: ConversionOptions = {},
 ): Promise<string> {
   if (!isMarkdown(input))
     throw new Error(`Input file must use .md or .markdown: ${input}`);
@@ -48,7 +57,50 @@ export async function convertFile(
   );
   const outputRoot = dirname(output);
   const historyPath = toHistoryPath(basename(output));
-  const previousSource = await readHistory(outputRoot, historyPath);
+  const previousHistoryPath = toPreviousHistoryPath(basename(output));
+  const latestSource = await readHistory(outputRoot, historyPath);
+  const storedPreviousSource = await readHistory(
+    outputRoot,
+    previousHistoryPath,
+  );
+  const sourceChanged = latestSource !== undefined && latestSource !== markdown;
+  const previousSource = sourceChanged ? latestSource : storedPreviousSource;
+  const currentHash = contentHash(markdown);
+  const versionPath = toVersionHistoryPath(basename(output), currentHash);
+  const versionIndexPath = join(
+    outputRoot,
+    ...dirname(versionPath).split("/"),
+    "index.json",
+  );
+  let versions: HistoryVersion[] = [];
+  try {
+    const stored = JSON.parse(await readFile(versionIndexPath, "utf8")) as {
+      versions?: HistoryVersion[];
+    };
+    for (const version of stored.versions ?? []) {
+      const source = await readHistory(outputRoot, version.path);
+      if (source !== undefined) versions.push({ ...version, source });
+    }
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "ENOENT" &&
+        !(error instanceof SyntaxError)) throw error;
+  }
+  if (versions.length === 0 && previousSource !== undefined) {
+    const sourceHash = contentHash(previousSource);
+    versions.push({
+      sourceHash,
+      path: toVersionHistoryPath(basename(output), sourceHash),
+      source: previousSource,
+    });
+  }
+  if (versions.at(-1)?.sourceHash !== currentHash)
+    versions.push({
+      sourceHash: currentHash,
+      path: versionPath,
+      modifiedAt: sourceStat.mtime.toISOString(),
+      source: markdown,
+    });
+  versions = versions.slice(-((options.historyLimit ?? 5) + 1));
   await atomicWriteFile(
     output,
     renderMarkdown(
@@ -62,8 +114,28 @@ export async function convertFile(
       },
       annotations,
       previousSource,
+      undefined,
+      versions.slice(0, -1).map((version, index, previousVersions) => ({
+        markdown: version.source!,
+        label: version.modifiedAt ?? `過去版 ${previousVersions.length - index}`,
+      })),
     ),
   );
+  if (sourceChanged) {
+    await writeHistory(outputRoot, previousHistoryPath, latestSource);
+  }
   await writeHistory(outputRoot, historyPath, markdown);
+  for (const version of versions)
+    await writeHistory(outputRoot, version.path, version.source!);
+  await atomicWriteFile(
+    versionIndexPath,
+    `${JSON.stringify({
+      versions: versions.map(({ sourceHash, path, modifiedAt }) => ({
+        sourceHash,
+        path,
+        modifiedAt,
+      })),
+    }, null, 2)}\n`,
+  );
   return output;
 }

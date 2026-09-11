@@ -26,8 +26,8 @@
 
 ### `arguments.ts`
 
-- `parseConvertArguments()`: 通常変換の位置引数、watch、verboseを副作用なしで解析する。
-- `parseServeArguments()`: serveの位置引数、host、port、open、watch、verboseを副作用なしで解析する。
+- `parseConvertArguments()`: 通常変換の位置引数、watch、verbose、history-limitを副作用なしで解析する。
+- `parseServeArguments()`: serveの位置引数、host、port、open、watch、verbose、history-limitを副作用なしで解析する。
 
 引数個数またはオプション値が不足する場合は`null`を返してエントリポイントへusage表示を委ね、不明なオプションと不正なportは具体的なエラーにする。
 
@@ -50,7 +50,7 @@
 `src/cli.ts`から呼び出されるコマンドモジュールは次を担当する。
 
 - 解析済みの`marksites [input] [output]`と`marksites serve [input] [output]`の実行
-- `--host`、`--port`、`--open`、`--watch`、`--verbose`の処理。ポート未指定時は3000から空きポートを昇順に探索し、`--port`指定時はそのポートだけを使用する
+- `--host`、`--port`、`--open`、`--watch`、`--verbose`、`--history-limit`の処理。履歴上限は既定5、最小1とする。ポート未指定時は3000から空きポートを昇順に探索し、`--port`指定時はそのポートだけを使用する
 - 通常のディレクトリ変換と`serve`で、`--watch`指定時に入力ディレクトリの変更を監視して差分変換する。単一ファイル入力では`--watch`を受け付けない
 - `--verbose`指定時は文書ごとの変換・スキップとwatchイベント、watch再変換開始を表示する。未指定時は従来の集計表示だけを維持する
 - 入力省略時のカレントディレクトリ解決
