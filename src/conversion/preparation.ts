@@ -26,7 +26,7 @@ export async function loadHistories(
   files: MarkdownFile[],
   previous: BuildManifest | undefined,
   output: string,
-  historyLimit = 5,
+  historyLimit = 10,
 ): Promise<void> {
   for (const file of files) {
     file.historyPath = toHistoryPath(file.relativePath);

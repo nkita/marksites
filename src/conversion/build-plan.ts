@@ -1,4 +1,3 @@
-import { countActiveAnnotations } from "../annotations/model.js";
 import {
   GENERATOR_VERSION,
   OUTPUT_COMPATIBILITY_VERSION,
@@ -29,13 +28,14 @@ export function createBuildPlan(
   previous: BuildManifest | undefined,
   manifestWarning?: string,
   removed = findRemovedPaths(files, previous),
-  historyLimit = 5,
+  historyLimit = 10,
+  documentDiff = true,
 ): BuildPlan {
   const treeHash = contentHash(
     files
       .map(
         (file) =>
-          `${file.relativePath}\0${file.modifiedAt}\0${file.annotations ? countActiveAnnotations(file.annotations) : 0}`,
+          `${file.relativePath}\0${file.modifiedAt}`,
       )
       .sort()
       .join("\n"),
@@ -53,6 +53,7 @@ export function createBuildPlan(
         OUTPUT_COMPATIBILITY_VERSION ||
       previous.generator.renderFingerprint !== fingerprint ||
       previous.historyLimit !== historyLimit ||
+      (previous.documentDiff ?? true) !== documentDiff ||
       previous.treeHash !== treeHash,
   };
 }

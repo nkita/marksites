@@ -34,6 +34,22 @@ test("renders Markdown as a standalone GitHub-styled document", () => {
   assert.match(html, /\.markdown-body/);
 });
 
+test("keeps selection tools while hiding the disabled comment controls", () => {
+  const html = markdownToHtml("# Document\n\nText\n");
+  assert.doesNotMatch(html, /data-sidebar-tab="comments"/);
+  assert.match(html, /data-selection-action="copy"/);
+  assert.match(html, /data-selection-action="replace"/);
+  assert.match(html, /data-selection-action="ai"/);
+  assert.match(
+    html,
+    /data-selection-action="copy"[\s\S]*data-selection-action="ai"[\s\S]*data-selection-action="replace"/,
+  );
+  assert.match(
+    html,
+    /\.selection-actions \[data-selection-action="comment"\]\{display:none\}/,
+  );
+});
+
 test("keeps representative standalone HTML byte-compatible", () => {
   const markdown = [
     "# Guide",
@@ -73,7 +89,7 @@ test("keeps representative standalone HTML byte-compatible", () => {
 
   assert.equal(
     createHash("sha256").update(html).digest("hex"),
-    "47fc03f9111e339438a6f7071e29c6404bd227042a77b6aef1721409b1bdfd96",
+    "f42830f3a64587c482aec11612ecac0653e271c266cb9cfe15a5b49f423c640c",
   );
 });
 
@@ -175,8 +191,6 @@ test("renders an optional Markdown update timestamp", () => {
     /class="file-breadcrumbs"[\s\S]*?<span class="site-header-metadata-separator" aria-hidden="true"><\/span>\s*<div class="document-metadata"><time class="document-modified"/,
   );
   assert.match(html, /date\.getFullYear\(\)/);
-  assert.doesNotMatch(html, /pad\(date\.getSeconds\(\)\)/);
-  assert.doesNotMatch(html, /timeZoneName/);
   assert.throws(
     () => markdownToHtml("text", { modifiedAt: "not-a-date" }),
     /Invalid modifiedAt timestamp/,

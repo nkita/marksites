@@ -9,6 +9,8 @@ export interface RenderOptions {
   highlight?: boolean;
   /** Add a table of contents generated from headings. Defaults to true. */
   tableOfContents?: boolean | TableOfContentsOptions;
+  /** Add the document diff view when history is available. Defaults to true. */
+  documentDiff?: boolean;
   /** Add a repository-style file tree for a converted Markdown collection. */
   fileTree?: FileTreeOptions;
   /** ISO 8601 timestamp shown as the Markdown source's last update time. */

@@ -1,7 +1,6 @@
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import type { Token } from "marked";
-import { emptyAnnotationDocument } from "../annotations/model.js";
 import { renderMarkdown } from "../markdown-to-html.js";
 
 interface PackageMetadata {
@@ -13,7 +12,7 @@ const packageMetadata = JSON.parse(
 ) as PackageMetadata;
 
 export const GENERATOR_VERSION = packageMetadata.version;
-export const OUTPUT_COMPATIBILITY_VERSION = 10;
+export const OUTPUT_COMPATIBILITY_VERSION = 11;
 
 export function contentHash(value: string | Buffer): string {
   return `sha256:${createHash("sha256").update(value).digest("hex")}`;
@@ -56,7 +55,6 @@ export function renderFingerprint(): string {
       },
       markedOptions: { walkTokens: rewriteMarkdownLinks },
     },
-    emptyAnnotationDocument("index.md"),
   );
   return contentHash(`${OUTPUT_COMPATIBILITY_VERSION}\n${representativeHtml}`);
 }

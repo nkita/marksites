@@ -245,6 +245,7 @@ async function renderChangedFiles(
                 file.rewriteImages?.(token);
               },
             },
+            documentDiff: options.documentDiff,
           },
           file.annotations,
           file.previousSource,
@@ -316,7 +317,7 @@ export async function convertDirectoryDetailed(
   if (loaded.warning) console.warn(loaded.warning);
   const previous = loaded.manifest;
   await loadSources(files);
-  const historyLimit = options.historyLimit ?? 5;
+  const historyLimit = options.historyLimit ?? 10;
   await loadHistories(files, previous, output, historyLimit);
   await prepareAssets(files, output);
   let annotationsMoved = await migrateLegacyMetadata(files, output);
@@ -331,6 +332,7 @@ export async function convertDirectoryDetailed(
     loaded.warning,
     removed,
     historyLimit,
+    options.documentDiff ?? true,
   );
 
   const removedResult = await removeDeletedHtml(removed, previous, output);
@@ -370,6 +372,7 @@ export async function convertDirectoryDetailed(
     },
     treeHash: plan.treeHash,
     historyLimit,
+    documentDiff: options.documentDiff ?? true,
     files: rendered.files,
   });
   return {

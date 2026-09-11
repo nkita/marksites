@@ -262,7 +262,9 @@ test("renders a GitHub-style file tree with a current page", () => {
   assert.match(html, /details\[data-folder-id=/);
   const scripts = [
     ...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g),
-  ].map((match) => match[1]);
+  ]
+    .filter((match) => !/type="application\/json"/.test(match[0]))
+    .map((match) => match[1]);
   for (const script of scripts) {
     assert.doesNotThrow(() => new Function(script));
   }

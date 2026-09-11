@@ -39,8 +39,8 @@ export function createAnnotationsFeature(
   const markup = `<script id="marksites-annotations-data" type="application/json">${safeJson(data)}</script>
 <div class="selection-actions" id="selection-actions" hidden role="toolbar" aria-label="選択範囲の操作">
   <button type="button" data-selection-action="copy" data-tooltip="選択範囲をコピー">${renderCopyIcon()}<span data-copy-label>コピー</span></button>
-  <button type="button" data-selection-action="replace" data-tooltip="文書内の同じ文字列を置換">${renderEditIcon()}<span>文字列置換</span></button>
   <button type="button" data-selection-action="ai" data-tooltip="AI向けの形式でコピー">${renderCopyIcon()}<span data-copy-label>AI向けコピー</span></button>
+  <button type="button" data-selection-action="replace" data-tooltip="文書内の同じ文字列を置換">${renderEditIcon()}<span>文字列置換</span></button>
   <button type="button" data-selection-action="comment" data-tooltip="選択範囲にコメントを追加" disabled title="コメントを追加するにはmarksites serveを起動してください">${renderAddIcon()}<span>コメント</span></button>
 </div>
 <form class="text-replace-alert" id="text-replace-alert" hidden role="alert" aria-live="polite">

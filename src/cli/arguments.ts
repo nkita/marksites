@@ -3,6 +3,7 @@ export interface ConvertArguments {
   watch: boolean;
   verbose: boolean;
   historyLimit: number;
+  documentDiff: boolean;
 }
 
 export interface ServeArguments extends ConvertArguments {
@@ -19,11 +20,13 @@ export function parseConvertArguments(args: string[]): ConvertArguments | null {
   const positional: string[] = [];
   let watch = false;
   let verbose = false;
-  let historyLimit = 5;
+  let historyLimit = 10;
+  let documentDiff = true;
   for (let index = 0; index < args.length; index++) {
     const argument = args[index]!;
     if (argument === "--watch") watch = true;
     else if (argument === "--verbose") verbose = true;
+    else if (argument === "--no-diff") documentDiff = false;
     else if (argument === "--history-limit") {
       const value = args[++index];
       if (!value) return null;
@@ -34,7 +37,7 @@ export function parseConvertArguments(args: string[]): ConvertArguments | null {
     else positional.push(argument);
   }
   if (positional.length > 2) return null;
-  return { positional, watch, verbose, historyLimit };
+  return { positional, watch, verbose, historyLimit, documentDiff };
 }
 
 export function parseServeArguments(args: string[]): ServeArguments | null {
@@ -44,7 +47,8 @@ export function parseServeArguments(args: string[]): ServeArguments | null {
   let open = false;
   let watch = false;
   let verbose = false;
-  let historyLimit = 5;
+  let historyLimit = 10;
+  let documentDiff = true;
   for (let index = 0; index < args.length; index++) {
     const argument = args[index]!;
     if (argument === "--open") {
@@ -57,6 +61,10 @@ export function parseServeArguments(args: string[]): ServeArguments | null {
     }
     if (argument === "--verbose") {
       verbose = true;
+      continue;
+    }
+    if (argument === "--no-diff") {
+      documentDiff = false;
       continue;
     }
     if (
@@ -82,5 +90,14 @@ export function parseServeArguments(args: string[]): ServeArguments | null {
     positional.push(argument);
   }
   if (positional.length > 2) return null;
-  return { positional, host, port, open, watch, verbose, historyLimit };
+  return {
+    positional,
+    host,
+    port,
+    open,
+    watch,
+    verbose,
+    historyLimit,
+    documentDiff,
+  };
 }

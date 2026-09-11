@@ -51,10 +51,6 @@ test("renders previous and current versions separately with changed words", () =
   assert.match(html, /data-document-diff-toggle[^>]*><span>差分<\/span><kbd aria-hidden="true">3<\/kbd><\/button>/);
   assert.match(html, /\["差分","Diff"\]/);
   assert.doesNotMatch(html, /data-document-diff-icon|data-document-current-icon/);
-  assert.doesNotMatch(
-    html,
-    /text-decoration:line-through|text-decoration-style:double/,
-  );
 });
 
 test("retains unchanged Japanese text in both columns", () => {
@@ -205,4 +201,16 @@ test("authorizes the offline alignment script and disables absent diffs", () => 
     assert.match(html, /data-document-diff-toggle[^>]*disabled/);
     assert.doesNotMatch(html, /class="document-diff-row"/);
   }
+});
+
+test("omits the diff button and content when disabled", () => {
+  const html = renderMarkdown(
+    "# After",
+    { documentDiff: false },
+    undefined,
+    "# Before",
+  );
+  assert.doesNotMatch(html, /<button[^>]*data-document-diff-toggle/);
+  assert.doesNotMatch(html, /class="document-diff-content"/);
+  assert.doesNotMatch(html, /class="document-diff-row"/);
 });

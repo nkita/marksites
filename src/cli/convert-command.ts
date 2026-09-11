@@ -7,7 +7,7 @@ import type { ConvertArguments } from "./arguments.js";
 import { reportConversion } from "./reporting.js";
 
 export async function runConvertCommand(parsed: ConvertArguments): Promise<void> {
-  const { positional, watch: shouldWatch, verbose, historyLimit } = parsed;
+  const { positional, watch: shouldWatch, verbose, historyLimit, documentDiff } = parsed;
   const inputArgument = positional[0] ?? ".";
   const input = resolve(inputArgument);
   const inputStat = await stat(input);
@@ -15,6 +15,7 @@ export async function runConvertCommand(parsed: ConvertArguments): Promise<void>
   const conversionOptions = {
     onLog: verbose ? (message: string) => console.log(message) : undefined,
     historyLimit,
+    documentDiff,
   };
   if (inputStat.isDirectory()) {
     const initial = await convertDirectoryDetailed(input, outputArgument, conversionOptions);

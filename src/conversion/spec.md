@@ -66,7 +66,7 @@ Markdown画像の相対ローカル参照を解決し、画像内容のSHA-256�
 
 ### `history.ts`
 
-本文が変わるたびに、文書パスとsourceHashから決まる不変なMarkdownスナップショットを出力先の`.marksites-history/`へ保存する。manifestは現在版を含む順序付き履歴を保持し、既定では現在版と過去5世代に制限する。`historyLimit`変更時はHTMLを全件再生成し、正常生成後に上限外のスナップショットを削除する。本文未変更の再生成では世代を追加しない。複数世代形式を持たない旧出力は最新・比較元履歴から移行し、比較元Markdownが残っていない場合は既存HTMLの差分を引き継ぐ。
+本文が変わるたびに、文書パスとsourceHashから決まる不変なMarkdownスナップショットを出力先の`.marksites-history/`へ保存する。manifestは現在版を含む順序付き履歴を保持し、既定では現在版と過去10世代に制限する。`historyLimit`または`documentDiff`変更時はHTMLを全件再生成する。`documentDiff`がfalseの場合は差分ボタン、本文、CSS、JavaScriptを生成しない。
 
 ### `watch.ts`
 
@@ -101,4 +101,4 @@ manifestのgenerator versionは実行中パッケージの`package.json`から�
 - `convertDirectoryDetailed()`: 探索からmanifest確定までを順番に組み立てる。
 - `convertDirectory()`: 互換用に変換件数だけを返す。
 
-treeHashはMarkdown相対パス、mtime、各文書のコメント件数から計算する。ファイル構成、更新日時、コメント件数のいずれかが変わった場合は、全ページに埋め込まれたファイルツリーと更新順一覧を更新するため全HTMLを再生成する。コメント本文の編集など件数を変えないメタデータ変更は対象HTMLだけを生成する。renderFingerprintが変わった場合も全HTMLを再生成し、manifestは全変換成功後にだけ更新する。生成結果の条件分岐が変わり代表HTMLの差分だけでは検知できない場合は、出力互換バージョンを更新して全HTMLを再生成する。
+treeHashはMarkdown相対パスとmtimeから計算する。コメントデータは生成HTMLとファイルツリーへ埋め込まない。renderFingerprintが変わった場合も全HTMLを再生成し、manifestは全変換成功後にだけ更新する。

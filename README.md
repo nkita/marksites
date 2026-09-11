@@ -10,7 +10,6 @@ Markdownを、GitHub風のスタンドアロンHTMLへ変換します。生成HT
 - コードのハイライト、コピー、折り返し
 - 表のコピー、列幅変更、ソート、固定見出し
 - ライト／ダークテーマ、日本語／英語UI
-- `serve`実行中のコメント編集
 
 ## 差分表示
 
@@ -19,7 +18,7 @@ Markdownを、GitHub風のスタンドアロンHTMLへ変換します。生成HT
 - 削除: 赤
 - 追加: 青
 - 狭い画面: 横スクロール
-- 既定の履歴: 過去5世代
+- 既定の履歴: 過去10世代
 
 ## インストール
 
@@ -44,6 +43,7 @@ const html = markdownToHtml("# Hello", { title: "My page" });
 | `modifiedAt` | ISO 8601形式の更新日時 |
 | `highlight` | コードハイライトの有効・無効 |
 | `tableOfContents` | 目次の有効・無効、タイトル、見出し範囲 |
+| `documentDiff` | 差分表示の有効・無効（既定は有効） |
 
 ```ts
 const html = markdownToHtml(markdown, {
@@ -60,20 +60,17 @@ const html = markdownToHtml(markdown, {
 | 操作 | コマンド |
 | --- | --- |
 | 変換 | `npx marksites [input] [output] [options]` |
-| 変換して配信 | `npx marksites serve [input-directory] [output-directory] [options]` |
 
 入力を省略すると`.`、出力を省略すると`./marksites/`を使用します。
 
 ### オプション
 
-| オプション | 対象 | 説明 | 既定値・制約 |
-| --- | --- | --- | --- |
-| `--history-limit <count>` | 共通 | 保持する過去世代数 | `5`、1以上 |
-| `--watch` | 共通 | 変更を監視して再変換 | ディレクトリ入力のみ |
-| `--verbose` | 共通 | 文書ごとの処理結果を表示 | 無効 |
-| `--host <host>` | `serve` | 待受ホスト | `127.0.0.1` |
-| `--port <port>` | `serve` | 待受ポート | `3000`から空きを探索。範囲は0～65535 |
-| `--open` | `serve` | 起動後にブラウザを開く | 無効 |
+| オプション | 説明 | 既定値・制約 |
+| --- | --- | --- |
+| `--history-limit <count>` | 保持する過去世代数 | `10`、1以上 |
+| `--no-diff` | 差分表示を無効化 | 無効 |
+| `--watch` | 変更を監視して再変換 | ディレクトリ入力のみ |
+| `--verbose` | 文書ごとの処理結果を表示 | 無効 |
 
 ### 実行例
 
@@ -81,20 +78,9 @@ const html = markdownToHtml(markdown, {
 npx marksites README.md README.html
 npx marksites docs public --history-limit 10
 npx marksites docs public --watch --verbose
-npx marksites serve docs public --port 4000 --open
 ```
 
 ディレクトリ変換では、相対構造と文書間リンクを維持します。`.gitignore`、標準除外ディレクトリ、既存の生成先も探索から除外します。
-
-## コメントを編集する
-
-```sh
-npx marksites serve docs public/docs
-```
-
-`serve`実行中は、選択範囲または文書全体へコメントを追加・編集できます。停止後のHTMLでは閲覧のみ可能です。
-
-詳細は[ローカルサーバー設計](docs/local-server-design.md)を参照してください。
 
 ## Webアプリで公開する
 

@@ -51,6 +51,7 @@ export interface BuildManifest {
   };
   treeHash: string;
   historyLimit?: number;
+  documentDiff?: boolean;
   files: Record<string, ManifestFile>;
 }
 
@@ -67,4 +68,5 @@ export interface ConversionResult {
 export interface ConversionOptions {
   onLog?: (message: string) => void;
   historyLimit?: number;
+  documentDiff?: boolean;
 }

@@ -1,6 +1,7 @@
 import { marked, Renderer } from "marked";
 import { createCodeBlocksFeature } from "./features/code-blocks/index.js";
 import { createHeaderFeature } from "./features/header/index.js";
+import { emptyAnnotationDocument } from "./annotations/model.js";
 import { createAnnotationsFeature } from "./features/annotations/index.js";
 import type { AnnotationDocument } from "./annotations/model.js";
 import {
@@ -32,7 +33,7 @@ export function markdownToHtml(
 export function renderMarkdown(
   markdown: string,
   options: RenderOptions = {},
-  annotations?: AnnotationDocument,
+  _annotations?: AnnotationDocument,
   previousMarkdown?: string,
   preservedDiffContent?: string,
   previousVersions?: DocumentDiffVersion[],
@@ -66,13 +67,22 @@ export function renderMarkdown(
   );
   const fileTreeScript = renderFileTreeScript(fileTree !== "");
   const modifiedAt = renderModifiedAt(options.modifiedAt);
-  const documentDiff = createDocumentDiffFeature(
-    markdown,
-    previousMarkdown,
-    options.markedOptions,
-    preservedDiffContent,
-    previousVersions,
-  );
+  const documentDiffEnabled = options.documentDiff !== false;
+  const documentDiff = !documentDiffEnabled
+    ? {
+        content: "",
+        control: "",
+        styles: "",
+        script: "",
+        hasChanges: false,
+      }
+    : createDocumentDiffFeature(
+        markdown,
+        previousMarkdown,
+        options.markedOptions,
+        preservedDiffContent,
+        previousVersions,
+      );
   const documentView = createDocumentViewFeature(
     markdown,
     documentDiff.hasChanges,
@@ -80,14 +90,18 @@ export function renderMarkdown(
   const breadcrumbs = fileTree
     ? renderBreadcrumbs(options.fileTree?.breadcrumbs)
     : `<nav class="file-breadcrumbs" aria-label="ファイルパス"><span aria-current="page">${escapeHtml(rawTitle)}</span></nav>\n`;
-  const annotationFeature = createAnnotationsFeature(annotations);
+  // Selection tools historically shared the annotations feature. Keep the
+  // non-comment tools active with an empty, non-editable document.
+  const selectionFeature = createAnnotationsFeature(
+    emptyAnnotationDocument(currentFileName ?? rawTitle),
+  );
   const imageViewer = createImageViewerFeature(/<img\b/i.test(content));
   const tables = createTablesFeature(/<table\b/i.test(content));
   const sidebar = createSidebarFeature({
     tableOfContents: toc.markup,
     tableOfContentsTitle: toc.title,
-    annotations: annotationFeature.panel,
-    annotationCount: annotationFeature.count,
+    annotations: "",
+    annotationCount: 0,
   });
   const header = createHeaderFeature({
     documentNavigation: breadcrumbs,
@@ -107,14 +121,16 @@ export function renderMarkdown(
       fileSidebar,
       documentControls: `${documentView.control}${documentDiff.control}`,
       sourceContent: documentView.content,
-      diffContent: `<main class="document-diff-content" aria-label="文書の差分" hidden>\n${documentDiff.content}</main>`,
+      diffContent: documentDiffEnabled
+        ? `<main class="document-diff-content" aria-label="文書の差分" hidden>\n${documentDiff.content}</main>`
+        : "",
       sidebar: sidebar.markup,
-      overlays: `${annotationFeature.markup}${imageViewer.markup}`,
+      overlays: `${selectionFeature.markup}<div hidden>${selectionFeature.panel}</div>${imageViewer.markup}`,
     },
     assets: {
       styles: [
         sidebar.styles,
-        annotationFeature.styles,
+        `${selectionFeature.styles}\n.selection-actions [data-selection-action="comment"]{display:none}`,
         imageViewer.styles,
         header.styles,
         documentView.styles,
@@ -130,7 +146,7 @@ export function renderMarkdown(
         sidebar.script,
         toc.script,
         `\n${codeBlocks.renderScript()}\n`,
-        `${annotationFeature.script}\n`,
+        `${selectionFeature.script}\n`,
         ...(imageViewer.script ? [`${imageViewer.script}\n`] : []),
         ...tables.scripts.map((script) => `${script}\n`),
       ],

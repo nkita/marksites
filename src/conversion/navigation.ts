@@ -1,5 +1,4 @@
 import { basename, posix } from "node:path";
-import { countActiveAnnotations } from "../annotations/model.js";
 import type { FileBreadcrumb, FileTreeNode } from "../types.js";
 import type { MarkdownFile } from "./types.js";
 
@@ -44,12 +43,6 @@ export function createNavigation(files: MarkdownFile[]) {
   };
   sort(root);
   const indexes = new Map<string, MarkdownFile>();
-  const commentCounts = new Map(
-    files.map((file) => [
-      file,
-      file.annotations ? countActiveAnnotations(file.annotations) : 0,
-    ]),
-  );
   for (const file of files) {
     const directory = posix.dirname(file.relativePath);
     if (
@@ -81,7 +74,6 @@ export function createNavigation(files: MarkdownFile[]) {
             posix.basename(file.outputPath),
         ),
         current: file.outputPath === currentOutputPath,
-        commentCount: commentCounts.get(file)!,
       })),
     ];
   }

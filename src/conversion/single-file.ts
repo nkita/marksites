@@ -100,7 +100,7 @@ export async function convertFile(
       modifiedAt: sourceStat.mtime.toISOString(),
       source: markdown,
     });
-  versions = versions.slice(-((options.historyLimit ?? 5) + 1));
+  versions = versions.slice(-((options.historyLimit ?? 10) + 1));
   await atomicWriteFile(
     output,
     renderMarkdown(
@@ -111,6 +111,7 @@ export async function convertFile(
         markedOptions: {
           walkTokens: assets.rewrite,
         },
+        documentDiff: options.documentDiff,
       },
       annotations,
       previousSource,

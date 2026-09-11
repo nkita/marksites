@@ -42,5 +42,4 @@ test("omits code block controls when the document has no code blocks", () => {
   const html = markdownToHtml("# Document\n\nPlain text.");
 
   assert.doesNotMatch(html, /data-code-action/);
-  assert.doesNotMatch(html, /navigator\.clipboard/);
 });

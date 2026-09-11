@@ -2,7 +2,7 @@
 
 ## 責務
 
-`src/cli/`はCLI入力の解析、結果表示、ブラウザ起動、各コマンドの実行フローを所有する。`src/cli.ts`はサブコマンドのディスパッチと最上位エラー処理だけを行い、変換処理そのものは`src/conversion/`へ委譲する。
+`src/cli/`はCLI入力の解析、結果表示、各コマンドの実行フローを所有する。HTTP配信機能は無効であり、`serve`サブコマンドはエラーにする。
 
 ## ファイル
 
@@ -26,7 +26,7 @@
 
 ### `arguments.ts`
 
-- `parseConvertArguments()`: 通常変換の位置引数、watch、verbose、history-limitを副作用なしで解析する。
+- `parseConvertArguments()`: 通常変換の位置引数、watch、verbose、history-limit、no-diffを副作用なしで解析する。履歴上限は既定10とする。
 - `parseServeArguments()`: serveの位置引数、host、port、open、watch、verbose、history-limitを副作用なしで解析する。
 
 引数個数またはオプション値が不足する場合は`null`を返してエントリポイントへusage表示を委ね、不明なオプションと不正なportは具体的なエラーにする。

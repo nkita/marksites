@@ -1,25 +1,18 @@
 #!/usr/bin/env node
 
-import {
-  parseConvertArguments,
-  parseServeArguments,
-} from "./cli/arguments.js";
+import { parseConvertArguments } from "./cli/arguments.js";
 import { runConvertCommand } from "./cli/convert-command.js";
-import { runServeCommand } from "./cli/serve-command.js";
 
 function usage(): never {
   console.error(
-    "Usage:\n  marksites [input.md|input-directory] [output.html|output-directory] [--history-limit COUNT] [--watch] [--verbose]\n  marksites serve [input-directory] [output-directory] [--history-limit COUNT] [--host HOST] [--port PORT] [--open] [--watch] [--verbose]",
+    "Usage:\n  marksites [input.md|input-directory] [output.html|output-directory] [--history-limit COUNT] [--no-diff] [--watch] [--verbose]",
   );
   process.exit(1);
 }
 
 async function main(): Promise<void> {
-  if (process.argv[2] === "serve") {
-    const parsed = parseServeArguments(process.argv.slice(3));
-    if (!parsed) usage();
-    return runServeCommand(parsed);
-  }
+  if (process.argv[2] === "serve")
+    throw new Error("The serve command is disabled");
   const parsed = parseConvertArguments(process.argv.slice(2));
   if (!parsed) usage();
   return runConvertCommand(parsed);
