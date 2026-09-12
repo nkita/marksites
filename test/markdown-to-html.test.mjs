@@ -9,8 +9,14 @@ test("renders Markdown as a standalone GitHub-styled document", () => {
   assert.match(html, /^<!doctype html>/);
   assert.match(html, /<html lang="ja">/);
   assert.match(html, /<title>marksites \| Example<\/title>/);
-  assert.match(html, /class="markdown-body"/);
+  assert.match(html, /class="markdown-body shortcut-hints-hidden"/);
   assert.match(html, /class="site-header"/);
+  assert.match(html, /data-shortcut-hints-toggle[^>]*aria-pressed="false"/);
+  assert.match(html, /body\.shortcut-hints-hidden :is\(\.toc-shortcut-hints,\.file-shortcut-hints,\.document-view-shortcut-hint,\.layout-shortcut\)\{display:none\}/);
+  assert.match(html, /shortcutParameter='shortcuts'/);
+  assert.match(html, /pageUrl\.searchParams\.get\(shortcutParameter\)==='visible'/);
+  assert.match(html, /classList\.toggle\('shortcut-hints-hidden',!visible\)/);
+  assert.match(html, /if\(shortcuts\)url\.searchParams\.set\(shortcutParameter,'visible'\)/);
   assert.match(html, /class="site-header-brand"/);
   assert.doesNotMatch(html, /class="site-header-document-lead"/);
   assert.match(html, /\.site-header-action\{[^}]*background:transparent;border:0;/);
@@ -18,8 +24,8 @@ test("renders Markdown as a standalone GitHub-styled document", () => {
   assert.match(html, /data-language-toggle/);
   assert.match(html, /data-document-preview-toggle/);
   assert.match(html, /data-document-source-toggle/);
-  assert.match(html, /data-document-preview-toggle[^>]*>[\s\S]*?<kbd aria-hidden="true">1<\/kbd>/);
-  assert.match(html, /data-document-source-toggle[^>]*>[\s\S]*?<kbd aria-hidden="true">2<\/kbd>/);
+  assert.match(html, /class="document-view-shortcut-hint"><span>右へ移動：<kbd>L<\/kbd><\/span><span>左へ移動：<kbd>H<\/kbd>/);
+  assert.doesNotMatch(html, /data-document-source-toggle[^>]*>[\s\S]*?<kbd aria-hidden="true">2<\/kbd>/);
   assert.match(html, /<main class="markdown-source-content" aria-label="Markdown原文" hidden><pre><code><span class="markdown-source-line is-heading" id="markdown-source-hello"># Hello<\/span>/);
   assert.match(html, /const parameter='document-view'/);
   assert.match(html, /data-language-label>JA<\/span>/);
@@ -89,7 +95,7 @@ test("keeps representative standalone HTML byte-compatible", () => {
 
   assert.equal(
     createHash("sha256").update(html).digest("hex"),
-    "f42830f3a64587c482aec11612ecac0653e271c266cb9cfe15a5b49f423c640c",
+    "282061885b4066868721c0dffafa5b46006a5bbad4160f915ff60e21a251761c",
   );
 });
 
@@ -109,7 +115,9 @@ test("embeds escaped Markdown source for offline view switching", () => {
   assert.match(html, /\.markdown-source-content pre\{[^}]*border:0;border-radius:0/);
   assert.doesNotMatch(html, /data-replacement-menu|replacementButton/);
   assert.match(html, /previewButton\.addEventListener\('click',\(\)=>apply\('current'\)\)/);
-  assert.match(html, /const view=\{'1':'current','2':'markdown','3':'diff'\}\[event\.key\]/);
+  assert.match(html, /views=available\?\['current','markdown','diff'\]:\['current','markdown'\]/);
+  assert.match(html, /currentIndex\+\(key==='l'\?1:-1\)/);
+  assert.match(html, /\.document-view-shortcut-hint\{order:1;[^}]*margin-left:auto/);
   assert.match(html, /event\.target\.closest\('input,textarea,select,\[contenteditable\]/);
   assert.match(html, /\.document-content\{[^}]*border:1px solid[^}]*overflow:hidden\}/);
   assert.match(html, /\.document-content>\.markdown-content,\.document-content>\.document-diff-content\{margin:0;border:0/);

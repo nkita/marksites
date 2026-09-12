@@ -51,7 +51,7 @@ export function renderMarkdown(
   const tableOfContents = createTableOfContentsFeature(renderer, {
     enabled: options.tableOfContents !== false,
     title: tocOptions.title ?? "目次",
-    minDepth: tocOptions.minDepth ?? 2,
+    minDepth: tocOptions.minDepth ?? 1,
     maxDepth: tocOptions.maxDepth ?? 6,
   });
   const codeBlocks = createCodeBlocksFeature(renderer, highlight);

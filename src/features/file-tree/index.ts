@@ -233,7 +233,7 @@ function renderFileSidebar(options: FileTreeOptions, contents: string): string {
 
   return `<button type="button" class="layout-file-sidebar-control" data-file-sidebar-open hidden></button><button type="button" class="layout-file-sidebar-control" data-file-sidebar-close hidden></button>
 <aside class="file-sidebar" id="file-sidebar" aria-label="${title}">
-  <div class="file-sidebar-header"><span>${title}</span></div>
+  <div class="file-sidebar-header"><span>${title}</span><span class="file-shortcut-hints"><span>次へ：<kbd>Shift+J</kbd></span><span>前へ：<kbd>Shift+K</kbd></span></span></div>
   <nav class="file-tree file-tree-sidebar" aria-label="${title}">
 ${contents}
 </nav>
@@ -259,7 +259,9 @@ export function renderFileTreeScript(enabled: boolean): string {
   const popoverParameter = 'marksites-files';
   const sidebarParameter = 'file-sidebar';
   const viewParameter = 'file-view';
+  const focusParameter = 'file-focus';
   const pageUrl = new URL(location.href);
+  const focusCurrentFile = pageUrl.searchParams.get(focusParameter) === 'current';
   const openPaths = new Set(pageUrl.searchParams.getAll(stateParameter));
   const compact = matchMedia('(max-width: 900px)');
   let sidebarPreferenceOpen = pageUrl.searchParams.get(sidebarParameter) !== 'closed';
@@ -285,7 +287,8 @@ export function renderFileTreeScript(enabled: boolean): string {
 
   for (const directory of directories) {
     const details = directory.querySelector(':scope > details');
-    details.open = openPaths.has(details.dataset.folderId);
+    const containsCurrentFile = Boolean(details.querySelector('a[aria-current="page"]'));
+    details.open = focusCurrentFile ? containsCurrentFile : openPaths.has(details.dataset.folderId) || containsCurrentFile;
     initialOpenState.set(details.dataset.folderId, details.open);
   }
 
@@ -294,6 +297,7 @@ export function renderFileTreeScript(enabled: boolean): string {
       .filter(([, isOpen]) => isOpen)
       .map(([id]) => id);
     const updateUrl = (url) => {
+      url.searchParams.delete(focusParameter);
       url.searchParams.delete(stateParameter);
       for (const path of open) url.searchParams.append(stateParameter, path);
       url.searchParams.delete(popoverParameter);
@@ -519,6 +523,14 @@ export function renderFileTreeScript(enabled: boolean): string {
   setPopoverOpen(pageUrl.searchParams.get(popoverParameter) === 'open' && sidebar.hidden, false, false);
   applyView(activeView, false);
   syncState();
+  if (focusCurrentFile) {
+    requestAnimationFrame(() => {
+      const currentFile = sidebar.querySelector('.file-tree-root a[aria-current="page"]');
+      if (!currentFile) return;
+      currentFile.focus({ preventScroll: true });
+      currentFile.scrollIntoView({ block: 'center' });
+    });
+  }
 
   popoverToggle?.addEventListener('click', (event) => {
     event.preventDefault();
@@ -532,6 +544,23 @@ export function renderFileTreeScript(enabled: boolean): string {
   });
   document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape' && !popover.hidden) setPopoverOpen(false, true);
+    if (!event.shiftKey || event.ctrlKey || event.metaKey || event.altKey) return;
+    if (event.target instanceof Element && event.target.closest('input, textarea, select, [contenteditable]:not([contenteditable="false"])')) return;
+    const key = event.key.toLowerCase();
+    if (key !== 'j' && key !== 'k') return;
+    const panelSelector = activeView === 'recent' ? '.file-tree-recent' : '.file-tree-root';
+    let links = [...sidebar.querySelectorAll(panelSelector+' a[href]')];
+    let currentIndex = links.findIndex(link => link.getAttribute('aria-current') === 'page');
+    if (currentIndex < 0) {
+      links = [...sidebar.querySelectorAll('.file-tree-root a[href]')];
+      currentIndex = links.findIndex(link => link.getAttribute('aria-current') === 'page');
+    }
+    const target = links[(currentIndex < 0 ? (key === 'j' ? -1 : 0) : currentIndex) + (key === 'j' ? 1 : -1)];
+    if (!target) return;
+    event.preventDefault();
+    const targetUrl = new URL(target.href, location.href);
+    targetUrl.searchParams.set(focusParameter, 'current');
+    location.href = targetUrl.href;
   });
   compact.addEventListener('change', () => applySidebarState(sidebarPreferenceOpen && !compact.matches));
   copyPath?.addEventListener('click', async () => {

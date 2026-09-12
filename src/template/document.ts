@@ -28,8 +28,8 @@ interface DocumentParts {
 
 export function renderDocument(parts: DocumentParts): string {
   const bodyClass = parts.regions.fileSidebar
-    ? "markdown-body has-file-tree"
-    : "markdown-body";
+    ? "markdown-body has-file-tree shortcut-hints-hidden"
+    : "markdown-body shortcut-hints-hidden";
 
   const trustedScript = (script: string): string =>
     script.replace("<script>", '<script data-marksites-script="true">');

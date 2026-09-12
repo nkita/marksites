@@ -299,7 +299,7 @@ function createSingleDocumentDiffFeature(
       : "");
   const disabled = hasChanges ? "" : " disabled";
   const label = hasChanges ? "差分を表示" : "前回からの変更はありません";
-  const control = `<button type="button" class="document-content-action document-diff-toggle" data-document-diff-toggle aria-label="${label}" title="${label}" aria-pressed="false"${disabled}><span>差分</span><kbd aria-hidden="true">3</kbd></button>`;
+  const control = `<button type="button" class="document-content-action document-diff-toggle" data-document-diff-toggle aria-label="${label}" title="${label}" aria-pressed="false"${disabled}><span>差分</span></button>`;
 
   return {
     content,
@@ -356,7 +356,7 @@ export function createDocumentDiffFeature(
   return {
     ...rendered[latest]!,
     content: `<div data-document-diff-active>${contentFor(latest)}</div>${templates}`,
-    control: `<button type="button" class="document-content-action document-diff-toggle" data-document-diff-toggle aria-label="${label}" title="${label}" aria-pressed="false"${hasChanges ? "" : " disabled"}><span>差分</span><kbd aria-hidden="true">3</kbd></button>`,
+    control: `<button type="button" class="document-content-action document-diff-toggle" data-document-diff-toggle aria-label="${label}" title="${label}" aria-pressed="false"${hasChanges ? "" : " disabled"}><span>差分</span></button>`,
     script: hasChanges ? diffScript : "",
     hasChanges,
   };

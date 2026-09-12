@@ -11,7 +11,7 @@ test("generates a table of contents with GitHub-style heading IDs", () => {
   assert.match(html, /href="#getting-started">Getting Started<\/a>/);
   assert.match(html, /href="#api--usage">API &amp; usage<\/a>/);
   assert.match(html, /href="#getting-started-1">Getting Started<\/a>/);
-  assert.doesNotMatch(html, /href="#document"/);
+  assert.match(html, /href="#document">Document<\/a>/);
   assert.match(html, /<h2 id="getting-started">/);
   assert.match(html, /<h2 id="getting-started-1">/);
   assert.match(html, /grid-template-columns: minmax\(0, 1fr\) 300px/);
@@ -28,11 +28,44 @@ test("generates a table of contents with GitHub-style heading IDs", () => {
   assert.doesNotMatch(html, /background: #edf2f7/);
   assert.match(html, /aria-current/);
   assert.match(html, /requestAnimationFrame/);
-  assert.match(html, /a\[aria-current="location"\]::before/);
-  assert.match(html, /border-radius: 0 6px 6px 0/);
+  assert.match(html, /Math\.ceil\(window\.scrollY \+ window\.innerHeight\) >= document\.documentElement\.scrollHeight - 2/);
+  assert.match(html, /if \(atDocumentEnd\) \{[\s\S]*active = available\.at\(-1\)/);
+  assert.doesNotMatch(html, /a\[aria-current="location"\]::before/);
+  assert.match(
+    html,
+    /class="toc-children"/,
+  );
+  assert.match(
+    html,
+    /\.toc-children > li::before[^}]*border-top: 1px solid/,
+  );
+  assert.match(html, /\.toc-children > li:last-child::after/);
+  assert.doesNotMatch(html, /--toc-level/);
+  assert.match(html, /border-radius: 4px/);
+  assert.match(html, /\.sidebar-tab\{[^}]*text-align:left/);
+  assert.doesNotMatch(html, /\.sidebar-tab\[aria-selected="true"\]::after/);
+  assert.match(html, /\.toc-children \{ margin: 0 0 0 17px/);
+  assert.match(html, /\.table-of-contents a \{[^}]*text-align: left/);
+  assert.match(
+    html,
+    /a\[aria-current="location"\][^}]*background: var\(--bgColor-accent-muted, #ddf4ff\)/,
+  );
+  assert.doesNotMatch(
+    html,
+    /a\[aria-current="location"\][^}]*linear-gradient/,
+  );
   assert.match(html, /class="document-sidebar"/);
   assert.match(html, /class="sidebar-tabs" role="tablist"/);
-  assert.match(html, /data-sidebar-tab="toc">目次<\/button>/);
+  assert.match(html, /data-sidebar-tab="toc"><span>目次<\/span><span class="toc-shortcut-hints"/);
+  assert.match(html, /次へ：<kbd>J<\/kbd>[\s\S]*前へ：<kbd>K<\/kbd>/);
+  assert.match(html, /key !== 'j' && key !== 'k'/);
+  assert.match(html, /currentIndex \+ \(key === 'j' \? 1 : -1\)/);
+  assert.match(html, /const targetIndex = entries\.indexOf\(entry\)/);
+  assert.match(html, /if \(targetIndex === 0\) window\.scrollTo\(\{ top: 0 \}\)/);
+  assert.match(html, /if \(keyboardIndex === null\) currentIndex =/);
+  assert.match(html, /keyboardIndex === null \? null : entries\[keyboardIndex\]/);
+  assert.match(html, /const releaseKeyboardNavigation = \(\) => \{ keyboardIndex = null; \}/);
+  assert.match(html, /closest\('input, textarea, select, \[contenteditable\]/);
   assert.match(html, /class="panel-toggle-icon"/);
   assert.match(
     html,
@@ -92,7 +125,7 @@ test("supports table of contents options", () => {
     tableOfContents: { title: "目次", minDepth: 1, maxDepth: 2 },
   });
 
-  assert.match(html, /data-sidebar-tab="toc">目次<\/button>/);
+  assert.match(html, /data-sidebar-tab="toc"><span>目次<\/span>/);
   assert.match(html, /href="#document"/);
   assert.match(html, /href="#section"/);
   assert.doesNotMatch(html, /href="#detail"/);

@@ -24,7 +24,7 @@ export function createSidebarFeature({
   const initialPanel = tableOfContents ? "toc" : "comments";
   const tabs = `${
     tableOfContents
-      ? `<button type="button" class="sidebar-tab" id="sidebar-tab-toc" role="tab" aria-selected="${initialPanel === "toc"}" aria-controls="sidebar-panel-toc" data-sidebar-tab="toc">${tocTitle}</button>`
+      ? `<button type="button" class="sidebar-tab" id="sidebar-tab-toc" role="tab" aria-selected="${initialPanel === "toc"}" aria-controls="sidebar-panel-toc" data-sidebar-tab="toc"><span>${tocTitle}</span><span class="toc-shortcut-hints"><span>次へ：<kbd>J</kbd></span><span>前へ：<kbd>K</kbd></span></span></button>`
       : ""
   }${
     hasComments
@@ -51,12 +51,13 @@ ${tableOfContents}${annotations}
 .sidebar-toggle{display:none}
 .document-sidebar-body{display:flex;min-height:0;flex:1 1 auto;flex-direction:column;overflow:hidden}
 .sidebar-tabs{display:flex;flex:none;gap:4px;padding:10px 10px 0;border-bottom:1px solid var(--borderColor-muted,#d8dee4)}
-.sidebar-tab{position:relative;min-width:0;flex:1;padding:8px 6px 10px;color:var(--fgColor-muted,#59636e);font:inherit;font-size:.8125rem;font-weight:600;line-height:1.25;background:transparent;border:0;cursor:pointer}
-.sidebar-tab::after{position:absolute;right:4px;bottom:-1px;left:4px;height:2px;background:transparent;content:""}
+.sidebar-tab{position:relative;display:flex;min-width:0;flex:1;align-items:center;justify-content:space-between;gap:8px;padding:8px 6px 10px;color:var(--fgColor-muted,#59636e);font:inherit;font-size:.8125rem;font-weight:600;line-height:1.25;text-align:left;background:transparent;border:0;cursor:pointer}
 .sidebar-tab:hover{color:var(--fgColor-default,#1f2328)}
 .sidebar-tab:focus-visible{outline:2px solid var(--focus-outlineColor,#0969da);outline-offset:-2px}
 .sidebar-tab[aria-selected="true"]{color:var(--fgColor-default,#1f2328)}
-.sidebar-tab[aria-selected="true"]::after{background:var(--borderColor-accent-emphasis,#0969da)}
+.toc-shortcut-hints{display:inline-flex;flex:none;align-items:center;gap:6px;color:var(--fgColor-muted,#59636e);font-size:.6875rem;font-weight:400;white-space:nowrap}
+.toc-shortcut-hints>span{display:inline-flex;align-items:center;gap:3px}
+.toc-shortcut-hints kbd{display:inline-flex;box-sizing:border-box;min-width:18px;height:18px;align-items:center;justify-content:center;padding:0 4px;color:var(--fgColor-default,#1f2328);font:inherit;font-weight:600;line-height:16px;background:var(--bgColor-muted,#f6f8fa);border:1px solid var(--borderColor-default,#d0d7de);border-radius:4px;box-shadow:inset 0 -1px 0 var(--borderColor-default,#d0d7de)}
 .sidebar-count{display:inline-flex;min-width:18px;height:18px;align-items:center;justify-content:center;margin-left:3px;padding:0 4px;color:var(--fgColor-muted,#59636e);font-size:.6875rem;line-height:18px;background:var(--bgColor-muted,#f6f8fa);border-radius:9px}
 .sidebar-panels{display:flex;min-height:0;flex:1 1 auto;align-items:stretch;overflow:hidden}
 .sidebar-panel{box-sizing:border-box;width:100%;height:100%;min-height:0;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;padding:12px;scrollbar-width:thin;scrollbar-color:var(--borderColor-default,#d0d7de) transparent}

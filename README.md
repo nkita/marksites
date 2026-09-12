@@ -42,7 +42,7 @@ const html = markdownToHtml("# Hello", { title: "My page" });
 | `title` | ページタイトル |
 | `modifiedAt` | ISO 8601形式の更新日時 |
 | `highlight` | コードハイライトの有効・無効 |
-| `tableOfContents` | 目次の有効・無効、タイトル、見出し範囲 |
+| `tableOfContents` | 目次の有効・無効、タイトル、見出し範囲（既定はレベル1〜6） |
 | `documentDiff` | 差分表示の有効・無効（既定は有効） |
 
 ```ts

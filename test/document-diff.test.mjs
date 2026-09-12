@@ -48,7 +48,8 @@ test("renders previous and current versions separately with changed words", () =
     /<header class="site-header">[\s\S]*?<\/header>/.exec(html)[0],
     /data-document-diff-toggle/,
   );
-  assert.match(html, /data-document-diff-toggle[^>]*><span>差分<\/span><kbd aria-hidden="true">3<\/kbd><\/button>/);
+  assert.match(html, /data-document-diff-toggle[^>]*><span>差分<\/span><\/button>/);
+  assert.doesNotMatch(html, /\.document-diff-toggle\[aria-pressed="true"\]/);
   assert.match(html, /\["差分","Diff"\]/);
   assert.doesNotMatch(html, /data-document-diff-icon|data-document-current-icon/);
 });

@@ -33,9 +33,10 @@ test("renders a GitHub-style file tree with a current page", () => {
     },
   });
 
-  assert.match(html, /class="markdown-body has-file-tree"/);
+  assert.match(html, /class="markdown-body has-file-tree shortcut-hints-hidden"/);
   assert.match(html, /class="file-sidebar" id="file-sidebar"/);
   assert.match(html, /class="file-tree file-tree-sidebar"/);
+  assert.match(html, /class="file-shortcut-hints"><span>次へ：<kbd>Shift\+J<\/kbd><\/span><span>前へ：<kbd>Shift\+K<\/kbd>/);
   assert.match(html, /class="file-tree file-tree-popover"/);
   assert.match(
     html,
@@ -50,7 +51,7 @@ test("renders a GitHub-style file tree with a current page", () => {
     html,
     /file-sidebar-collapsed \{[^}]*grid-template-columns: minmax\(0, 1fr\) 300px; grid-template-areas: "content toc"/,
   );
-  assert.match(html, /data-sidebar-tab="toc">目次<\/button>/);
+  assert.match(html, /data-sidebar-tab="toc"><span>目次<\/span>/);
   assert.doesNotMatch(html, /data-sidebar-tab="files"/);
   assert.doesNotMatch(html, /data-sidebar-tab="comments"/);
   assert.match(
@@ -95,6 +96,15 @@ test("renders a GitHub-style file tree with a current page", () => {
   assert.doesNotMatch(html, /<span data-copy-label>Copy path<\/span>/);
   assert.match(html, /copyPath\.title = 'コピーしました'/);
   assert.match(html, /class="file-tree-filter-input"/);
+  assert.match(html, /key !== 'j' && key !== 'k'/);
+  assert.match(html, /!event\.shiftKey/);
+  assert.match(html, /details\.querySelector\('a\[aria-current="page"\]'\)/);
+  assert.match(html, /location\.href = targetUrl\.href/);
+  assert.match(html, /targetUrl\.searchParams\.set\(focusParameter, 'current'\)/);
+  assert.match(html, /currentFile\.focus\(\{ preventScroll: true \}\)/);
+  assert.match(html, /currentFile\.scrollIntoView\(\{ block: 'center' \}\)/);
+  assert.match(html, /focusCurrentFile \? containsCurrentFile : openPaths\.has/);
+  assert.match(html, /closest\('input, textarea, select, \[contenteditable\]/);
   assert.match(html, /data-file-tree-view="tree" aria-selected="true">ツリー/);
   assert.match(
     html,
@@ -395,7 +405,7 @@ test("groups only consecutive recent files from the same directory", () => {
 test("does not alter the document shell without file tree options", () => {
   const html = markdownToHtml("# Guide");
 
-  assert.match(html, /<body class="markdown-body">/);
+  assert.match(html, /<body class="markdown-body shortcut-hints-hidden">/);
   assert.doesNotMatch(html, /class="file-tree"/);
   assert.doesNotMatch(html, /class="file-sidebar"/);
   assert.doesNotMatch(html, /<body class="markdown-body has-file-tree">/);
