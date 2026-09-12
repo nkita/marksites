@@ -88,8 +88,10 @@ test("generates a table of contents with GitHub-style heading IDs", () => {
   assert.match(html, /data-layout="both-hidden"/);
   assert.match(html, /data-layout="all-visible"/);
   assert.match(html, /data-layout="all-visible"[^>]*>[\s\S]*?<kbd class="layout-shortcut" aria-hidden="true">Q<\/kbd>/);
-  assert.match(html, /data-layout="both-hidden"[^>]*>[\s\S]*?<kbd class="layout-shortcut" aria-hidden="true">R<\/kbd>/);
-  assert.match(html, /const index='qwer'\.indexOf\(event\.key\.toLowerCase\(\)\)/);
+  assert.match(html, /data-layout="right-hidden"[^>]*>[\s\S]*?<kbd class="layout-shortcut" aria-hidden="true">E<\/kbd>/);
+  assert.match(html, /data-layout="left-hidden"[^>]*>[\s\S]*?<kbd class="layout-shortcut" aria-hidden="true">R<\/kbd>/);
+  assert.match(html, /data-layout="both-hidden"[^>]*>[\s\S]*?<kbd class="layout-shortcut" aria-hidden="true">W<\/kbd>/);
+  assert.match(html, /shortcutLayouts=\{q:'all-visible',w:'both-hidden',e:'right-hidden',r:'left-hidden'\}/);
   assert.match(html, /\.layout-menu button::before\{width:12px;flex:none;[^}]*content:""/);
   assert.match(html, /\.layout-menu button\[aria-checked="true"\]::before\{content:"✓"\}/);
   assert.match(html, /layoutToggle\.dataset\.layout=current/);
