@@ -87,22 +87,24 @@ test("generates a table of contents with GitHub-style heading IDs", () => {
   assert.match(html, /data-layout="right-hidden"/);
   assert.match(html, /data-layout="both-hidden"/);
   assert.match(html, /data-layout="all-visible"/);
-  assert.match(html, /data-layout="all-visible"[^>]*>[\s\S]*?<kbd class="layout-shortcut" aria-hidden="true">Q<\/kbd>/);
-  assert.match(html, /data-layout="right-hidden"[^>]*>[\s\S]*?<kbd class="layout-shortcut" aria-hidden="true">E<\/kbd>/);
+  assert.match(html, /data-layout="all-visible"[^>]*>[\s\S]*?<kbd class="layout-shortcut" aria-hidden="true">A<\/kbd>/);
+  assert.match(html, /data-layout="right-hidden"[^>]*>[\s\S]*?<kbd class="layout-shortcut" aria-hidden="true">L<\/kbd>/);
   assert.match(html, /data-layout="left-hidden"[^>]*>[\s\S]*?<kbd class="layout-shortcut" aria-hidden="true">R<\/kbd>/);
   assert.match(html, /data-layout="both-hidden"[^>]*>[\s\S]*?<kbd class="layout-shortcut" aria-hidden="true">W<\/kbd>/);
-  assert.match(html, /shortcutLayouts=\{q:'all-visible',w:'both-hidden',e:'right-hidden',r:'left-hidden'\}/);
+  assert.match(html, /shortcutLayouts=\{a:'all-visible',w:'both-hidden',l:'right-hidden',r:'left-hidden'\}/);
   assert.match(html, /\.layout-menu button::before\{width:12px;flex:none;[^}]*content:""/);
   assert.match(html, /\.layout-menu button\[aria-checked="true"\]::before\{content:"✓"\}/);
   assert.match(html, /layoutToggle\.dataset\.layout=current/);
   assert.match(html, /\.layout-menu-toggle \.layout-option-icon\{box-sizing:border-box;width:16px;height:16px/);
   assert.match(html, /\.layout-menu-toggle\[data-layout="both-hidden"\] \.layout-option-icon i:last-child\{opacity:\.18\}/);
+  assert.match(html, /\.layout-menu-toggle\[data-layout="both-hidden"\] \.layout-option-icon i:nth-child\(2\)\{grid-column:1\/-1\}/);
+  assert.match(html, /\.layout-menu button\[data-layout="both-hidden"\] \.layout-option-icon i:nth-child\(2\)\{grid-column:1\/-1\}/);
   assert.match(
     html,
-    /data-layout="all-visible"[^>]*>[\s\S]*すべて表示[\s\S]*data-layout="right-hidden"[^>]*>[\s\S]*左＋本文[\s\S]*data-layout="left-hidden"[^>]*>[\s\S]*本文＋右[\s\S]*data-layout="both-hidden"[^>]*>[\s\S]*本文のみ/,
+    /data-layout="all-visible"[^>]*>[\s\S]*すべて表示[\s\S]*data-layout="both-hidden"[^>]*>[\s\S]*ワイド[\s\S]*data-layout="right-hidden"[^>]*>[\s\S]*<span>左<\/span>[\s\S]*data-layout="left-hidden"[^>]*>[\s\S]*<span>右<\/span>/,
   );
   assert.match(html, /\["すべて表示","Show all"\]/);
-  assert.match(html, /\["本文のみ","Content only"\]/);
+  assert.match(html, /\["ワイド","Wide"\]/);
   assert.match(html, /body\.document-sidebar-collapsed\{grid-template-columns:minmax\(0,1fr\);grid-template-areas:"content"\}/);
   assert.match(html, /\.document-sidebar\.is-desktop-hidden\{display:none\}/);
   assert.doesNotMatch(html, /is-desktop-preview/);

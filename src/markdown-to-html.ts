@@ -18,6 +18,7 @@ import { createDocumentDiffFeature } from "./features/document-diff/index.js";
 import type { DocumentDiffVersion } from "./features/document-diff/index.js";
 import { createDocumentViewFeature } from "./features/document-view/index.js";
 import { createTablesFeature } from "./features/tables/index.js";
+import { createHeadingCopyFeature } from "./features/heading-copy/index.js";
 import { renderDocument } from "./template/document.js";
 import type { RenderOptions } from "./types.js";
 import { escapeHtml } from "./utils/html.js";
@@ -97,6 +98,7 @@ export function renderMarkdown(
   );
   const imageViewer = createImageViewerFeature(/<img\b/i.test(content));
   const tables = createTablesFeature(/<table\b/i.test(content));
+  const headingCopy = createHeadingCopyFeature();
   const sidebar = createSidebarFeature({
     tableOfContents: toc.markup,
     tableOfContentsTitle: toc.title,
@@ -114,6 +116,10 @@ export function renderMarkdown(
   return renderDocument({
     title,
     language,
+    documentPath:
+      options.fileTree?.breadcrumbs?.map((breadcrumb) => breadcrumb.name).join("/") ??
+      currentFileName ??
+      rawTitle,
     content,
     highlight,
     regions: {
@@ -136,6 +142,7 @@ export function renderMarkdown(
         documentView.styles,
         documentDiff.styles,
         tables.styles,
+        headingCopy.styles,
       ],
       scripts: [
         header.script,
@@ -149,6 +156,7 @@ export function renderMarkdown(
         `${selectionFeature.script}\n`,
         ...(imageViewer.script ? [`${imageViewer.script}\n`] : []),
         ...tables.scripts.map((script) => `${script}\n`),
+        headingCopy.script,
       ],
     },
   });

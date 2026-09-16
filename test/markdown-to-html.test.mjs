@@ -24,7 +24,7 @@ test("renders Markdown as a standalone GitHub-styled document", () => {
   assert.match(html, /data-language-toggle/);
   assert.match(html, /data-document-preview-toggle/);
   assert.match(html, /data-document-source-toggle/);
-  assert.match(html, /class="document-view-shortcut-hint"><span>右へ移動：<kbd>L<\/kbd><\/span><span>左へ移動：<kbd>H<\/kbd>/);
+  assert.match(html, /class="document-view-shortcut-hint"><span>プレビュー：<kbd>1<\/kbd><\/span><span>コード：<kbd>2<\/kbd><\/span><span>差分：<kbd>3<\/kbd>/);
   assert.doesNotMatch(html, /data-document-source-toggle[^>]*>[\s\S]*?<kbd aria-hidden="true">2<\/kbd>/);
   assert.match(html, /<main class="markdown-source-content" aria-label="Markdown原文" hidden><pre><code><span class="markdown-source-line is-heading" id="markdown-source-hello"># Hello<\/span>/);
   assert.match(html, /const parameter='document-view'/);
@@ -95,7 +95,7 @@ test("keeps representative standalone HTML byte-compatible", () => {
 
   assert.equal(
     createHash("sha256").update(html).digest("hex"),
-    "790817230865d19f3a2bc2380da6c514d41d9e81f87d72f87f90e227c156966a",
+    "9effd736c5c01cf8a013b5627c80c3ba708b971ef84078459b948535646affd0",
   );
 });
 
@@ -115,8 +115,8 @@ test("embeds escaped Markdown source for offline view switching", () => {
   assert.match(html, /\.markdown-source-content pre\{[^}]*border:0;border-radius:0/);
   assert.doesNotMatch(html, /data-replacement-menu|replacementButton/);
   assert.match(html, /previewButton\.addEventListener\('click',\(\)=>apply\('current'\)\)/);
-  assert.match(html, /views=available\?\['current','markdown','diff'\]:\['current','markdown'\]/);
-  assert.match(html, /currentIndex\+\(key==='l'\?1:-1\)/);
+  assert.match(html, /const view=\{1:'current',2:'markdown',3:available\?'diff':null\}\[event\.key\]/);
+  assert.doesNotMatch(html, /key!==['"]h['"]|key!==['"]l['"]/);
   assert.match(html, /\.document-view-shortcut-hint\{order:1;[^}]*margin-left:auto/);
   assert.match(html, /event\.target\.closest\('input,textarea,select,\[contenteditable\]/);
   assert.match(html, /\.document-content\{[^}]*border:1px solid[^}]*overflow:hidden\}/);

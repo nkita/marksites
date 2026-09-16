@@ -83,7 +83,11 @@
 
 ### `document-view/index.ts`
 
-- `createDocumentViewFeature(markdown, hasDiff)`: HTML、エスケープ済みMarkdown原文、差分の排他的な表示、本文右上のMarkdown切り替え、`document-view` URL状態とサイト内リンクへの引き継ぎを所有する。
+- `createDocumentViewFeature(markdown, hasDiff)`: HTML、エスケープ済みMarkdown原文、差分の排他的な表示、本文右上のMarkdown切り替え、`document-view` URL状態とサイト内リンクへの引き継ぎを所有する。フォーム入力、編集可能領域、修飾キー併用時を除き、`1`でプレビュー、`2`でコード、`3`で利用可能な差分へ直接切り替える。
+
+### `heading-copy/index.ts`
+
+- `createHeadingCopyFeature()`: プレビューの見出しへ、Markdownファイルパスと見出し階層を`#`で区切り、見出し同士を`>`で連結してコピーする操作と、見出しURLをコピーする操作を追加する。
 
 ### `header/index.ts`
 

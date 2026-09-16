@@ -5,10 +5,12 @@ import {
   highlightCss,
   highlightThemeStyles,
 } from "./styles.js";
+import { escapeHtml } from "../utils/html.js";
 
 interface DocumentParts {
   title: string;
   language: string;
+  documentPath: string;
   content: string;
   highlight: boolean;
   regions: {
@@ -53,7 +55,7 @@ ${parts.regions.fileSidebar}
 <div class="document-content-actions" role="toolbar" aria-label="文書表示と操作">
 ${parts.regions.documentControls}
 </div>
-<main class="markdown-content">
+<main class="markdown-content" data-document-path="${escapeHtml(parts.documentPath)}">
 ${parts.content}
 </main>
 ${parts.regions.sourceContent}
