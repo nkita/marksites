@@ -30,6 +30,7 @@ export function createBuildPlan(
   removed = findRemovedPaths(files, previous),
   historyLimit = 10,
   documentDiff = true,
+  showFiles = true,
 ): BuildPlan {
   const treeHash = contentHash(
     files
@@ -54,6 +55,7 @@ export function createBuildPlan(
       previous.generator.renderFingerprint !== fingerprint ||
       previous.historyLimit !== historyLimit ||
       (previous.documentDiff ?? true) !== documentDiff ||
+      (previous.fileNavigation ?? true) !== showFiles ||
       previous.treeHash !== treeHash,
   };
 }

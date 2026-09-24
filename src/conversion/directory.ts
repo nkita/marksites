@@ -226,7 +226,7 @@ async function renderChangedFiles(
       old.assetHash !== file.assetHash ||
       !(await pathExists(destination));
     if (changed) {
-      navigation ??= createNavigation(files);
+      if (options.files !== false) navigation ??= createNavigation(files);
       await atomicWriteFile(
         destination,
         renderMarkdown(
@@ -234,10 +234,10 @@ async function renderChangedFiles(
           {
             title: basename(file.relativePath, extname(file.relativePath)),
             modifiedAt: file.modifiedAt,
-            fileTree: {
+            fileTree: options.files === false ? undefined : {
               title: "ファイル",
-              items: navigation.buildFileTree(file.outputPath),
-              breadcrumbs: navigation.buildBreadcrumbs(file),
+              items: navigation!.buildFileTree(file.outputPath),
+              breadcrumbs: navigation!.buildBreadcrumbs(file),
             },
             markedOptions: {
               walkTokens: (token) => {
@@ -333,6 +333,7 @@ export async function convertDirectoryDetailed(
     removed,
     historyLimit,
     options.documentDiff ?? true,
+    options.files ?? true,
   );
 
   const removedResult = await removeDeletedHtml(removed, previous, output);
@@ -373,6 +374,7 @@ export async function convertDirectoryDetailed(
     treeHash: plan.treeHash,
     historyLimit,
     documentDiff: options.documentDiff ?? true,
+    fileNavigation: options.files ?? true,
     files: rendered.files,
   });
   return {

@@ -9,6 +9,7 @@ test("parses conversion arguments without process side effects", () => {
     verbose: true,
     historyLimit: 10,
     documentDiff: true,
+    files: true,
   });
   assert.equal(parseConvertArguments(["a", "b", "c"]), null);
   assert.throws(() => parseConvertArguments(["--open"]), /Unknown option/);
@@ -16,6 +17,7 @@ test("parses conversion arguments without process side effects", () => {
 
 test("parses diff and history options", () => {
   assert.equal(parseConvertArguments(["--no-diff"]).documentDiff, false);
+  assert.equal(parseConvertArguments(["--no-files"]).files, false);
   assert.equal(parseConvertArguments(["--history-limit"]), null);
   assert.equal(parseConvertArguments(["--history-limit", "8"]).historyLimit, 8);
   assert.throws(

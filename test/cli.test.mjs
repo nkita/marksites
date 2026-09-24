@@ -60,6 +60,24 @@ test("converts a Markdown directory while preserving its hierarchy", async () =>
   assert.doesNotMatch(guide, />docs<\//);
 });
 
+test("can omit the files area from directory output", async () => {
+  const root = await mkdtemp(join(tmpdir(), "marksites-no-files-"));
+  const input = join(root, "docs");
+  const output = join(root, "site");
+  await mkdir(input);
+  await writeFile(join(input, "index.md"), "# Home\n");
+
+  await execFileAsync(process.execPath, [cliPath, input, output, "--no-files"]);
+  const html = await readFile(join(output, "index.html"), "utf8");
+  const manifest = JSON.parse(
+    await readFile(join(output, ".marksites-build.json"), "utf8"),
+  );
+
+  assert.doesNotMatch(html, /class="file-sidebar"/);
+  assert.doesNotMatch(html, /class="file-tree file-tree-popover"/);
+  assert.equal(manifest.fileNavigation, false);
+});
+
 test("copies local Markdown images to content-addressed assets", async () => {
   const root = await mkdtemp(join(tmpdir(), "marksites-images-"));
   const input = join(root, "docs"), output = join(root, "site");

@@ -69,6 +69,7 @@ const html = markdownToHtml(markdown, {
 | --- | --- | --- |
 | `--history-limit <count>` | 保持する過去世代数 | `10`、1以上 |
 | `--no-diff` | 差分表示を無効化 | 無効 |
+| `--no-files` | ディレクトリ変換時のファイルエリアを非表示 | 表示 |
 | `--watch` | 変更を監視して再変換 | ディレクトリ入力のみ |
 | `--verbose` | 文書ごとの処理結果を表示 | 無効 |
 

@@ -4,6 +4,7 @@ export interface ConvertArguments {
   verbose: boolean;
   historyLimit: number;
   documentDiff: boolean;
+  files: boolean;
 }
 
 export interface ServeArguments extends ConvertArguments {
@@ -22,11 +23,13 @@ export function parseConvertArguments(args: string[]): ConvertArguments | null {
   let verbose = false;
   let historyLimit = 10;
   let documentDiff = true;
+  let files = true;
   for (let index = 0; index < args.length; index++) {
     const argument = args[index]!;
     if (argument === "--watch") watch = true;
     else if (argument === "--verbose") verbose = true;
     else if (argument === "--no-diff") documentDiff = false;
+    else if (argument === "--no-files") files = false;
     else if (argument === "--history-limit") {
       const value = args[++index];
       if (!value) return null;
@@ -37,7 +40,7 @@ export function parseConvertArguments(args: string[]): ConvertArguments | null {
     else positional.push(argument);
   }
   if (positional.length > 2) return null;
-  return { positional, watch, verbose, historyLimit, documentDiff };
+  return { positional, watch, verbose, historyLimit, documentDiff, files };
 }
 
 export function parseServeArguments(args: string[]): ServeArguments | null {
@@ -49,6 +52,7 @@ export function parseServeArguments(args: string[]): ServeArguments | null {
   let verbose = false;
   let historyLimit = 10;
   let documentDiff = true;
+  let files = true;
   for (let index = 0; index < args.length; index++) {
     const argument = args[index]!;
     if (argument === "--open") {
@@ -65,6 +69,10 @@ export function parseServeArguments(args: string[]): ServeArguments | null {
     }
     if (argument === "--no-diff") {
       documentDiff = false;
+      continue;
+    }
+    if (argument === "--no-files") {
+      files = false;
       continue;
     }
     if (
@@ -99,5 +107,6 @@ export function parseServeArguments(args: string[]): ServeArguments | null {
     verbose,
     historyLimit,
     documentDiff,
+    files,
   };
 }

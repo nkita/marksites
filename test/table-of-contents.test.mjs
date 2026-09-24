@@ -44,7 +44,9 @@ test("generates a table of contents with GitHub-style heading IDs", () => {
   assert.match(html, /border-radius: 4px/);
   assert.match(html, /\.sidebar-tab\{[^}]*text-align:left/);
   assert.doesNotMatch(html, /\.sidebar-tab\[aria-selected="true"\]::after/);
-  assert.match(html, /\.toc-children \{ margin: 0 0 0 17px/);
+  assert.match(html, /\.toc-children \{ margin: 0 0 0 8px; padding: 0 0 0 6px/);
+  assert.match(html, /\.toc-children > li::before \{[^}]*left: -6px; width: 6px/);
+  assert.match(html, /\.table-of-contents a \{[^}]*padding: 5px 6px/);
   assert.match(html, /\.table-of-contents a \{[^}]*text-align: left/);
   assert.match(
     html,

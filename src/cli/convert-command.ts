@@ -7,7 +7,7 @@ import type { ConvertArguments } from "./arguments.js";
 import { reportConversion } from "./reporting.js";
 
 export async function runConvertCommand(parsed: ConvertArguments): Promise<void> {
-  const { positional, watch: shouldWatch, verbose, historyLimit, documentDiff } = parsed;
+  const { positional, watch: shouldWatch, verbose, historyLimit, documentDiff, files } = parsed;
   const inputArgument = positional[0] ?? ".";
   const input = resolve(inputArgument);
   const inputStat = await stat(input);
@@ -16,6 +16,7 @@ export async function runConvertCommand(parsed: ConvertArguments): Promise<void>
     onLog: verbose ? (message: string) => console.log(message) : undefined,
     historyLimit,
     documentDiff,
+    files,
   };
   if (inputStat.isDirectory()) {
     const initial = await convertDirectoryDetailed(input, outputArgument, conversionOptions);
@@ -46,6 +47,6 @@ export async function runConvertCommand(parsed: ConvertArguments): Promise<void>
   if (shouldWatch) throw new Error("--watch input must be a directory");
   if (verbose) console.log(`Converting ${input}`);
   console.log(
-    `Created ${await convertFile(input, outputArgument, { historyLimit })}`,
+    `Created ${await convertFile(input, outputArgument, { historyLimit, documentDiff })}`,
   );
 }

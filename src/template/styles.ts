@@ -43,10 +43,10 @@ export const documentStyles = `    body.markdown-body { box-sizing: border-box; 
     .action-icon { display: block; width: 14px; height: 14px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.25; stroke-linecap: round; stroke-linejoin: round; }
     .table-of-contents ul { margin: 0; padding: 0; list-style: none; }
     .table-of-contents li { position: relative; margin: 0; }
-    .table-of-contents .toc-children { margin: 0 0 0 17px; padding: 0 0 0 13px; border-left: 1px solid var(--borderColor-muted, #d8dee4); }
-    .table-of-contents .toc-children > li::before { position: absolute; top: 1em; left: -13px; width: 13px; border-top: 1px solid var(--borderColor-muted, #d8dee4); content: ""; }
-    .table-of-contents .toc-children > li:last-child::after { position: absolute; top: calc(1em + 1px); bottom: 0; left: -14px; width: 2px; background: var(--bgColor-default, #fff); content: ""; }
-    .table-of-contents a { position: relative; display: block; padding: 6px 10px; color: var(--fgColor-muted, #59636e); font-size: 0.875rem; line-height: 1.4; overflow-wrap: anywhere; text-align: left; text-decoration: none; border-radius: 4px; transition: color 120ms ease, background-color 120ms ease; }
+    .table-of-contents .toc-children { margin: 0 0 0 8px; padding: 0 0 0 6px; border-left: 1px solid var(--borderColor-muted, #d8dee4); }
+    .table-of-contents .toc-children > li::before { position: absolute; top: 1em; left: -6px; width: 6px; border-top: 1px solid var(--borderColor-muted, #d8dee4); content: ""; }
+    .table-of-contents .toc-children > li:last-child::after { position: absolute; top: calc(1em + 1px); bottom: 0; left: -7px; width: 2px; background: var(--bgColor-default, #fff); content: ""; }
+    .table-of-contents a { position: relative; display: block; padding: 5px 6px; color: var(--fgColor-muted, #59636e); font-size: 0.875rem; line-height: 1.4; overflow-wrap: anywhere; text-align: left; text-decoration: none; border-radius: 4px; transition: color 120ms ease, background-color 120ms ease; }
     .table-of-contents a:hover { color: var(--fgColor-default, #1f2328); background: var(--bgColor-muted, #f6f8fa); text-decoration: none; }
     .table-of-contents a:focus-visible { outline: 2px solid var(--focus-outlineColor, #0969da); outline-offset: -2px; }
     .table-of-contents a[aria-current="location"] { color: var(--fgColor-accent, #0969da); font-weight: 600; background: var(--bgColor-accent-muted, #ddf4ff); }

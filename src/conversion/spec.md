@@ -66,7 +66,7 @@ Markdown画像の相対ローカル参照を解決し、画像内容のSHA-256�
 
 ### `history.ts`
 
-本文が変わるたびに、文書パスとsourceHashから決まる不変なMarkdownスナップショットを出力先の`.marksites-history/`へ保存する。manifestは現在版を含む順序付き履歴を保持し、既定では現在版と過去10世代に制限する。`historyLimit`または`documentDiff`変更時はHTMLを全件再生成する。`documentDiff`がfalseの場合は差分ボタン、本文、CSS、JavaScriptを生成しない。
+本文が変わるたびに、文書パスとsourceHashから決まる不変なMarkdownスナップショットを出力先の`.marksites-history/`へ保存する。manifestは現在版を含む順序付き履歴を保持し、既定では現在版と過去10世代に制限する。`historyLimit`、`documentDiff`、またはファイルエリアの生成設定変更時はHTMLを全件再生成する。`documentDiff`がfalseの場合は差分ボタン、本文、CSS、JavaScriptを生成しない。`files`がfalseの場合はファイルエリアとパンくずを含むファイルナビゲーションを生成しない。
 
 ### `watch.ts`
 

@@ -5,7 +5,7 @@ import { runConvertCommand } from "./cli/convert-command.js";
 
 function usage(): never {
   console.error(
-    "Usage:\n  marksites [input.md|input-directory] [output.html|output-directory] [--history-limit COUNT] [--no-diff] [--watch] [--verbose]",
+    "Usage:\n  marksites [input.md|input-directory] [output.html|output-directory] [--history-limit COUNT] [--no-diff] [--no-files] [--watch] [--verbose]",
   );
   process.exit(1);
 }
