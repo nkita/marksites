@@ -1,6 +1,57 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import vm from "node:vm";
 import { markdownToHtml } from "../dist/index.js";
+
+test("reveals the current file within the visible sidebar without moving document focus", () => {
+  const html = markdownToHtml("# Guide", {
+    fileTree: { items: [{ type: "file", name: "guide.md", href: "guide.html", current: true }] },
+  });
+  const script = html.match(/const revealCurrentFile = [\s\S]*?(?=\n  const applySidebarState)/)[0];
+  for (const view of ["tree", "recent"]) {
+    let focused = false;
+    let rowTop = 900;
+    let present = true;
+    let visible = true;
+    const currentFile = {
+      getClientRects: () => visible ? [{}] : [],
+      getBoundingClientRect: () => ({ top: rowTop, bottom: rowTop + 24, height: 24 }),
+      focus: (options) => { assert.equal(options.preventScroll, true); focused = true; },
+    };
+    const tree = {
+      scrollTop: 0, clientTop: 0, clientHeight: 400,
+      getBoundingClientRect: () => ({ top: 52 }),
+      querySelector: (selector) => {
+        assert.equal(selector, (view === "recent" ? ".file-tree-recent" : ".file-tree-root") + ' a[aria-current="page"]');
+        return present ? currentFile : null;
+      },
+    };
+    const sidebar = { hidden: false, querySelector: () => tree };
+    const context = vm.createContext({ sidebar, activeView: view, requestAnimationFrame: (callback) => callback() });
+    vm.runInContext(script, context);
+    vm.runInContext("revealCurrentFile()", context);
+    assert.equal(tree.scrollTop, 660);
+    assert.equal(focused, false);
+    rowTop = 100;
+    vm.runInContext("revealCurrentFile()", context);
+    assert.equal(tree.scrollTop, 660, "visible rows preserve scrolling");
+    rowTop = 20;
+    vm.runInContext("revealCurrentFile()", context);
+    assert.equal(tree.scrollTop, 440, "rows above the viewport are revealed");
+    vm.runInContext("revealCurrentFile(true)", context);
+    assert.equal(focused, true);
+    const previous = tree.scrollTop;
+    sidebar.hidden = true;
+    vm.runInContext("revealCurrentFile()", context);
+    sidebar.hidden = false;
+    present = false;
+    vm.runInContext("revealCurrentFile()", context);
+    present = true;
+    visible = false;
+    vm.runInContext("revealCurrentFile()", context);
+    assert.equal(tree.scrollTop, previous);
+  }
+});
 
 test("renders a GitHub-style file tree with a current page", () => {
   const html = markdownToHtml("# Guide\n\n## Start", {
@@ -102,7 +153,7 @@ test("renders a GitHub-style file tree with a current page", () => {
   assert.match(html, /location\.href = targetUrl\.href/);
   assert.match(html, /targetUrl\.searchParams\.set\(focusParameter, 'current'\)/);
   assert.match(html, /currentFile\.focus\(\{ preventScroll: true \}\)/);
-  assert.match(html, /currentFile\.scrollIntoView\(\{ block: 'center' \}\)/);
+  assert.match(html, /if \(focusCurrentFile\) revealCurrentFile\(true\)/);
   assert.match(html, /focusCurrentFile \? containsCurrentFile : openPaths\.has/);
   assert.match(html, /closest\('input, textarea, select, \[contenteditable\]/);
   assert.match(html, /data-file-tree-view="tree" aria-selected="true">ツリー/);

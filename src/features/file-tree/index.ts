@@ -346,6 +346,22 @@ export function renderFileTreeScript(enabled: boolean): string {
     else if (restoreFocus) popoverToggle.focus();
   };
 
+  const revealCurrentFile = (focus = false) => {
+    requestAnimationFrame(() => {
+      if (sidebar.hidden) return;
+      const tree = sidebar.querySelector('.file-tree-sidebar');
+      const panelSelector = activeView === 'recent' ? '.file-tree-recent' : '.file-tree-root';
+      const currentFile = tree.querySelector(panelSelector+' a[aria-current="page"]');
+      if (!currentFile || currentFile.getClientRects().length === 0) return;
+      if (focus) currentFile.focus({ preventScroll: true });
+      const viewport = tree.getBoundingClientRect();
+      const row = currentFile.getBoundingClientRect();
+      const top = viewport.top + tree.clientTop;
+      if (focus || row.top < top || row.bottom > top + tree.clientHeight)
+        tree.scrollTop += row.top - top - (tree.clientHeight - row.height) / 2;
+    });
+  };
+
   const applySidebarState = (open) => {
     if (open && !popover.hidden) setPopoverOpen(false, false, false);
     sidebar.hidden = !open;
@@ -355,6 +371,7 @@ export function renderFileTreeScript(enabled: boolean): string {
     document.body.classList.toggle('file-sidebar-collapsed', !open);
     popoverToggle.disabled = open;
     popoverToggle.setAttribute('aria-disabled', String(open));
+    if (open) revealCurrentFile();
   };
 
   const setSidebarOpen = (open, sync = true, focus = true) => {
@@ -502,6 +519,7 @@ export function renderFileTreeScript(enabled: boolean): string {
       tree.querySelector('.file-tree-filter-empty').hidden = items.length === 0 || items.some(item => !item.hidden);
     }
     if (sync) syncState();
+    revealCurrentFile();
   };
 
   for (const tree of trees) {
@@ -523,14 +541,7 @@ export function renderFileTreeScript(enabled: boolean): string {
   setPopoverOpen(pageUrl.searchParams.get(popoverParameter) === 'open' && sidebar.hidden, false, false);
   applyView(activeView, false);
   syncState();
-  if (focusCurrentFile) {
-    requestAnimationFrame(() => {
-      const currentFile = sidebar.querySelector('.file-tree-root a[aria-current="page"]');
-      if (!currentFile) return;
-      currentFile.focus({ preventScroll: true });
-      currentFile.scrollIntoView({ block: 'center' });
-    });
-  }
+  if (focusCurrentFile) revealCurrentFile(true);
 
   popoverToggle?.addEventListener('click', (event) => {
     event.preventDefault();

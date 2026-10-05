@@ -44,6 +44,10 @@ export function renderMarkdown(
     (breadcrumb) => breadcrumb.current,
   )?.name;
   const title = escapeHtml(`marksites | ${currentFileName ?? rawTitle}`);
+  const documentPath =
+    options.fileTree?.breadcrumbs?.map((breadcrumb) => breadcrumb.name).join("/") ??
+    currentFileName ??
+    rawTitle;
   const language = escapeHtml(options.language ?? "ja");
   const highlight = options.highlight ?? true;
   const tocOptions =
@@ -94,7 +98,7 @@ export function renderMarkdown(
   // Selection tools historically shared the annotations feature. Keep the
   // non-comment tools active with an empty, non-editable document.
   const selectionFeature = createAnnotationsFeature(
-    emptyAnnotationDocument(currentFileName ?? rawTitle),
+    emptyAnnotationDocument(documentPath),
   );
   const imageViewer = createImageViewerFeature(/<img\b/i.test(content));
   const tables = createTablesFeature(/<table\b/i.test(content));
@@ -116,10 +120,7 @@ export function renderMarkdown(
   return renderDocument({
     title,
     language,
-    documentPath:
-      options.fileTree?.breadcrumbs?.map((breadcrumb) => breadcrumb.name).join("/") ??
-      currentFileName ??
-      rawTitle,
+    documentPath,
     content,
     highlight,
     regions: {

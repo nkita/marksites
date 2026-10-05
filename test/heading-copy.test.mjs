@@ -22,8 +22,8 @@ test("adds hierarchical path copying to preview headings", () => {
   assert.match(html, /url\.hash=heading\.id/);
   assert.match(html, /await copy\(url\.href\)/);
   assert.match(html, /見出しURLをコピー/);
-  assert.match(html, /heading-link-icon\\" viewBox=\\"0 0 20 20\\"/);
-  assert.match(html, /\.heading-action-button svg\{width:14px;height:14px[^}]*\}\.markdown-content \.heading-action-button \.heading-link-icon\{stroke-width:2\.2\}/);
+  assert.match(html, /heading-link-icon\\" viewBox=\\"0 0 24 24\\"/);
+  assert.match(html, /\.heading-action-button svg\{width:14px;height:14px[^}]*\}\.markdown-content \.heading-action-button \.heading-link-icon\{stroke-width:2\.5\}/);
   assert.match(html, /navigator\.clipboard&&window\.isSecureContext/);
   assert.match(html, /document\.execCommand\('copy'\)/);
   assert.match(html, /h6\):hover \.heading-action-button[^}]*opacity:1;visibility:visible/);

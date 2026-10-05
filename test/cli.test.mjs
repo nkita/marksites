@@ -29,6 +29,10 @@ test("converts a Markdown directory while preserving its hierarchy", async () =>
   const guide = await readFile(join(output, "guide", "start.html"), "utf8");
 
   assert.equal(count, 2);
+  const selectionData = JSON.parse(
+    /<script id="marksites-annotations-data" type="application\/json">([\s\S]*?)<\/script>/.exec(guide)[1],
+  );
+  assert.equal(selectionData.document, "guide/start.md");
   assert.match(home, /href="guide\/start\.html"/);
   assert.match(guide, /href="\.\.\/index\.html"/);
   assert.match(
